@@ -1,116 +1,116 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Report Settings Schema",
+  "title": "Esquema de Configurações de Relatórios",
   "type": "object",
   "properties": {
     "business_hours": {
       "type": "object",
-      "title": "Business Hours",
+      "title": "Horário de Funcionamento",
       "properties": {
         "extended_hours": {
           "type": "boolean",
-          "title": "Extended Hours",
+          "title": "Horário Estendido",
           "default": false
         },
         "hours_offset": {
           "type": "number",
-          "title": "Hours Offset (hours)",
+          "title": "Compensação de Horas (horas)",
           "default": 4
         }
       }
     },
     "cost_configuration": {
       "type": "object",
-      "title": "Cost Configuration",
+      "title": "Configuração de Custos",
       "properties": {
         "buying_price_list": {
           "type": "string",
-          "title": "Buying Price List",
+          "title": "Lista de Preços de Compra",
           "default": "Standard Buying"
         },
         "depreciation": {
           "type": "number",
-          "title": "Depreciation Rate (%)",
+          "title": "Taxa de Depreciação (%)",
           "default": 5.0
         },
         "electricity_charges": {
           "type": "number",
-          "title": "Electricity Charges ($/mo)",
+          "title": "Custos de Energia Elétrica (R$/mês)",
           "default": 1200.0
         }
       }
     },
     "expenses": {
       "type": "object",
-      "title": "Expenses",
+      "title": "Despesas",
       "properties": {
         "direct_fixed_expenses": {
           "type": "array",
-          "title": "Direct Fixed Expenses",
+          "title": "Despesas Fixas Diretas",
           "items": {
             "type": "object",
             "properties": {
-              "name": { "type": "string", "title": "Expense Name" },
-              "amount": { "type": "number", "title": "Amount" },
-              "frequency": { "type": "string", "title": "Frequency" }
+              "name": { "type": "string", "title": "Nome da Despesa" },
+              "amount": { "type": "number", "title": "Valor" },
+              "frequency": { "type": "string", "title": "Frequência" }
             }
           }
         },
         "indirect_fixed_expenses": {
           "type": "array",
-          "title": "Indirect Fixed Expenses",
+          "title": "Despesas Fixas Indiretas",
           "items": {
             "type": "object",
             "properties": {
-              "name": { "type": "string", "title": "Expense Name" },
-              "amount": { "type": "number", "title": "Amount" },
-              "frequency": { "type": "string", "title": "Frequency" }
+              "name": { "type": "string", "title": "Nome da Despesa" },
+              "amount": { "type": "number", "title": "Valor" },
+              "frequency": { "type": "string", "title": "Frequência" }
             }
           }
         },
         "percentage_expenses": {
           "type": "array",
-          "title": "Percentage Expenses",
+          "title": "Despesas Percentuais",
           "items": {
             "type": "object",
             "properties": {
-              "name": { "type": "string", "title": "Expense Name" },
-              "percentage": { "type": "number", "title": "Percentage (%)" },
-              "basis": { "type": "string", "title": "Basis" }
+              "name": { "type": "string", "title": "Nome da Despesa" },
+              "percentage": { "type": "number", "title": "Percentual (%)" },
+              "basis": { "type": "string", "title": "Base de Cálculo" }
             }
           }
         },
         "employee_costs": {
           "type": "array",
-          "title": "Employee Costs",
+          "title": "Custos com Equipe",
           "items": {
             "type": "object",
             "properties": {
-              "role": { "type": "string", "title": "Role / Title" },
-              "salary": { "type": "number", "title": "Monthly Salary" },
-              "count": { "type": "number", "title": "Headcount" }
+              "role": { "type": "string", "title": "Cargo / Função" },
+              "salary": { "type": "number", "title": "Salário Mensal" },
+              "count": { "type": "number", "title": "Quantidade de Funcionários" }
             }
           }
         },
         "monthly_fixed_expenses": {
           "type": "array",
-          "title": "Monthly Fixed Expenses",
+          "title": "Despesas Fixas Mensais",
           "items": {
             "type": "object",
             "properties": {
-              "name": { "type": "string", "title": "Expense Name" },
-              "amount": { "type": "number", "title": "Monthly Amount" }
+              "name": { "type": "string", "title": "Nome da Despesa" },
+              "amount": { "type": "number", "title": "Valor Mensal" }
             }
           }
         },
         "consumables": {
           "type": "array",
-          "title": "Consumables",
+          "title": "Insumos / Descartáveis",
           "items": {
             "type": "object",
             "properties": {
-              "item_name": { "type": "string", "title": "Item Name" },
-              "monthly_budget": { "type": "number", "title": "Monthly Budget" }
+              "item_name": { "type": "string", "title": "Nome do Item" },
+              "monthly_budget": { "type": "number", "title": "Orçamento Mensal" }
             }
           }
         }

@@ -1,29 +1,29 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Branch Schema",
+  "title": "Esquema de Filial",
   "type": "object",
   "properties": {
     "branch_name": {
       "type": "string",
-      "title": "Branch Name"
+      "title": "Nome da Filial"
     },
     "invoice_series_prefix": {
       "type": "string",
-      "title": "Invoice Series Prefix",
+      "title": "Prefixo da Série de Faturas",
       "default": "INV-MAIN-"
     },
     "aggregator_series_prefix": {
       "type": "string",
-      "title": "Aggregator Series Prefix",
+      "title": "Prefixo da Série de Agregadores",
       "default": "AGG-MAIN-"
     },
     "tax_id": {
       "type": "string",
-      "title": "Tax ID"
+      "title": "CNPJ / CPF"
     },
     "address": {
       "type": "string",
-      "title": "Address"
+      "title": "Endereço"
     }
   },
   "required": ["branch_name", "invoice_series_prefix"]

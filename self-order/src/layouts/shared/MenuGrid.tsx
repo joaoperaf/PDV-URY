@@ -36,7 +36,7 @@ function MenuGrid({ menu, cart, capabilities, onAdd, gridClassName, cardClassNam
             <div className="font-medium">{item.item_name}</div>
             <div className="text-muted-foreground tabular-nums">{formatCurrency(item.rate)}</div>
             {cart[item.item] && (
-              <div className="mt-1 text-sm font-semibold text-primary">In cart: {cart[item.item].qty}</div>
+              <div className="mt-1 text-sm font-semibold text-primary">No carrinho: {cart[item.item].qty}</div>
             )}
           </div>
         </button>

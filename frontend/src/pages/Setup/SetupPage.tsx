@@ -71,7 +71,8 @@ export default function SetupPage() {
         const formattedLangs = rawLangs
           .map((l: any) => {
             const val = typeof l === 'string' ? l : (l.name || l.value || l.label);
-            if (val === 'English') return { value: 'English', label: 'English' };
+            if (val === 'Português' || val === 'Portuguese' || val === 'pt-BR') return { value: val, label: 'Português (Brasil)' };
+            if (val === 'English') return { value: 'English', label: 'Inglês (English)' };
             if (val === 'العربية' || val === 'Arabic') return { value: 'Arabic', label: 'عربي' };
             if (val === 'Français' || val === 'French') return { value: 'French', label: 'français' };
             return null;
@@ -191,7 +192,7 @@ export default function SetupPage() {
       }
       finishSetup(pending);
     } catch (err: any) {
-      setError(err?.message || 'An error occurred during setup');
+      setError(err?.message || 'Ocorreu um erro durante a configuração');
       setSubmitting(false);
     }
   }, [finishSetup]);
@@ -223,11 +224,11 @@ export default function SetupPage() {
       setProgressSteps(
         steps.length
           ? steps.map((step) => step.status)
-          : ['Setting up your restaurant']
+          : ['Configurando seu restaurante']
       );
     } catch (err) {
       console.error('Failed to load setup stages', err);
-      setProgressSteps(['Setting up your restaurant']);
+      setProgressSteps(['Configurando seu restaurante']);
     }
 
     finishedRef.current = false;
@@ -241,7 +242,7 @@ export default function SetupPage() {
     <WizardLayout
       step={1}
       onNext={handleNext}
-      nextLabel="Continue"
+      nextLabel="Continuar"
       isNextDisabled={submitting}
     >
       <div className="space-y-8">
@@ -253,7 +254,7 @@ export default function SetupPage() {
         />
         
         <div>
-          <h3 className="text-lg font-semibold text-foreground mb-4">Installation Type</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Tipo de Instalação</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {setupSchema.installationTypes?.map((type: any) => (
               <InstallationTypeCard 
@@ -269,10 +270,10 @@ export default function SetupPage() {
         <div className="rounded-lg border border-border p-4 flex items-start justify-between gap-4">
           <div className="space-y-1">
             <label htmlFor="setup-ury-demo" className="text-sm font-semibold text-foreground cursor-pointer">
-              Set up with demo data
+              Configurar com dados de demonstração
             </label>
             <p className="text-sm text-muted-foreground">
-              Adds a sample branch, rooms, tables, menu, and POS you can change or delete later.
+              Adiciona filial, salões, mesas, cardápio e PDV de exemplo que você pode alterar ou excluir depois.
             </p>
           </div>
           <Switch
@@ -293,8 +294,8 @@ export default function SetupPage() {
           eventName="setup_task"
           description={
             setupUryDemo
-              ? 'This can take a few minutes if demo data is on.'
-              : 'Setting things up, this usually takes less than a minute.'
+              ? 'Isso pode levar alguns minutos se os dados de demonstração estiverem ativados.'
+              : 'Configurando o sistema, isso geralmente leva menos de um minuto.'
           }
           onStepChange={setActiveIndex}
           onReady={doApiCall}

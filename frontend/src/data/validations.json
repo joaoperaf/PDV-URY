@@ -1,8 +1,8 @@
 {
-  "required": "This field is required",
-  "minLength": "Minimum length is {min} characters",
-  "maxLength": "Maximum length is {max} characters",
+  "required": "Este campo é obrigatório",
+  "minLength": "O tamanho mínimo é de {min} caracteres",
+  "maxLength": "O tamanho máximo é de {max} caracteres",
   "pattern": {
-    "^[A-Z0-9]+$": "Only uppercase letters and numbers allowed"
+    "^[A-Z0-9]+$": "Apenas letras maiúsculas e números são permitidos"
   }
 }

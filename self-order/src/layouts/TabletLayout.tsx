@@ -45,7 +45,7 @@ function TabletLayout({ initialContext }: LayoutProps) {
   const idleResetTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
   function handleReset() {
-    if (window.confirm('Start a new order? Current cart will be cleared.')) {
+    if (window.confirm('Iniciar um novo pedido? O carrinho atual será limpo.')) {
       resetSession()
     }
   }
@@ -73,7 +73,7 @@ function TabletLayout({ initialContext }: LayoutProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading menu…
+        Carregando cardápio…
       </div>
     )
   }
@@ -90,13 +90,13 @@ function TabletLayout({ initialContext }: LayoutProps) {
     <div className="flex h-screen flex-col overflow-hidden">
       <header className="flex items-center justify-between border-b bg-background/95 px-6 py-4">
         <h1 className="text-xl font-semibold">
-          {context?.table ? `Table ${context.table}` : 'Order for Pickup'}
+          {context?.table ? `Mesa ${context.table}` : 'Pedido para Retirada'}
         </h1>
         <button
           onClick={handleReset}
           className="rounded-md border px-3 py-2 text-sm font-medium text-muted-foreground"
         >
-          New Order
+          Novo Pedido
         </button>
       </header>
 
@@ -138,14 +138,14 @@ function TabletLayout({ initialContext }: LayoutProps) {
       <Dialog open={showIdleWarning} onOpenChange={(open) => !open && handleStillHere()}>
         <DialogContent onClose={handleStillHere}>
           <DialogHeader>
-            <DialogTitle>Still there?</DialogTitle>
+            <DialogTitle>Você ainda está aí?</DialogTitle>
           </DialogHeader>
           <DialogFooter>
             <button
               onClick={handleStillHere}
               className="w-full rounded-md bg-primary py-3 text-base font-medium text-primary-foreground"
             >
-              I'm still here
+              Continuar pedido
             </button>
           </DialogFooter>
         </DialogContent>

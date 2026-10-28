@@ -28,14 +28,14 @@ function App() {
     if (deviceLoading) {
       return (
         <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-          Starting up…
+          Iniciando…
         </div>
       )
     }
     if (deviceError || !deviceContext) {
       return (
         <div className="flex min-h-screen items-center justify-center p-6 text-center text-destructive">
-          {deviceError ?? 'This device could not be started. Please contact staff.'}
+          {deviceError ?? 'Não foi possível iniciar este dispositivo. Por favor, chame um atendente.'}
         </div>
       )
     }

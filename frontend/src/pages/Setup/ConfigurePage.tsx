@@ -26,34 +26,34 @@ const SECTION_CONFIGS: Record<
   { title: string; description: string }
 > = {
   branch: {
-    title: 'Branch Details',
+    title: 'Dados da Filial',
     description:
-      'Set up your main branch name, invoice numbering, and tax details.',
+      'Defina o nome da sua filial principal, numeração de faturas e dados fiscais.',
   },
   rooms: {
-    title: 'Rooms',
+    title: 'Salões / Ambientes',
     description:
-      "Add the seating areas in your restaurant — you'll set how many tables each one has.",
+      'Adicione os ambientes de atendimento do seu restaurante — você definirá quantas mesas cada um possui.',
   },
   tables: {
-    title: 'Tables',
+    title: 'Mesas',
     description:
-      'Review and adjust the tables we generated for each room — rename, adjust seats, or add more.',
+      'Revise e ajuste as mesas geradas para cada salão — renomeie, ajuste a quantidade de lugares ou adicione mais.',
   },
   menu: {
-    title: 'Menu',
+    title: 'Cardápio',
     description:
-      'Add a few items to get started — you can bulk-import or add hundreds more anytime later.',
+      'Adicione alguns itens para começar — você pode importar em lote ou cadastrar centenas de outros itens depois.',
   },
   payment: {
-    title: 'Payments',
+    title: 'Formas de Pagamento',
     description:
-      'How your customers will pay. Cash is added by default — add Card, UPI, or others your restaurant accepts.',
+      'Como seus clientes irão pagar. Dinheiro já vem adicionado por padrão — adicione Cartão, PIX ou outros métodos aceitos.',
   },
   users: {
-    title: 'Staff Accounts',
+    title: 'Contas da Equipe',
     description:
-      "Add login accounts for your staff now, or skip this and add them later. We've suggested a starting cashier account below.",
+      'Adicione contas de acesso para sua equipe agora, ou pule esta etapa e cadastre depois. Sugerimos uma conta inicial de operador de caixa abaixo.',
   },
 };
 
@@ -64,7 +64,7 @@ function classifyError(err: unknown): {
   if (!err) {
     return {
       type: 'unknown',
-      msg: 'An unknown error occurred.',
+      msg: 'Ocorreu um erro desconhecido.',
     };
   }
 
@@ -72,7 +72,7 @@ function classifyError(err: unknown): {
   if (err instanceof TypeError) {
     return {
       type: 'network',
-      msg: 'Network error, check your connection and retry.',
+      msg: 'Erro de rede, verifique sua conexão e tente novamente.',
     };
   }
 
@@ -109,7 +109,7 @@ function classifyError(err: unknown): {
   ) {
     return {
       type: 'duplicate',
-      msg: 'Some records already exist and have been reused.',
+      msg: 'Alguns registros já existem e foram reutilizados.',
     };
   }
 
@@ -129,7 +129,7 @@ function classifyError(err: unknown): {
     (typeof err === 'string' ? err : '') ||
     ((err as any)?.message ?? '') ||
     ((err as any)?.exception ?? '') ||
-    'Failed to configure setup. Check backend logs.';
+    'Falha ao concluir a configuração. Verifique os logs do servidor.';
 
   return {
     type: 'unknown',
@@ -227,7 +227,7 @@ function ConfigurePageContent() {
 
       if (classified.type === 'network') {
         setError(
-          'Network error, check your connection. Your data is preserved. Click "Finish with defaults" to retry.'
+          'Erro de rede, verifique sua conexão. Seus dados foram preservados. Clique em "Concluir com padrões" para tentar novamente.'
         );
       } else {
         setError(classified.msg);
@@ -293,12 +293,12 @@ function ConfigurePageContent() {
       step={2}
       onPrev={handlePrev}
       onNext={handleNext}
-      nextLabel={isLastSection ? 'Launch' : 'Next'}
+      nextLabel={isLastSection ? 'Iniciar Sistema' : 'Próximo'}
       isNextLoading={finishing}
       secondaryAction={
         <div className="flex items-center gap-3">
           <span className="hidden sm:inline text-xs text-muted-foreground">
-            the data can be changed later
+            os dados podem ser alterados depois
           </span>
 
           <Button
@@ -307,7 +307,7 @@ function ConfigurePageContent() {
             onClick={handleFinish}
             disabled={finishing}
           >
-            Finish with defaults
+            Concluir com padrões
           </Button>
         </div>
       }
@@ -317,7 +317,7 @@ function ConfigurePageContent() {
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 text-red-700">
             <div className="flex-1 text-sm font-medium">
               <span className="font-bold block mb-1">
-                Configuration Error:
+                Erro de Configuração:
               </span>
               {error}
             </div>
@@ -326,7 +326,7 @@ function ConfigurePageContent() {
               onClick={() => setError(null)}
               className="text-xs text-red-500 hover:text-red-700 font-semibold underline shrink-0"
             >
-              Dismiss
+              Dispensar
             </button>
           </div>
         )}

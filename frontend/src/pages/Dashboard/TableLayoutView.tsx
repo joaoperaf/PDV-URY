@@ -38,7 +38,36 @@ type POSInvoice = any;
 const getTableOrder = async (_name: string): Promise<any> => null;
 const getCombinedOrderTotals = (_order: any) => ({ roundedTotal: 0 });
 
+const PT_BR_LAYOUT_LABELS: Record<string, string> = {
+  'tables.finish_editing': 'Concluir Edição',
+  'tables.edit_layout': 'Editar Layout',
+  'tables.editing_layout_hint_title': 'Modo de Edição de Layout',
+  'tables.drag_tables_hint': 'Arraste as mesas para reposicioná-las no salão',
+  'tables.autosave_hint': 'As alterações são salvas automaticamente',
+  'tables.zoom_pan_hint': 'Use o scroll para zoom • Clique e arraste para mover o mapa',
+  'tables.edit_settings': 'Editar Configurações da Mesa',
+  'tables.table_info': 'Informações da Mesa',
+  'tables.table_name': 'Nome da Mesa',
+  'tables.table_name_title': 'O nome da mesa não pode ser alterado aqui',
+  'tables.capacity': 'Capacidade (Lugares)',
+  'tables.capacity_placeholder': 'Digite a capacidade',
+  'tables.capacity_range_hint': 'Entre 1 e 20 lugares',
+  'tables.shape': 'Formato',
+  'tables.circle': 'Redonda',
+  'tables.square': 'Quadrada',
+  'tables.rectangle': 'Retangular',
+  'tables.status': 'Status',
+  'tables.occupied': 'Ocupada',
+  'tables.available': 'Disponível',
+  'tables.position': 'Posição',
+  'tables.size': 'Dimensões',
+  'tables.current_bill': 'Conta Atual',
+  'tables.started_at': 'Iniciada às',
+  'tables.total_amount': 'Valor Total',
+};
+
 const t = (key: string) => {
+  if (PT_BR_LAYOUT_LABELS[key]) return PT_BR_LAYOUT_LABELS[key];
   const parts = key.split('.');
   const last = parts[parts.length - 1];
   return last.charAt(0).toUpperCase() + last.slice(1).replace(/_/g, ' ');

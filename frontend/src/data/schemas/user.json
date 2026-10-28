@@ -1,28 +1,28 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "User Schema",
+  "title": "Esquema de Usuário",
   "type": "object",
   "properties": {
     "first_name": {
       "type": "string",
-      "title": "First Name"
+      "title": "Nome"
     },
     "last_name": {
       "type": "string",
-      "title": "Last Name"
+      "title": "Sobrenome"
     },
     "email": {
       "type": "string",
       "format": "email",
-      "title": "Email Address"
+      "title": "E-mail"
     },
     "password": {
       "type": "string",
-      "title": "Password"
+      "title": "Senha"
     },
     "roles": {
       "type": "array",
-      "title": "Roles",
+      "title": "Funções / Perfis",
       "items": {
         "type": "string",
         "enum": ["URY Cashier", "URY Waiter", "URY Manager"]
@@ -30,20 +30,20 @@
     },
     "assigned_room": {
       "type": "string",
-      "title": "Assigned Room"
+      "title": "Salão Atribuído"
     },
     "branch": {
       "type": "string",
-      "title": "Branch"
+      "title": "Filial"
     },
     "enabled": {
       "type": "boolean",
-      "title": "Enabled",
+      "title": "Ativo",
       "default": true
     },
     "avatar": {
       "type": "string",
-      "title": "Avatar URL"
+      "title": "URL do Avatar"
     }
   },
   "required": ["first_name", "email", "roles"]

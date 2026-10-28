@@ -1,31 +1,31 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "URY Table Schema",
-  "description": "Form and data schema for URY Restaurant Table management",
+  "title": "Esquema de Mesa URY",
+  "description": "Esquema de formulário e dados para gerenciamento de Mesas do Restaurante URY",
   "type": "object",
   "properties": {
     "table_name": {
       "type": "string",
-      "title": "Table Name",
-      "placeholder": "e.g. T-01",
+      "title": "Nome / Número da Mesa",
+      "placeholder": "Ex.: M-01",
       "minLength": 1
     },
     "seats": {
       "type": "integer",
-      "title": "Number of Seats",
+      "title": "Quantidade de Lugares",
       "default": 4,
       "minimum": 1,
       "maximum": 30
     },
     "room": {
       "type": "string",
-      "title": "Room Area",
+      "title": "Salão / Ambiente",
       "enum": ["Main Hall", "Terrace", "VIP Lounge", "Rooftop Garden", "Bar Counter"],
       "default": "Main Hall"
     },
     "branch": {
       "type": "string",
-      "title": "Branch",
+      "title": "Filial",
       "enum": ["Main Branch", "Downtown Branch", "Beachfront Outpost", "Express Outlet"],
       "default": "Main Branch"
     },
@@ -37,18 +37,18 @@
     },
     "shape": {
       "type": "string",
-      "title": "Table Shape",
+      "title": "Formato da Mesa",
       "enum": ["Rectangle", "Square", "Circle"],
       "default": "Rectangle"
     },
     "layout": {
       "type": "object",
-      "title": "Advanced Layout Position",
+      "title": "Posição Avançada no Mapa",
       "properties": {
-        "x": { "type": "integer", "title": "X Position", "default": 0 },
-        "y": { "type": "integer", "title": "Y Position", "default": 0 },
-        "width": { "type": "integer", "title": "Width (px)", "default": 120 },
-        "height": { "type": "integer", "title": "Height (px)", "default": 80 }
+        "x": { "type": "integer", "title": "Posição X", "default": 0 },
+        "y": { "type": "integer", "title": "Posição Y", "default": 0 },
+        "width": { "type": "integer", "title": "Largura (px)", "default": 120 },
+        "height": { "type": "integer", "title": "Altura (px)", "default": 80 }
       }
     }
   },

@@ -92,7 +92,7 @@ export default function CaptainTables() {
       setTables(sortTablesByMergeGroups(fetchedTables));
     } catch (err) {
       console.error(err);
-      setTablesError('Failed to load tables');
+      setTablesError('Falha ao carregar mesas');
       setTables([]);
     } finally {
       setTablesLoading(false);
@@ -158,7 +158,7 @@ export default function CaptainTables() {
     }
 
     const ownerName = order ? ownerNames.get(order.waiter) ?? order.waiter : null;
-    showToast.error(ownerName ? `Assigned to ${ownerName}` : 'This table is occupied');
+    showToast.error(ownerName ? `Atribuída a ${ownerName}` : 'Esta mesa está ocupada');
   };
 
   const isLoading = contextLoading || (roomsLoading && branchRooms.length === 0);
@@ -167,7 +167,7 @@ export default function CaptainTables() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner message="Loading captain context..." />
+        <Spinner message="Carregando painel do garçom..." />
       </div>
     );
   }
@@ -177,7 +177,7 @@ export default function CaptainTables() {
       <div className="flex min-h-screen items-center justify-center p-6">
         <div className="text-center">
           <AlertTriangle className="mx-auto mb-3 h-8 w-8 text-red-600" />
-          <h2 className="mb-1 text-lg font-semibold text-gray-800">Unable to load tables</h2>
+          <h2 className="mb-1 text-lg font-semibold text-gray-800">Não foi possível carregar as mesas</h2>
           <p className="text-sm text-gray-600">{error}</p>
         </div>
       </div>
@@ -188,9 +188,9 @@ export default function CaptainTables() {
     <div className="flex min-h-screen flex-col bg-gray-50">
       <div className="sticky top-0 z-10 border-b border-gray-200 bg-white p-3">
         <div className="flex items-center justify-between gap-2">
-          <h1 className="text-lg font-bold text-gray-900">Tables</h1>
+          <h1 className="text-lg font-bold text-gray-900">Mesas</h1>
           <Button variant="ghost" size="sm" onClick={refresh}>
-            Refresh
+            Atualizar
           </Button>
         </div>
 
@@ -216,7 +216,7 @@ export default function CaptainTables() {
         {branchRooms.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 py-16 text-gray-500">
             <AlertTriangle className="h-8 w-8" />
-            <p className="text-sm">No rooms available for your account.</p>
+            <p className="text-sm">Nenhum salão disponível para sua conta.</p>
           </div>
         ) : tablesError ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 py-16 text-red-500">
@@ -224,11 +224,11 @@ export default function CaptainTables() {
             <p className="text-sm">{tablesError}</p>
           </div>
         ) : tablesLoading ? (
-          <Spinner message="Loading tables..." />
+          <Spinner message="Carregando mesas..." />
         ) : tableGroups.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 py-16 text-gray-500">
             <Square className="h-8 w-8" />
-            <p className="text-sm">No tables found in this room.</p>
+            <p className="text-sm">Nenhuma mesa encontrada neste salão.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">

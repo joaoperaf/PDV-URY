@@ -61,9 +61,9 @@ Como o sistema rodará localmente neste notebook via Docker:
   - `git` instalado e autenticado no GitHub (`joaoperaf`).
   - Repositório clonado fisicamente em `/mnt/hd/projetos/PDV-URY` (com symlink em `/home/pericles-burger/PDV-URY`).
   - Remotes `origin` (`joaoperaf/PDV-URY`) e `upstream` (`ury-erp/ury`) configurados.
-  - Tags criadas: `v0.2.1-original` (estado original do fork) e `v0.2.1-docker-ready` (ambiente Docker + backups prontos).
+  - Tags criadas: `v0.2.1-original` (estado original do fork), `v0.2.1-docker-ready` (ambiente Docker + backups prontos) e `v0.3.0-ptbr` (sistema 100% traduzido para Português do Brasil — PT-BR).
   - **Node.js v22.14.0 LTS** e **Yarn 1.22.22** instalados fisicamente em `/mnt/hd/tools/node` (com caches em `/mnt/hd/.cache` e `/mnt/hd/sites/common_site_config.json` criado para compilação local dos frontends).
-  - **Todos os 5 frontends compilados** (`pos`, `frontend`, `self-order`, `mosaic`, `urypos`).
+  - **Todos os 5 frontends compilados e traduzidos para PT-BR** (`pos`, `frontend`, `self-order`, `mosaic`, `urypos`), com moeda padrão `R$` (`pt-BR`) e dicionário de backend Frappe (`ury/translations/pt-BR.csv` e `ury/translations/pt.csv`).
   - **Ambiente Docker rodando** ([`docker/docker-compose.yml`](./docker/docker-compose.yml) e [`docker/entrypoint-ury.sh`](./docker/entrypoint-ury.sh)) com volumes em `/mnt/hd/docker/volumes`:
     - `pdv-ury-frappe` (`frappe/erpnext:v15` + `ury` montado ao vivo de `/mnt/hd/projetos/PDV-URY`)
     - `pdv-ury-mariadb` (`mariadb:10.6`)
@@ -81,6 +81,13 @@ Como o sistema rodará localmente neste notebook via Docker:
 ---
 
 ## 6. Histórico de Sessões / Últimos Passos
+
+### [2026-10-28] — Passo 4 Concluído: Tradução Completa para Português do Brasil (PT-BR) em 4 Etapas (Antigravity)
+- **Etapa 1 (ERPNext Desk + PDV Principal `/pos`):** Configurado idioma padrão `pt-BR` no banco Frappe (`System Settings` e usuário `Administrator`), criado `pos/src/i18n/locales/pt-BR.json` com mais de 410 chaves traduzidas, registrado `pt-BR` como idioma padrão no i18next do PDV e formatador de moeda global em `packages/core/src/format.ts` (`pt-BR`, `R$`).
+- **Etapa 2 (KDS Cozinha `/mosaic`, Autoatendimento `/order` e App Garçom Captain):** Traduzidos todos os componentes de KDS (`mosaic/src/`), Totem/QR Code/Tablet (`self-order/src/`) e interface mobile do garçom (`pos/src/captain/`).
+- **Etapa 3 (Painel Gerencial, Wizard de Setup, Cadastros e 17 Relatórios `/ury`):** Traduzidos todos os schemas JSON, formulários dinâmicos, guardas de rota, páginas de cadastros do Dashboard e as 17 telas de relatórios gerenciais/DRE em `frontend/src/` e `packages/ui/src/components/data-table.tsx`.
+- **Etapa 4 (Backend Frappe — DocTypes, Campos, Roles e Mensagens de API):** Criados `ury/translations/pt-BR.csv` e `ury/translations/pt.csv` com 646 traduções de DocTypes, campos, opções, permissões, scripts do Desk e mensagens de erro/validação do backend Python, além de internacionalizar os rótulos do DRE em `ury/ury/report_api/financial.py`.
+- Todos os frontends recompilados, cache do Frappe limpo (`bench --site ury.localhost clear-cache`), branch `feat/traducao-ptbr` mesclada na `version-2` e tag `v0.3.0-ptbr` criada e enviada ao GitHub (`origin`).
 
 ### [2026-10-28] — Passo 3 Concluído: Subida do ERPNext v15 + URY no Docker, Build dos Frontends e Backup Automático (Antigravity)
 - Atualizado Node.js em `/mnt/hd/tools/node` para `v22.14.0 LTS` (compatível com todas as dependências) e compilados todos os 5 frontends (`yarn install && yarn build`).
@@ -105,4 +112,5 @@ Como o sistema rodará localmente neste notebook via Docker:
 - [x] **Passo 1:** Clonar projeto no HD (`/mnt/hd`), criar tag `v0.2.1-original` e configurar protocolo Multi-LLM (`HANDOFF.md` + `AGENTS.MD`).
 - [x] **Passo 2:** Instalar e configurar o **Docker** apontando seu `data-root` para `/mnt/hd/docker` (preservando o SSD) + autenticar GitHub (`gh`).
 - [x] **Passo 3:** Subir o ambiente Docker do Frappe/ERPNext v15 + URY, compilar frontends e configurar rotina automática de backup do banco de dados em `/mnt/hd/Backups/pdv-ury`.
-- [ ] **Passo 4:** Definir e iniciar as primeiras customizações de código e configuração inicial do restaurante no PDV-URY em branches dedicadas.
+- [x] **Passo 4:** Traduzir 100% do sistema (PDV, KDS Mosaic, Autoatendimento, Captain, Painel Gerencial, Wizard, 17 Relatórios e Backend Frappe) para Português do Brasil (`PT-BR`, tag `v0.3.0-ptbr`).
+- [ ] **Passo 5:** Realizar a configuração inicial do restaurante (Péricles Burger) e iniciar novas customizações de regras de negócio / fluxo operacional.
