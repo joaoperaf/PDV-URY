@@ -1,0 +1,3 @@
+Sempre leia `HANDOFF.md` e `AGENTS.MD` antes de iniciar qualquer tarefa e atualize `HANDOFF.md` ao finalizar cada alteração.
+Restrição crítica de hardware: O SSD (`/`, 116 GB) é exclusivo para o sistema operacional. Todo armazenamento pesado (projeto, Docker data-root em `/mnt/hd/docker`, caches e backups em `/mnt/hd/Backups/pdv-ury`) deve ficar obrigatoriamente em `/mnt/hd`.
+Faça commits atômicos e utilize branches dedicadas para novas funcionalidades.

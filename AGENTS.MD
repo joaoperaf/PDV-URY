@@ -1,5 +1,14 @@
 # URY — Root Agent Documentation
 
+## 0. REGRAS OBRIGATÓRIAS PARA TODAS AS LLMs / AGENTES (LEIA PRIMEIRO)
+
+> **IMPORTANTE — Sincronização Multi-LLM e Restrições de Hardware:**
+> 1. **Leitura e Atualização do `HANDOFF.md`:** Antes de iniciar qualquer tarefa, leia o arquivo [`HANDOFF.md`](./HANDOFF.md) na raiz do repositório. Ao concluir qualquer tarefa ou antes de realizar um commit, **atualize o `HANDOFF.md`** com o que foi feito, arquivos alterados e próximos passos para que a próxima LLM tenha contexto total.
+> 2. **Proteção Estrita do SSD (`/`):** O SSD principal (`/dev/sdb2`, 116 GB) é exclusivo para o sistema operacional. **NUNCA** armazene containers/volumes Docker, caches pesados (`node_modules`, cache de Yarn/NPM/Pip) ou backups no SSD. Todo armazenamento pesado deve ficar no HD de 1 TB (`/mnt/hd`), onde este projeto já reside fisicamente (`/mnt/hd/projetos/PDV-URY`, com symlink em `/home/pericles-burger/PDV-URY`). O Docker deve usar `data-root` em `/mnt/hd/docker`.
+> 3. **Versionamento Seguro (Git):** Faça commits atômicos a cada pequena funcionalidade testada. Use branches dedicadas para novas funcionalidades e mantenha tags de versão estáveis (`v0.2.1-original` marca o estado inicial do fork).
+
+---
+
 ## 1. App Overview
 
 **URY** is a complete restaurant order management system built as a Frappe/ERPNext custom app.
