@@ -1,0 +1,71 @@
+name: pdv-ury
+
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: pdv-ury-mariadb
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-admin123}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-admin123}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=${MYSQL_ROOT_PASSWORD:-admin123}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis-cache:
+    image: redis:6.2-alpine
+    container_name: pdv-ury-redis-cache
+    restart: unless-stopped
+    volumes:
+      - redis-cache-data:/data
+
+  redis-queue:
+    image: redis:6.2-alpine
+    container_name: pdv-ury-redis-queue
+    restart: unless-stopped
+    volumes:
+      - redis-queue-data:/data
+
+  frappe:
+    image: frappe/erpnext:v15
+    container_name: pdv-ury-frappe
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+    environment:
+      SITE_NAME: ${SITE_NAME:-ury.localhost}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      DB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-admin123}
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      REDIS_CACHE: redis-cache:6379
+      REDIS_QUEUE: redis-queue:6379
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    volumes:
+      - sites-data:/home/frappe/frappe-bench/sites
+      - /mnt/hd/projetos/PDV-URY:/home/frappe/frappe-bench/apps/ury
+      - /mnt/hd/projetos/PDV-URY/docker/entrypoint-ury.sh:/home/frappe/entrypoint-ury.sh:ro
+      - /mnt/hd/Backups/pdv-ury:/backups
+    entrypoint: ["bash", "/home/frappe/entrypoint-ury.sh"]
+
+volumes:
+  mariadb-data:
+  redis-cache-data:
+  redis-queue-data:
+  sites-data:
