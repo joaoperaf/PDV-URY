@@ -86,7 +86,7 @@ def get_daily_pnl(date, branch):
 	summary = [
 		{
 			"key": amount_field,
-			"label": label,
+			"label": frappe._(label),
 			"amount": doc.get(amount_field) or 0,
 			"percent": doc.get(percent_field) or 0,
 		}

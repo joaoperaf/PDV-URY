@@ -1,0 +1,648 @@
+% of selected sales,% das vendas selecionadas
+"<li>Daily Gross Salary Cost is calculated from employees attendance.</li>
+<br>","<li>O Custo Diário de Salário Bruto é calculado a partir da frequência dos colaboradores.</li>
+<br>"
+A staff member will assist with payment shortly.,Um membro da equipe ajudará você com o pagamento em instantes.
+A valid recipient is required,É necessário informar um destinatário válido
+AC,Climatizado (AC)
+Acknowledged,Confirmado
+Active,Ativo
+Active Info,Informações de Ativação
+Add Discount,Adicionar Desconto
+Add Item,Adicionar Item
+Adding further items to this order is not allowed,Não é permitido adicionar mais itens a este pedido
+Additional Details,Detalhes Adicionais
+Address,Endereço
+Aggregator ID,ID do Agregador
+Aggregator Series Prefix,Prefixo de Série do Agregador
+Aggregator Settings,Configurações de Agregadores
+Aggregators,Agregadores (Delivery)
+Aggregators Settings,Configurações de Agregadores
+All,Todos
+Allow Add to Running Table,Permitir Adicionar a Mesa em Andamento
+Allow Cashier To Edit And Remove Table Order Items,Permitir ao Caixa Editar e Remover Itens de Pedido de Mesa
+Allow Cashier To View All Status,Permitir ao Caixa Visualizar Todos os Status
+Amended From,Retificado De
+Amount,Valor
+An error occurred while printing,Ocorreu um erro durante a impressão
+An unexpected error occurred while reprinting KOT. Please check logs.,Ocorreu um erro inesperado ao reimprimir o KOT. Verifique os logs.
+Applied for both Sales Invoice and POS Invoice,Aplicado tanto para Fatura de Venda quanto Fatura de PDV
+Applies To,Aplica-se A
+Approved,Aprovado
+Arrived Time,Horário de Chegada
+Assistance,Atendimento
+At least one item must remain on the original bill.,Pelo menos um item deve permanecer na conta original.
+Auth & Status,Autenticação e Status
+Bill,Conta
+Bill Merge Details,Detalhes de Agrupamento de Contas
+Billing & Payment,Faturamento e Pagamento
+Block Takeaway KOT,Bloquear KOT de Para Viagem
+Both,Ambos
+Both invoices must be in Draft state to merge.,Ambas as faturas devem estar em Rascunho para serem agrupadas.
+Both start_date and end_date are required.,A data inicial e a data final são obrigatórias.
+Branch,Filial
+Branch information is missing for the user. Please contact your administrator.,As informações de filial não foram definidas para o usuário. Contate o administrador.
+Breakup,Detalhamento
+Burning Materials (Other Consumables),Materiais de Consumo (Gás/Combustível/Outros)
+Busy,Ocupado
+Buying Price,Preço de Compra
+Buying Price List,Lista de Preços de Compra
+Cancel,Cancelar
+Cancel Order,Cancelar Pedido
+Cancellation Reason,Motivo do Cancelamento
+Cancelled,Cancelado
+Cancelled Qty,Qtd. Cancelada
+Cannot merge an already merged table.,Não é possível agrupar uma mesa que já está agrupada.
+Cannot merge an invoice with itself.,Não é possível agrupar uma fatura com ela mesma.
+Cannot merge bills from different branches.,Não é possível agrupar contas de filiais diferentes.
+Cannot merge tables from different rooms.,Não é possível agrupar mesas de salões diferentes.
+Cannot merge tables with separate active orders.,Não é possível agrupar mesas que já possuem pedidos ativos separados.
+Cannot move more than available quantity for {0}.,Não é possível mover mais do que a quantidade disponível para {0}.
+Cannot unmerge active tables.,Não é possível desagrupar mesas com pedidos ativos.
+Cannot verify transfer permission: order has no POS Profile.,Não foi possível verificar a permissão de transferência: o pedido não possui Perfil de PDV.
+Captain Transfer,Transferência de Garçom
+Captain transfer is not allowed between different rooms,A transferência de garçom não é permitida entre salões diferentes
+Cart Items,Itens do Carrinho
+Cashier,Operador de Caixa
+Checklist Items,Itens do Checklist
+Checklist Type,Tipo de Checklist
+Checkout,Fechar Conta
+Circle,Círculo
+Click Enter To Add,Pressione Enter para Adicionar
+Closed,Fechado
+Closing,Fechamento
+Closing Amount,Valor de Fechamento
+Comment,Comentário
+Comments,Comentários
+Company,Empresa
+Complete,Concluído
+Completed At,Concluído Em
+Completed By,Concluído Por
+Confirm Cancellation,Confirmar Cancelamento
+Cost Of Goods,Custo das Mercadorias
+Cost Of Goods Sold (Breakup),Custo das Mercadorias Vendidas (Detalhamento)
+Cost Per Unit,Custo por Unidade
+Cost center is mandatory.,O centro de custo é obrigatório.
+Cost of Goods Sold,Custo das Mercadorias Vendidas (CMV)
+Cost of Goods Sold Percent,% do Custo das Mercadorias Vendidas
+Could Not Delete Demo Data,Não foi possível excluir os dados de demonstração
+Course,Etapa do Prato
+Course Icon,Ícone da Etapa
+Create Invoice without Tax,Criar Fatura sem Imposto
+Created At,Criado Em
+Creating demo transactions,Criando transações de demonstração
+Credential Hash,Hash de Credencial
+Currency,Moeda
+Current Order,Pedido Atual
+Customer,Cliente
+Customer Group,Grupo de Clientes
+Customer Name,Nome do Cliente
+Customer Territory,Território do Cliente
+Customer group,Grupo de Clientes
+Customer name is required,O nome do cliente é obrigatório
+Daily Fixed,Fixo Diário
+Daily P and L Settings,Configurações do DRE Diário
+Date,Data
+Declined,Recusado
+Default Customer,Cliente Padrão
+Default Menu,Cardápio Padrão
+Default Mode Of Payments,Formas de Pagamento Padrão
+Default Price List,Lista de Preços Padrão
+Default Room,Salão Padrão
+Default Tax Template,Modelo de Imposto Padrão
+Delivery,Entrega (Delivery)
+Depreciation,Depreciação
+Depreciation Percent,% de Depreciação
+Details,Detalhes
+Device,Dispositivo
+Device Config,Configuração do Dispositivo
+Device ID,ID do Dispositivo
+Device Info,Informações do Dispositivo
+Device Name,Nome do Dispositivo
+Device Type,Tipo de Dispositivo
+Device not recognized,Dispositivo não reconhecido
+Difference,Diferença
+Dine In,Consumo no Local
+Direct Expenses,Despesas Diretas
+Direct Fixed Expenses,Despesas Fixas Diretas
+Disabled,Desativado
+Discount is not allowed for this POS Profile,Desconto não é permitido para este Perfil de PDV
+Discount of {0}% exceeds the maximum allowed discount of {1}%.,O desconto de {0}% excede o desconto máximo permitido de {1}%.
+Discount percentage must be between 0 and 100,O percentual de desconto deve estar entre 0 e 100
+Discounts & Round Offs,Descontos e Arredondamentos
+Discounts & Round Offs Percent,% de Descontos e Arredondamentos
+Discounts are not enabled for POS Profile {0}.,Descontos não estão habilitados para o Perfil de PDV {0}.
+Draft,Rascunho
+Duplicate,Duplicado
+Edit Cart,Editar Carrinho
+Either Bill is not enabled / Printer is not selected in Printer Settings.,A impressão de conta não está habilitada ou nenhuma impressora foi selecionada nas Configurações de Impressora.
+Electricity Closing,Leitura Final de Energia
+Electricity Opening,Leitura Inicial de Energia
+Electricty Charges,Despesas de Energia Elétrica
+Employee Cost,Custo com Pessoal
+Employee Cost Percent,% de Custo com Pessoal
+Employee Costs,Custos com Pessoal
+Enable Customer Payment,Habilitar Pagamento do Cliente
+Enable Discount,Habilitar Desconto
+Enable Item Notes,Habilitar Observações nos Itens
+Enable KOT Audio Alert,Habilitar Alerta Sonoro de KOT
+Enable KOT Reprint,Habilitar Reimpressão de KOT
+Enable Kiosk Ordering,Habilitar Pedidos no Totem
+Enable Multiple Cashier,Habilitar Múltiplos Caixas
+Enable Order Type Edit,Habilitar Edição do Tipo de Pedido
+Enable Pay at Counter,Habilitar Pagamento no Balcão
+Enable Payment Link,Habilitar Link de Pagamento
+Enable Product Detail Page,Habilitar Página de Detalhes do Produto
+Enable QR Pickup Ordering,Habilitar Pedidos via QR Code para Retirada
+Enable QR Table Ordering,Habilitar Pedidos via QR Code na Mesa
+Enable Request Bill,Habilitar Solicitação de Conta
+Enable discount feature in URY POS,Habilitar função de desconto no PDV URY
+Enable order type wise display on mosaic,Habilitar exibição por tipo de pedido no KDS Mosaic
+Enabled,Ativado
+"Enables Cashiers to view all statuses (Paid, Consolidated, Return Invoices) in the recent order.","Permite aos operadores de caixa visualizar todos os status (Pago, Consolidado, Devoluções) nos pedidos recentes."
+Enter Units Consumed,Informe as Unidades Consumidas
+Error while placing order: {0},Erro ao enviar o pedido: {0}
+Expected Amount,Valor Esperado
+Expense,Despesa
+Expired,Expirado
+Expires At,Expira Em
+Extended Hours,Horário Estendido
+Failed,Falhou
+Failed to create demo transactions,Falha ao criar transações de demonstração
+"Failed to erase demo data, please delete the demo company manually.",Falha ao apagar os dados de demonstração; exclua a empresa de demonstração manualmente.
+Failed to load data . Please refresh the page,Falha ao carregar os dados. Atualize a página
+Failed to load restaurant demo masters,Falha ao carregar os cadastros de demonstração do restaurante
+Failed to set up POS demo,Falha ao configurar a demonstração do PDV
+Favorite Item,Item Favorito
+Favorite Items,Itens Favoritos
+Fixed,Fixo
+Fixed Table,Mesa Fixa
+Generate URY Demo Data,Gerar Dados de Demonstração do URY
+Grand Total,Total Geral
+Gross Profit/Loss,Lucro/Prejuízo Bruto
+Gross Profit/Loss Percent,% de Lucro/Prejuízo Bruto
+Gross Sales,Vendas Brutas
+Gross Sales Percent,% de Vendas Brutas
+Icon,Ícone
+Idle,Ocioso
+"If checked, we will create URY demo data for you to explore the system. This demo data can be erased later.","Se marcado, criaremos dados de demonstração do URY para você explorar o sistema. Esses dados poderão ser apagados depois."
+Image,Imagem
+In Progress,Em Andamento
+Includes in Total Indirect Expense,Incluir no Total de Despesas Indiretas
+Incomplete data. Check POS Opening Entry.,Dados incompletos. Verifique a Abertura de Caixa PDV.
+Incorrect staff PIN,PIN da equipe incorreto
+Indicate Course,Indicar Etapa do Prato
+Indicate In KDS,Indicar no KDS
+Indirect Expenses,Despesas Indiretas
+Indirect Fixed Expenses,Despesas Fixas Indiretas
+Invalid Electricity Reading,Leitura de energia elétrica inválida
+Invalid QZ private key path in site config,Caminho da chave privada do QZ inválido na configuração do site
+Invalid characters in search term,Caracteres inválidos no termo de busca
+Invalid discount value: {0},Valor de desconto inválido: {0}
+Invalid mobile number format,Formato de número de celular inválido
+Invalid ordering link,Link de autoatendimento inválido
+Invalid quantity for item {0},Quantidade inválida para o item {0}
+Invalid table,Mesa inválida
+Invoice,Fatura
+Invoice Already Billed,Fatura Já Faturada
+Invoice Created,Fatura Criada
+Invoice Creation Time,Horário de Criação da Fatura
+Invoice Printed,Fatura Impressa
+Invoice Series Prefix,Prefixo da Série de Faturas
+Is Aggregator,É Agregador
+Is Checked,Marcado
+Is Mandatory,É Obrigatório
+Is Take Away,É Para Viagem
+Item,Item
+Item Add On,Adicional de Item
+Item Added Total Qty=,Item Adicionado Qtd. Total=
+Item Added Total Qty= 1,Item Adicionado Qtd. Total= 1
+Item Cart,Carrinho de Itens
+Item Code,Código do Item
+Item Group,Grupo de Itens
+Item Groups,Grupos de Itens
+Item Label,Rótulo do Item
+Item Name,Nome do Item
+Item Quantity Reduced Total Qty=,Quantidade do Item Reduzida Qtd. Total=
+Item not found,Item não encontrado
+Item {0} is not available on this menu,O item {0} não está disponível neste cardápio
+Items,Itens
+KDS Order Type,Tipo de Pedido no KDS
+KDS Settings,Configurações do KDS
+KOT,Pedido de Cozinha (KOT)
+KOT Items,Itens do KOT
+KOT Print,Impressão de KOT
+KOT Print Format,Formato de Impressão do KOT
+KOT Reprint is disabled in POS Profile.,A reimpressão de KOT está desativada no Perfil de PDV.
+KOT Settings,Configurações de KOT
+KOT Warning Time,Tempo de Alerta do KOT
+KOT alert sound,Som de alerta do KOT
+Keep Sales Invoice Unpaid,Manter Fatura de Venda em Aberto
+Kiosk,Totem
+Kiosk ordering is currently unavailable,Os pedidos no totem estão indisponíveis no momento
+Landscape Kiosk,Totem Horizontal (Paisagem)
+Last Activity,Última Atividade
+Last Seen,Visto por Último
+Last Transaction,Última Transação
+Last Transaction ID,ID da Última Transação
+Latest Invoice Time,Horário da Última Fatura
+Layout,Mapa do Salão
+Layout Height,Altura no Mapa
+Layout Position,Posição no Mapa
+Layout Width,Largura no Mapa
+Layout X,Posição X no Mapa
+Layout Y,Posição Y no Mapa
+Linked Invoices,Faturas Vinculadas
+Loading Invoices! Please Wait...,Carregando Faturas! Aguarde...
+Loading restaurant demo masters,Carregando cadastros de demonstração do restaurante
+Main Cashier,Caixa Principal
+Material,Material
+Materials Consumed,Materiais Consumidos
+Menu,Cardápio
+Menu For Room,Cardápio do Salão
+Menu Info,Informações do Cardápio
+Menu for Room,Cardápio do Salão
+Merged POS Invoice,Fatura de PDV Agrupada
+Merged POS Invoice Details,Detalhes da Fatura de PDV Agrupada
+Merged Tables,Mesas Agrupadas
+Merged Total,Total Agrupado
+Merged With,Agrupada Com
+Minimum Seating,Ocupação Mínima
+Missing URY Report Settings,Configurações de Relatórios URY Ausentes
+Missing ordering session,Sessão de autoatendimento ausente
+Missing ordering token or device credentials,Token de autoatendimento ou credenciais do dispositivo ausentes
+Missing payload to sign,Payload para assinatura ausente
+Mobile Number,Número de Celular
+Mobile Number is required,O número de celular é obrigatório
+Mode of Payment,Forma de Pagamento
+Modified time,Horário de Modificação
+Monthly Fixed,Fixo Mensal
+Monthly Fixed Expenses,Despesas Fixas Mensais
+Multiple Cashier Configuration,Configuração de Múltiplos Caixas
+Multiple Rooms,Múltiplos Salões
+NON-AC,Não Climatizado (Sem AC)
+Net Profit/Loss,Lucro/Prejuízo Líquido
+Net Profit/Loss Percent,% de Lucro/Prejuízo Líquido
+Net Sales,Vendas Líquidas
+Net Sales Percent,% de Vendas Líquidas
+Net Total,Total Líquido
+New Order,Novo Pedido
+No Company found.,Nenhuma empresa encontrada.
+No Expense Account found for Write Off,Nenhuma Conta de Despesa encontrada para Baixa (Write Off)
+No KOT Reprint Print Format is set in POS Profile.,Nenhum Formato de Reimpressão de KOT está definido no Perfil de PDV.
+No Of Hours,Nº de Horas
+No Sub POS Closing entries found between the given dates,Nenhum Fechamento de Subcaixa encontrado entre as datas informadas
+No active order for this session,Nenhum pedido ativo para esta sessão
+No active order for this table,Nenhum pedido ativo para esta mesa
+No branch or room information found for the user. Please contact your administrator.,Nenhuma filial ou salão encontrado para o usuário. Contate o administrador.
+No company found for URY demo data,Nenhuma empresa encontrada para os dados de demonstração do URY
+No item price found for Item: {0} in Price List: {1}. Please check the price list settings.,Nenhum preço encontrado para o Item: {0} na Lista de Preços: {1}. Verifique as configurações da lista de preços.
+No items provided,Nenhum item informado
+No of Seats,Nº de Lugares
+No payment request found for this order — create one first,Nenhuma solicitação de pagamento encontrada para este pedido — crie uma primeiro
+No payment terminal is configured for this kiosk.,Nenhum terminal de pagamento está configurado para este totem.
+"No payment terminal is configured for this kiosk. Please use a card/UPI reader at the counter, or pay via the online payment option if enabled.","Nenhum terminal de pagamento está configurado para este totem. Pague no balcão ou utilize a opção de pagamento online, se habilitada."
+No printer is assigned for reprinting KOT.,Nenhuma impressora está atribuída para reimpressão de KOT.
+No room assigned to this user. Please contact your administrator.,Nenhum salão atribuído a este usuário. Contate o administrador.
+No such simulated terminal transaction.,Transação simulada de terminal não encontrada.
+No warehouses found for the demo company. Please create at least one warehouse.,Nenhum almoxarifado encontrado para a empresa de demonstração. Crie pelo menos um almoxarifado.
+None,Nenhum
+Not allowed to cancel billed orders.,Não é permitido cancelar pedidos já faturados.
+Not allowed to cancel table orders through PoS,Não é permitido cancelar pedidos de mesa pelo PDV
+Not permitted,Não permitido
+Not permitted to access orders outside your assigned room,Sem permissão para acessar pedidos fora do seu salão atribuído
+Not permitted to access this Customer,Sem permissão para acessar este Cliente
+Not permitted to access this order,Sem permissão para acessar este pedido
+Not permitted to apply discounts,Sem permissão para aplicar descontos
+Not permitted to create POS Opening Entry,Sem permissão para criar Abertura de Caixa PDV
+Not permitted to execute KOT for this invoice,Sem permissão para gerar KOT para esta fatura
+Not permitted to modify this order,Sem permissão para modificar este pedido
+Not permitted to print this document,Sem permissão para imprimir este documento
+Not permitted to print this invoice,Sem permissão para imprimir esta fatura
+Not permitted to release tables for this invoice,Sem permissão para liberar mesas para esta fatura
+Not permitted to reprint KOT for orders outside your active branch,Sem permissão para reimprimir KOT de pedidos fora da sua filial ativa
+Not permitted to send notifications for this KOT,Sem permissão para enviar notificações para este KOT
+Not permitted to serve this KOT,Sem permissão para marcar este KOT como servido
+Not permitted to split invoices from another branch.,Sem permissão para dividir faturas de outra filial.
+Not permitted to split this invoice.,Sem permissão para dividir esta fatura.
+Not permitted to submit POS Opening Entry,Sem permissão para confirmar Abertura de Caixa PDV
+Not permitted to take orders for a table outside your active branch.,Sem permissão para anotar pedidos em mesas fora da sua filial ativa.
+Not permitted to take orders for a table outside your assigned room.,Sem permissão para anotar pedidos em mesas fora do seu salão atribuído.
+Not permitted to transfer this order,Sem permissão para transferir este pedido
+Not permitted to use this POS Profile.,Sem permissão para usar este Perfil de PDV.
+Not permitted to view POS Opening Entries.,Sem permissão para visualizar Aberturas de Caixa PDV.
+Not permitted to view orders outside your active branch,Sem permissão para visualizar pedidos fora da sua filial ativa
+Not permitted to view this order,Sem permissão para visualizar este pedido
+Not permitted to view this table,Sem permissão para visualizar esta mesa
+Notify KOT Delay,Notificar Atraso do KOT
+Occupied,Ocupada
+Occupied tables cannot be merged.,Mesas ocupadas não podem ser agrupadas.
+Offline,Offline
+Online payment is not enabled,O pagamento online não está habilitado
+Only draft invoices can be split.,Apenas faturas em rascunho podem ser divididas.
+Open,Aberto
+Opened At,Aberto Em
+Opening,Abertura
+Opening Amount,Valor de Abertura
+Opening amount cannot be negative.,O valor de abertura não pode ser negativo.
+Order,Pedido
+Order Completed,Pedido Concluído
+Order Info,Informações do Pedido
+Order Modified,Pedido Modificado
+Order No,Nº do Pedido
+Order Status,Status do Pedido
+Order Type,Tipo de Pedido
+Order Type Menu,Cardápio por Tipo de Pedido
+Order Type Wise Menu,Cardápio por Tipo de Pedido
+Order Updated,Pedido Atualizado
+Ordering Modes,Modos de Autoatendimento
+Ordering Profile,Perfil de Autoatendimento
+Ordering is currently unavailable,O autoatendimento está indisponível no momento
+Ordering is currently unavailable for this restaurant,O autoatendimento está indisponível para este restaurante no momento
+Ordering session expired or invalid. Please rescan the QR code.,Sessão de autoatendimento expirada ou inválida. Escaneie o QR Code novamente.
+Ordering session expired. Please rescan the QR code.,Sessão de autoatendimento expirada. Escaneie o QR Code novamente.
+Original KOT,KOT Original
+Other,Outro
+Other Expenses,Outras Despesas
+Other Expenses Percent,% de Outras Despesas
+PAX,Pessoas (PAX)
+POS Invoice,Fatura de PDV
+POS Item Variants,Variações de Itens no PDV
+POS Opening Entry,Abertura de Caixa PDV
+POS Opening Entry is not created,A Abertura de Caixa PDV não foi criada
+POS Profile,Perfil de PDV
+POS Profile Failed to Load,Falha ao Carregar o Perfil de PDV
+POS Profile Not Found or User permission in POS Profile is not given to this user,Perfil de PDV não encontrado ou permissão de usuário não concedida no Perfil de PDV
+POS Profile has no mode of payment configured,O Perfil de PDV não possui formas de pagamento configuradas
+POS Profile {0} not found.,Perfil de PDV {0} não encontrado.
+POS Transactions,Transações do PDV
+POST requests only,Apenas requisições POST são permitidas
+Parcel Order Printer,Impressora de Pedidos Para Viagem
+Partially cancelled,Parcialmente cancelado
+Past Order Fetched,Pedido Anterior Carregado
+Pax,Pessoas (PAX)
+Payment Amount,Valor do Pagamento
+Payment Reconciliation,Conciliação de Pagamentos
+Payment Type,Tipo de Pagamento
+Payment links are not enabled,Links de pagamento não estão habilitados
+Pending,Pendente
+Per Unit,Por Unidade
+Percent,Percentual
+Percentage Expenses,Despesas Percentuais
+Percentage Type,Tipo de Percentual
+Period Details,Detalhes do Período
+Period End Date,Data Final do Período
+Period Start Date,Data Inicial do Período
+Phone In,Pedido por Telefone
+Pickup ordering is not enabled,Pedidos para retirada não estão habilitados
+Please enter valid customer details,Informe dados válidos do cliente
+Please select a table,Selecione uma mesa
+Please set an active menu for Restaurant {0},Defina um cardápio ativo para o Restaurante {0}
+Please set up URY Report Settings for the selected branch: <strong>{0}</strong>,Configure as Configurações de Relatórios URY para a filial selecionada: <strong>{0}</strong>
+Point of Sale,Ponto de Venda (PDV)
+Portable Tablet,Tablet Portátil
+Portrait Kiosk,Totem Vertical (Retrato)
+Posting Date,Data de Lançamento
+Posting Time,Hora de Lançamento
+Price List (Auto created),Lista de Preços (Criada Automaticamente)
+Print,Imprimir
+Printer,Impressora
+Printer Info,Informações da Impressora
+Printer Settings,Configurações de Impressora
+Printer info,Informações da impressora
+Printers,Impressoras
+Printing Failed,Falha na Impressão
+Printing Failed: Error connecting to QZ Tray,Falha na Impressão: Erro ao conectar ao QZ Tray
+Printing Failed: Error looking up printer,Falha na Impressão: Erro ao localizar a impressora
+Printing Failed: Error printing with QZ Tray,Falha na Impressão: Erro ao imprimir com o QZ Tray
+Printing Invoice,Imprimindo Fatura
+Printing the invoice is mandatory before submitting. Please print the invoice.,A impressão da fatura é obrigatória antes de confirmar. Imprima a fatura.
+Priority,Prioridade
+Processing Sales! Please Wait...,Processando Vendas! Aguarde...
+Product Display,Exibição de Produtos
+Production,Produção
+Profile Info,Informações do Perfil
+Profile Name,Nome do Perfil
+Profit / Loss,Lucro / Prejuízo
+Provider,Provedor
+QR Pickup,QR Code para Retirada
+QR Signing Secret,Chave Secreta de Assinatura do QR Code
+QR Table,QR Code na Mesa
+QZ Host,Host do QZ Tray
+QZ Print,Impressão via QZ Tray
+QZ private key is not configured in site config,A chave privada do QZ não está configurada no site
+Qty,Qtd.
+Quantity,Quantidade
+Queued,Na Fila
+Rate,Preço Unitário
+Reason,Motivo
+Receiver By Role,Destinatário por Função
+Recipients,Destinatários
+Rectangle,Retângulo
+Remarks,Observações
+Reprint KOT Format,Formato de Reimpressão do KOT
+Request Type,Tipo de Solicitação
+Requested At,Solicitado Em
+Requesting the bill is not enabled,A solicitação de conta não está habilitada
+Require Daily POS Closing,Exigir Fechamento Diário de Caixa
+Reset Order Number Daily,Reiniciar Numeração de Pedidos Diariamente
+Resolved,Resolvido
+Resolved At,Resolvido Em
+Resolved By,Resolvido Por
+Restaurant,Restaurante
+Restaurant Info,Informações do Restaurante
+Restaurant Menu,Cardápio do Restaurante
+Restaurant Prefix For Sales Invoice,Prefixo do Restaurante para Fatura de Venda
+Restaurant Room,Salão do Restaurante
+Restaurant Table,Mesa do Restaurante
+Retry,Tentar Novamente
+Role,Função (Cargo)
+Role Allowed For Billing,Função Autorizada para Faturamento
+Role Permitted,Função Permitida
+Role Permitted For Captain Transfer,Função Autorizada para Transferência de Garçom
+Role Restricted For Table Order,Função com Restrição para Pedidos de Mesa
+Room,Salão
+Room Type,Tipo de Salão
+Room Wise Menu,Cardápio por Salão
+Rooms,Salões
+Search term too long (max 100 characters),Termo de busca muito longo (máx. 100 caracteres)
+Select Customer / No of Pax,Selecionar Cliente / Nº de Pessoas
+Select Items,Selecionar Itens
+Select Table,Selecionar Mesa
+Select at least one item to move.,Selecione pelo menos um item para mover.
+Select at least one table to merge.,Selecione pelo menos uma mesa para agrupar.
+Selectable,Selecionável
+Selected POS Profile has no Branch.,O Perfil de PDV selecionado não possui Filial.
+Selected POS Profile has no Restaurant.,O Perfil de PDV selecionado não possui Restaurante.
+Self Ordering Manager,Gerente de Autoatendimento
+Self ordering is not configured for this restaurant,O autoatendimento não está configurado para este restaurante
+Self ordering profile has no default customer configured,O perfil de autoatendimento não possui cliente padrão configurado
+Serve Priority,Prioridade de Atendimento
+Served Time,Horário de Entrega
+Server Error,Erro no Servidor
+Serving Priority,Prioridade de Preparo
+Session,Sessão
+Session Idle Timeout (Minutes),Tempo Limite de Inatividade da Sessão (Minutos)
+Set a limit for the cashier to view a restricted number of recently paid invoices.,Defina um limite para o caixa visualizar uma quantidade restrita de faturas pagas recentemente.
+Setting table,Configurando mesa
+Setting up POS demo,Configurando demonstração do PDV
+Setup already completed,A configuração inicial já foi concluída
+Setup failed,Falha na configuração
+Shift Date,Data do Turno
+Show Item Descriptions,Exibir Descrições dos Itens
+Show Item Image In URY Pos,Exibir Imagens dos Itens no PDV URY
+Show Item Images,Exibir Imagens dos Itens
+Show Limited Paid Invoices,Limitar Exibição de Faturas Pagas
+Simulated,Simulado
+Source,Origem
+Special Dish,Prato Especial
+Split From,Dividida De
+Split Group,Grupo de Divisão
+Square,Quadrado
+Staff PIN,PIN da Equipe
+Start Time For Preparation,Horário de Início do Preparo
+Status,Status
+Sub Cashiers are not allowed to make POS Closing Entries.,Subcaixas não têm permissão para realizar o Fechamento de Caixa Principal.
+Sub POS Close Entry,Fechamento de Subcaixa PDV
+Sub POS Closing,Fechamento de Subcaixa
+Sub POS Closing Failed,Falha no Fechamento de Subcaixa
+Sub POS Closing Payment,Pagamento de Fechamento de Subcaixa
+Sub POS Closing failed while running in a background process. You can resolve the {0} and retry the process again.,O Fechamento de Subcaixa falhou durante a execução em segundo plano. Resolva o problema em {0} e tente novamente.
+Sub POS Invoices,Faturas de Subcaixa
+Submit/Delete Draft Invoices,Confirmar/Excluir Faturas em Rascunho
+Submitted,Confirmado
+Summary,Resumo
+Table,Mesa
+Table Assignment Error,Erro na Atribuição de Mesa
+Table Attention time,Tempo de Atenção da Mesa
+Table Info,Informações da Mesa
+Table List,Lista de Mesas
+Table Mode,Modo de Mesa
+Table Order Printer,Impressora de Pedidos de Mesa
+Table Shape,Formato da Mesa
+Table Tablet,Tablet de Mesa
+Table Takeaway,Para Viagem na Mesa
+Table Transfer,Transferência de Mesa
+Table is not merged.,A mesa não está agrupada.
+Table not found.,Mesa não encontrada.
+Table ordering is not enabled,Pedidos na mesa não estão habilitados
+Table transfer between different branches is restricted.,A transferência de mesa entre filiais diferentes é restrita.
+Table transfer is not allowed for merged tables. Unmerge first.,A transferência de mesa não é permitida para mesas agrupadas. Desagrupe primeiro.
+Tablet,Tablet
+Take Away,Para Viagem
+Take Away List,Lista Para Viagem
+Tax,Imposto
+Tax Percent,% de Imposto
+Terminal,Terminal
+Terminal ID,ID do Terminal
+The Main Cashier cannot close a Sub POS Closing entry.,O Caixa Principal não pode fechar um registro de Fechamento de Subcaixa.
+The selected bill already includes another bill.,A conta selecionada já inclui outra conta agrupada.
+The selected bill has no items to merge.,A conta selecionada não possui itens para agrupar.
+The selected user is not assigned to this branch.,O usuário selecionado não está atribuído a esta filial.
+The selected user is not permitted to take table orders.,O usuário selecionado não tem permissão para atender pedidos de mesa.
+There are no active Fiscal Years for which Demo Data can be generated.,Não há Exercícios Fiscais ativos para gerar os Dados de Demonstração.
+This bill already includes a merged bill.,Esta conta já inclui uma conta agrupada.
+This device is not configured for table selection,Este dispositivo não está configurado para seleção de mesa
+This method is only meant for developer mode,Este método é exclusivo para o modo de desenvolvedor
+This order has already been billed and cannot be modified.,Este pedido já foi faturado e não pode ser modificado.
+This order has already been billed. Please reload the page.,Este pedido já foi faturado. Recarregue a página.
+This order is already settled,Este pedido já foi liquidado
+This role grants permissions for Captain Transfer with access to all tables,Esta função concede permissão para Transferência de Garçom com acesso a todas as mesas
+This table already has an order in progress. Please ask staff for assistance.,Esta mesa já possui um pedido em andamento. Solicite auxílio à equipe.
+This table is assigned to {0}. Please contact them for assistance.,Esta mesa está atribuída a {0}. Solicite auxílio a ele(a).
+Time,Hora
+Toggle Recent Orders,Alternar Pedidos Recentes
+Token Hash,Hash do Token
+Too many items in a single request,Muitos itens em uma única requisição
+Total Direct Expense,Total de Despesas Diretas
+Total Direct Expense Percent,% do Total de Despesas Diretas
+Total Direct Expenses,Total de Despesas Diretas
+Total Indirect Expenses,Total de Despesas Indiretas
+Total Indirect Expenses Percent,% do Total de Despesas Indiretas
+Total Items,Total de Itens
+Total Production Time,Tempo Total de Produção
+Total Quantity,Quantidade Total
+Total Spend Time,Tempo Total de Permanência
+Transaction ID,ID da Transação
+Type,Tipo
+URY,URY
+URY Captain,Garçom URY
+URY Cashier,Operador de Caixa URY
+URY Checklist Item,Item de Checklist URY
+URY Checklist Log Item,Item de Registro de Checklist URY
+URY Cost Of Goods,Custo das Mercadorias URY
+URY Daily P and L,DRE Diário URY
+URY Fixed Expenses,Despesas Fixas URY
+URY KOT,Pedido de Cozinha (KOT) URY
+URY KOT Error Log,Log de Erros do KOT URY
+URY KOT Items,Itens do KOT URY
+URY KOT Naming Series,Série de Numeração do KOT URY
+URY Last Aggregator Invoice,Última Fatura de Agregador URY
+URY Last Invoice,Última Fatura URY
+URY Manager,Gerente URY
+URY Materials,Materiais URY
+URY Menu,Cardápio URY
+URY Menu Course,Etapa do Cardápio URY
+URY Menu Item,Item do Cardápio URY
+URY Merged POS Invoice Detail,Detalhe de Fatura de PDV Agrupada URY
+URY Notification Recipient,Destinatário de Notificação URY
+URY Order,Pedido URY
+URY Order Item,Item do Pedido URY
+URY Order Number,Número do Pedido URY
+URY Ordering Device,Dispositivo de Autoatendimento URY
+URY Ordering Session,Sessão de Autoatendimento URY
+URY P and L Breakup,Detalhamento de DRE URY
+URY P and L Materials,Materiais do DRE URY
+URY POS Checklist Log,Registro de Checklist do PDV URY
+URY Payment Terminal,Terminal de Pagamento URY
+URY Payment Terminal Transaction,Transação de Terminal de Pagamento URY
+URY Printer Settings,Configurações de Impressora URY
+URY Production Item Groups,Grupos de Itens de Produção URY
+URY Production Unit,Unidade de Produção URY
+URY Report Settings,Configurações de Relatórios URY
+URY Restaurant,Restaurante URY
+URY Room,Salão URY
+URY Self Ordering Profile,Perfil de Autoatendimento URY
+URY Service Request,Solicitação de Atendimento URY
+URY Table,Mesa URY
+URY User,Usuário URY
+URY Variable Expenses,Despesas Variáveis URY
+URY pos restrictions,Restrições de PDV URY
+Units Consumed,Unidades Consumidas
+Update,Atualizar
+User,Usuário
+User Details,Detalhes do Usuário
+User is not Associated with any Branch.Please refresh Page,O usuário não está associado a nenhuma filial. Atualize a página.
+"Users assigned this role will function as cashiers in URY POS, responsible for managing billing transactions.","Usuários com esta função atuarão como operadores de caixa no PDV URY, responsáveis pelas transações de faturamento."
+Users with this role have restricted access to table order functions.,Usuários com esta função têm acesso restrito às funções de pedidos de mesa.
+Validate that the previous day’s POS is closed before opening a new one.,Validar se o caixa do dia anterior foi fechado antes de abrir um novo.
+Validation Error,Erro de Validação
+Verified,Verificado
+Waiter,Garçom
+Waiter Print,Impressão para Garçom
+Waiter Print Format,Formato de Impressão para Garçom
+Warehouse,Almoxarifado (Estoque)
+Warning,Aviso
+Websocket Print,Impressão via WebSocket
+Whether the branch is open after 12 AM.,Indica se a filial permanece aberta após a meia-noite (00:00).
+You are not allowed to cancel an invoice from another branch.,Você não tem permissão para cancelar uma fatura de outra filial.
+You are not permitted to reduce or remove items from this order.,Você não tem permissão para reduzir ou remover itens deste pedido.
+You are not permitted to take Dine In table orders.,Você não tem permissão para anotar pedidos de mesa para consumo no local.
+You are not permitted to transfer captains.,Você não tem permissão para transferir garçons.
+You are not permitted to transfer tables.,Você não tem permissão para transferir mesas.
+You do not have permission to access KOT errors for POS Profile {0}.,Você não tem permissão para acessar os erros de KOT do Perfil de PDV {0}.
+You do not have permission to access invoices for POS Profile {0}.,Você não tem permissão para acessar as faturas do Perfil de PDV {0}.
+You do not have permission to access the checklist for POS Profile {0}.,Você não tem permissão para acessar o checklist do Perfil de PDV {0}.
+You do not have permission to access this report.,Você não tem permissão para acessar este relatório.
+You do not have permission to apply a discount on this order.,Você não tem permissão para aplicar desconto neste pedido.
+You do not have permission to cancel this invoice.,Você não tem permissão para cancelar esta fatura.
+You must save document as draft to cancel.,Você deve salvar o documento como rascunho para cancelar.
+Your order total is {0}. {1},O total do seu pedido é {0}. {1}
+"bucket_size_hours must be 1, 2, or 4.","O intervalo de horas deve ser 1, 2 ou 4."
+closing reading(Unit),Leitura Final (Unid.)
+customer is required.,O cliente é obrigatório.
+employee is required.,O colaborador é obrigatório.
+opening reading(Unit),Leitura Inicial (Unid.)
+start_date must not be after end_date.,A data inicial não pode ser posterior à data final.
+user,Usuário
+verified_by,Verificado Por
