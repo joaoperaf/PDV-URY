@@ -57,23 +57,41 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 5. Estado Atual do Projeto
 
-- **Ambiente Local:**
-  - `git` instalado e configurado (`João Pedro Reis`).
+- **Ambiente Local (100% Operacional):**
+  - `git` instalado e autenticado no GitHub (`joaoperaf`).
   - Repositório clonado fisicamente em `/mnt/hd/projetos/PDV-URY` (com symlink em `/home/pericles-burger/PDV-URY`).
-  - Remotes `origin` e `upstream` configurados.
-  - Tag `v0.2.1-original` criada no commit base (`cabe174`).
-  - **Node.js v20.18.3 LTS** e **Yarn 1.22.22** instalados fisicamente em `/mnt/hd/tools/node` (com symlinks em `~/.local/bin` e todos os caches em `/mnt/hd/.cache`, ocupando 0 MB no SSD).
-  - **Docker v29.1.3** e **Docker Compose v2.40.3** instalados e ativos, com `Docker Root Dir: /mnt/hd/docker` confirmado.
-  - **GitHub CLI (`gh` 2.45.0)** e **Rclone (`1.60.1`)** instalados para autenticação Git e sincronização de backups em nuvem.
+  - Remotes `origin` (`joaoperaf/PDV-URY`) e `upstream` (`ury-erp/ury`) configurados.
+  - Tags criadas: `v0.2.1-original` (estado original do fork) e `v0.2.1-docker-ready` (ambiente Docker + backups prontos).
+  - **Node.js v22.14.0 LTS** e **Yarn 1.22.22** instalados fisicamente em `/mnt/hd/tools/node` (com caches em `/mnt/hd/.cache` e `/mnt/hd/sites/common_site_config.json` criado para compilação local dos frontends).
+  - **Todos os 5 frontends compilados** (`pos`, `frontend`, `self-order`, `mosaic`, `urypos`).
+  - **Ambiente Docker rodando** ([`docker/docker-compose.yml`](./docker/docker-compose.yml) e [`docker/entrypoint-ury.sh`](./docker/entrypoint-ury.sh)) com volumes em `/mnt/hd/docker/volumes`:
+    - `pdv-ury-frappe` (`frappe/erpnext:v15` + `ury` montado ao vivo de `/mnt/hd/projetos/PDV-URY`)
+    - `pdv-ury-mariadb` (`mariadb:10.6`)
+    - `pdv-ury-redis-cache` e `pdv-ury-redis-queue` (`redis:6.2-alpine`)
+  - **Acesso Local ao Sistema:**
+    - **URL Principal / Login:** `http://localhost:8000/login`
+    - **Usuário:** `Administrator` | **Senha:** `admin`
+    - **Painel Gestão URY:** `http://localhost:8000/ury`
+    - **PDV v2 (React):** `http://localhost:8000/pos`
+    - **Cozinha KDS/KOT (Mosaic):** `http://localhost:8000/mosaic`
+    - **Autoatendimento:** `http://localhost:8000/order`
+  - **Backup Automático do Banco de Dados:**
+    - Script [`scripts/backup-db.sh`](./scripts/backup-db.sh) testado e agendado no `crontab` (a cada 4 horas), salvando em `/mnt/hd/Backups/pdv-ury/` e pronto para sincronizar com Google Drive (`rclone config` -> remote `gdrive`).
 
 ---
 
 ## 6. Histórico de Sessões / Últimos Passos
 
-### [2026-10-28] — Passo 2 Concluído: Docker em `/mnt/hd/docker`, Node 20/Yarn e Ferramentas (Antigravity)
-- Instalado Node.js v20.18.3 e Yarn 1.22.22 em `/mnt/hd/tools/node` com caches globais apontando para `/mnt/hd/.cache/npm`, `/mnt/hd/.cache/yarn` e `/mnt/hd/.cache/corepack`.
+### [2026-10-28] — Passo 3 Concluído: Subida do ERPNext v15 + URY no Docker, Build dos Frontends e Backup Automático (Antigravity)
+- Atualizado Node.js em `/mnt/hd/tools/node` para `v22.14.0 LTS` (compatível com todas as dependências) e compilados todos os 5 frontends (`yarn install && yarn build`).
+- Criados [`docker/docker-compose.yml`](./docker/docker-compose.yml) e [`docker/entrypoint-ury.sh`](./docker/entrypoint-ury.sh), subindo os containers `pdv-ury-mariadb`, `pdv-ury-redis-cache`, `pdv-ury-redis-queue` e `pdv-ury-frappe` com o site `ury.localhost` e os apps `frappe`, `erpnext` e `ury` instalados.
+- Criado e testado o script [`scripts/backup-db.sh`](./scripts/backup-db.sh) e configurado cronjob automático a cada 4 horas salvando em `/mnt/hd/Backups/pdv-ury/`.
+- Criada a tag `v0.2.1-docker-ready` e enviado tudo para o GitHub (`origin`).
+
+### [2026-10-28] — Passo 2 Concluído: Docker em `/mnt/hd/docker`, Node/Yarn e Ferramentas (Antigravity)
+- Instalado Node.js e Yarn em `/mnt/hd/tools/node` com caches globais apontando para `/mnt/hd/.cache/npm`, `/mnt/hd/.cache/yarn` e `/mnt/hd/.cache/corepack`.
 - Criado e executado o script [`scripts/setup-docker-hd.sh`](./scripts/setup-docker-hd.sh), configurando `/etc/docker/daemon.json` com `"data-root": "/mnt/hd/docker"` e instalando `docker.io`, `docker-compose-v2`, `gh` e `rclone`.
-- Verificado que `Docker Root Dir` está em `/mnt/hd/docker` e o SSD (`/`) permanece intacto (92 GB livres).
+- Autenticado GitHub CLI (`gh auth login`) e enviado commits + tag `v0.2.1-original` para `origin`.
 
 ### [2026-10-28] — Passo 1: Estruturação Inicial, Proteção do SSD e Protocolo Multi-LLM (Antigravity)
 - Clonado o repositório `joaoperaf/PDV-URY` e movido fisicamente para `/mnt/hd/projetos/PDV-URY` (com symlink em `~/PDV-URY`) para poupar o SSD de 116 GB.
@@ -84,6 +102,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ---
 
 ## 7. Próximos Passos Planejados
-- [x] **Passo 2:** Instalar e configurar o **Docker** apontando seu `data-root` para `/mnt/hd/docker` (preservando o SSD) + configurar cache do Node/Yarn em `/mnt/hd/.cache`.
-- [ ] **Passo 3:** Subir o ambiente Docker do Frappe/ERPNext v15 + URY e configurar rotina automática de backup do banco de dados (local em `/mnt/hd/Backups/pdv-ury` + nuvem).
-- [ ] **Passo 4:** Definir e iniciar as primeiras customizações de código no PDV-URY em branches dedicadas.
+- [x] **Passo 1:** Clonar projeto no HD (`/mnt/hd`), criar tag `v0.2.1-original` e configurar protocolo Multi-LLM (`HANDOFF.md` + `AGENTS.MD`).
+- [x] **Passo 2:** Instalar e configurar o **Docker** apontando seu `data-root` para `/mnt/hd/docker` (preservando o SSD) + autenticar GitHub (`gh`).
+- [x] **Passo 3:** Subir o ambiente Docker do Frappe/ERPNext v15 + URY, compilar frontends e configurar rotina automática de backup do banco de dados em `/mnt/hd/Backups/pdv-ury`.
+- [ ] **Passo 4:** Definir e iniciar as primeiras customizações de código e configuração inicial do restaurante no PDV-URY em branches dedicadas.
