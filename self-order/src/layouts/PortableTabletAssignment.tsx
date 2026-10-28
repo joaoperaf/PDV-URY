@@ -63,7 +63,7 @@ function PortableTabletAssignment() {
     const deviceId = localStorage.getItem(DEVICE_ID_KEY)
     const deviceCredential = localStorage.getItem(DEVICE_CREDENTIAL_KEY)
     if (!deviceId || !deviceCredential) {
-      setError('This tablet is not provisioned. Please contact staff.')
+      setError('Este tablet não está configurado. Por favor, avise um atendente.')
       return
     }
 
@@ -73,7 +73,7 @@ function PortableTabletAssignment() {
       const assigned = await assignDeviceTable(deviceId, deviceCredential, pin, table.trim())
       setContext(assigned)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not assign this table. Please check the PIN and try again.')
+      setError(err instanceof Error ? err.message : 'Não foi possível atribuir esta mesa. Verifique o PIN e tente novamente.')
       setPin('')
       setStep('pin')
     } finally {
@@ -87,7 +87,7 @@ function PortableTabletAssignment() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-6">
-      <h1 className="text-xl font-semibold">Assign This Tablet</h1>
+      <h1 className="text-xl font-semibold">Vincular Tablet à Mesa</h1>
 
       {error && (
         <div className="w-full max-w-xs rounded-md bg-destructive/10 p-3 text-center text-sm text-destructive">
@@ -97,8 +97,8 @@ function PortableTabletAssignment() {
 
       {step === 'pin' && (
         <div className="flex w-full max-w-xs flex-col items-center gap-4">
-          <p className="text-sm text-muted-foreground">Enter staff PIN</p>
-          <div className="flex gap-2" aria-label="PIN entry">
+          <p className="text-sm text-muted-foreground">Digite o PIN do atendente</p>
+          <div className="flex gap-2" aria-label="Entrada de PIN">
             {Array.from({ length: MAX_PIN_LENGTH }).map((_, idx) => (
               <div
                 key={idx}
@@ -130,18 +130,18 @@ function PortableTabletAssignment() {
             disabled={pin.length < MIN_PIN_LENGTH}
             className="w-full rounded-md bg-primary py-3 font-medium text-primary-foreground disabled:opacity-50"
           >
-            Continue
+            Continuar
           </button>
         </div>
       )}
 
       {step === 'table' && (
         <div className="flex w-full max-w-xs flex-col gap-4">
-          <p className="text-sm text-muted-foreground">Enter table name or code</p>
+          <p className="text-sm text-muted-foreground">Informe o nome ou número da mesa</p>
           <input
             value={table}
             onChange={(event) => setTable(event.target.value)}
-            placeholder="e.g. T12"
+            placeholder="ex.: M12"
             className="rounded-md border px-4 py-3 text-base"
           />
           <button
@@ -149,14 +149,14 @@ function PortableTabletAssignment() {
             disabled={!table.trim() || submitting}
             className="w-full rounded-md bg-primary py-3 font-medium text-primary-foreground disabled:opacity-50"
           >
-            {submitting ? 'Assigning…' : 'Assign Table'}
+            {submitting ? 'Vinculando…' : 'Vincular Mesa'}
           </button>
           <button
             onClick={() => setStep('pin')}
             disabled={submitting}
             className="w-full rounded-md border py-3 text-sm font-medium"
           >
-            Back
+            Voltar
           </button>
         </div>
       )}

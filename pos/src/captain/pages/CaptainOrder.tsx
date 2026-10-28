@@ -192,7 +192,7 @@ export default function CaptainOrder() {
       // 'customer'" — not just a Cashier-UI convention). Match OrderPanel's
       // exact validate-before-submit gate rather than only omitting the field.
       if (!selectedCustomer?.name) {
-        showToast.error('Please select a customer before sending the order.');
+        showToast.error('Selecione um cliente antes de enviar o pedido.');
         return;
       }
 
@@ -227,14 +227,14 @@ export default function CaptainOrder() {
       if (result?.message && typeof result.message === 'object' && 'status' in result.message && result.message.status === 'Failure') {
         showToast.error(
           isUpdatingOrder
-            ? 'This order was modified by someone else. Please reopen the table and try again.'
-            : 'Failed to send the order. Please try again.'
+            ? 'Este pedido foi modificado por outra pessoa. Reabra a mesa e tente novamente.'
+            : 'Falha ao enviar o pedido. Tente novamente.'
         );
         return;
       }
 
       clearTableOrder();
-      showToast.success(isUpdatingOrder ? 'Order updated.' : 'Order sent to kitchen.');
+      showToast.success(isUpdatingOrder ? 'Pedido atualizado.' : 'Pedido enviado para a cozinha.');
       navigate('/order');
     } catch (error) {
       console.error('Failed to sync order:', error);
@@ -246,14 +246,14 @@ export default function CaptainOrder() {
         try {
           const messages = JSON.parse(serverMessages);
           const messageObj = JSON.parse(messages[0]);
-          showToast.error(messageObj.message || 'API error');
+          showToast.error(messageObj.message || 'Erro de comunicação');
         } catch {
-          showToast.error('API error');
+          showToast.error('Erro de comunicação');
         }
       } else if (error instanceof Error) {
         showToast.error(error.message);
       } else {
-        showToast.error('Failed to send the order.');
+        showToast.error('Falha ao enviar o pedido.');
       }
     } finally {
       setIsSubmitting(false);
@@ -272,15 +272,15 @@ export default function CaptainOrder() {
 
   const handleReprintKot = async () => {
     if (!invoiceId) {
-      showToast.error('No active order to reprint.');
+      showToast.error('Nenhum pedido ativo para reimprimir.');
       return;
     }
     setIsReprintingKot(true);
     try {
       await reprintKot(invoiceId);
-      showToast.success('KOT reprinted.');
+      showToast.success('KOT reimpresso.');
     } catch (error) {
-      showToast.error(error instanceof Error ? error.message : 'Failed to reprint KOT.');
+      showToast.error(error instanceof Error ? error.message : 'Falha ao reimprimir KOT.');
     } finally {
       setIsReprintingKot(false);
     }
@@ -288,11 +288,11 @@ export default function CaptainOrder() {
 
   const handlePrintBill = async () => {
     if (!invoiceId) {
-      showToast.error('No active order to print.');
+      showToast.error('Nenhum pedido ativo para imprimir.');
       return;
     }
     if (!posProfile) {
-      showToast.error('POS profile not found.');
+      showToast.error('Perfil de PDV não encontrado.');
       return;
     }
     setIsPrintingBill(true);
@@ -302,9 +302,9 @@ export default function CaptainOrder() {
         posProfile,
         printFormat: resolvePrintFormat(context?.order ?? {}, posProfile.print_format),
       });
-      showToast.success('Printed successfully.');
+      showToast.success('Impresso com sucesso.');
     } catch (error) {
-      showToast.error(error instanceof Error ? error.message : 'Failed to print bill.');
+      showToast.error(error instanceof Error ? error.message : 'Falha ao imprimir conta.');
     } finally {
       setIsPrintingBill(false);
     }
@@ -312,12 +312,12 @@ export default function CaptainOrder() {
 
   const handleOpenTransferTable = async () => {
     if (!invoiceId || !table) {
-      showToast.error('No active order to transfer.');
+      showToast.error('Nenhum pedido ativo para transferir.');
       return;
     }
     const branch = posProfile?.branch;
     if (!branch) {
-      showToast.error('Unable to transfer this table.');
+      showToast.error('Não foi possível transferir esta mesa.');
       return;
     }
     setTransferDestinations([]);
@@ -328,7 +328,7 @@ export default function CaptainOrder() {
       setTransferDestinations(destinations);
     } catch (error) {
       setIsTransferTableOpen(false);
-      showToast.error(error instanceof Error ? error.message : 'Failed to load destination tables.');
+      showToast.error(error instanceof Error ? error.message : 'Falha ao carregar mesas de destino.');
     } finally {
       setIsTransferDestinationsLoading(false);
     }
@@ -338,7 +338,7 @@ export default function CaptainOrder() {
     if (!table || !invoiceId) return;
     await tableTransfer(table, newTable, invoiceId);
     clearTableOrder();
-    showToast.success('Table transferred.');
+    showToast.success('Mesa transferida.');
     navigate('/order');
   };
 
@@ -346,7 +346,7 @@ export default function CaptainOrder() {
 
   const handleOpenTransferCaptain = () => {
     if (!invoiceId) {
-      showToast.error('No active order to transfer.');
+      showToast.error('Nenhum pedido ativo para transferir.');
       return;
     }
     setIsTransferCaptainOpen(true);
@@ -356,7 +356,7 @@ export default function CaptainOrder() {
     if (!invoiceId) return;
     await captainTransfer(currentCaptain, newCaptain, invoiceId);
     clearTableOrder();
-    showToast.success('Captain transferred.');
+    showToast.success('Garçom transferido.');
     navigate('/order');
   };
 
@@ -375,14 +375,14 @@ export default function CaptainOrder() {
 
       {!canModify && (
         <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-3">
-          <span className="text-sm font-medium text-gray-700">Pax</span>
+          <span className="text-sm font-medium text-gray-700">Pessoas</span>
           <span className="text-sm text-gray-900">{noOfPax}</span>
         </div>
       )}
 
       {canModify && (
         <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-3">
-          <span className="text-sm font-medium text-gray-700">Pax</span>
+          <span className="text-sm font-medium text-gray-700">Pessoas</span>
           <div className="flex items-center gap-3">
             <Button
               onClick={() => setNoOfPax(Math.max(MIN_PAX, noOfPax - 1))}
@@ -410,10 +410,10 @@ export default function CaptainOrder() {
       {activeOrders.length === 0 && alreadyOrderedLines.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-16">
           <ClipboardList className="w-10 h-10 text-gray-300 mb-3" />
-          <p className="text-gray-500 text-sm">No items yet.</p>
+          <p className="text-gray-500 text-sm">Nenhum item ainda.</p>
           {canModify && (
             <Button onClick={() => setMode('menu')} variant="outline" size="sm" className="mt-3 lg:hidden">
-              Browse menu
+              Ver cardápio
             </Button>
           )}
         </div>
@@ -422,7 +422,7 @@ export default function CaptainOrder() {
           {alreadyOrderedLines.length > 0 && (
             <section>
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
-                Already Ordered
+                Já Pedidos
               </h2>
               <div className="space-y-2">
                 {alreadyOrderedLines.map((line) => (
@@ -443,7 +443,7 @@ export default function CaptainOrder() {
           {newOrChangedLines.length > 0 && (
             <section>
               <h2 className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2 px-1">
-                New / Changed
+                Novos / Alterados
               </h2>
               <div className="space-y-2">
                 {newOrChangedLines.map((line) => (
@@ -464,7 +464,7 @@ export default function CaptainOrder() {
           {reductionPendingLines.length > 0 && (
             <section>
               <h2 className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2 px-1">
-                Reduction Pending
+                Redução Pendente
               </h2>
               <div className="space-y-2">
                 {reductionPendingLines.map((line) => (
@@ -487,7 +487,7 @@ export default function CaptainOrder() {
   if (isContextLoading || !isOrderReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Spinner message="Loading table…" />
+        <Spinner message="Carregando mesa…" />
       </div>
     );
   }
@@ -496,10 +496,10 @@ export default function CaptainOrder() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
         <div className="text-center">
-          <p className="text-lg font-semibold text-red-600 mb-2">Unable to load this table</p>
+          <p className="text-lg font-semibold text-red-600 mb-2">Não foi possível carregar esta mesa</p>
           <p className="text-gray-600 text-sm">{contextError}</p>
           <Button onClick={() => navigate('/order')} variant="outline" className="mt-4">
-            Back to Tables
+            Voltar para Mesas
           </Button>
         </div>
       </div>
@@ -510,12 +510,12 @@ export default function CaptainOrder() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
         <div className="text-center max-w-sm">
-          <p className="text-lg font-semibold text-gray-900 mb-2">Not permitted</p>
+          <p className="text-lg font-semibold text-gray-900 mb-2">Sem permissão</p>
           <p className="text-gray-600 text-sm">
-            You don't have access to view this table's order. It may belong to another captain.
+            Você não tem acesso para visualizar o pedido desta mesa. Ela pode pertencer a outro garçom.
           </p>
           <Button onClick={() => navigate('/order')} variant="outline" className="mt-4">
-            Back to Tables
+            Voltar para Mesas
           </Button>
         </div>
       </div>
@@ -527,12 +527,12 @@ export default function CaptainOrder() {
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-3 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button onClick={() => navigate('/order')} variant="ghost" size="icon" aria-label="Back to Tables">
+          <Button onClick={() => navigate('/order')} variant="ghost" size="icon" aria-label="Voltar para Mesas">
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="font-semibold text-gray-900 leading-tight">Table {table}</h1>
-            <p className="text-xs text-gray-500">{isUpdatingOrder ? 'Updating order' : 'New order'}</p>
+            <h1 className="font-semibold text-gray-900 leading-tight">Mesa {table}</h1>
+            <p className="text-xs text-gray-500">{isUpdatingOrder ? 'Atualizando pedido' : 'Novo pedido'}</p>
           </div>
         </div>
 
@@ -547,7 +547,7 @@ export default function CaptainOrder() {
                 )}
               >
                 <UtensilsCrossed className="w-4 h-4" />
-                Menu
+                Cardápio
               </button>
               <button
                 onClick={() => setMode('order')}
@@ -557,7 +557,7 @@ export default function CaptainOrder() {
                 )}
               >
                 <ClipboardList className="w-4 h-4" />
-                Order
+                Pedido
                 {activeOrders.length > 0 && (
                   <span className="ms-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-blue-600 text-white text-xs">
                     {activeOrders.length}
@@ -587,7 +587,7 @@ export default function CaptainOrder() {
       {!canModify && (
         <div className="px-3 pt-3">
           <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-            View only — you don't have permission to modify this table's order right now.
+            Somente visualização — você não tem permissão para modificar o pedido desta mesa no momento.
           </p>
         </div>
       )}
@@ -631,12 +631,12 @@ export default function CaptainOrder() {
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  {isUpdatingOrder ? 'Updating…' : 'Sending…'}
+                  {isUpdatingOrder ? 'Atualizando…' : 'Enviando…'}
                 </div>
               ) : isUpdatingOrder ? (
-                'Update Order'
+                'Atualizar Pedido'
               ) : (
-                'Send Order'
+                'Enviar Pedido'
               )}
             </Button>
           </div>
@@ -660,12 +660,12 @@ export default function CaptainOrder() {
             {isSubmitting ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {isUpdatingOrder ? 'Updating…' : 'Sending…'}
+                {isUpdatingOrder ? 'Atualizando…' : 'Enviando…'}
               </div>
             ) : isUpdatingOrder ? (
-              'Update Order'
+              'Atualizar Pedido'
             ) : (
-              'Send Order'
+              'Enviar Pedido'
             )}
           </Button>
         </div>

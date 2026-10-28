@@ -23,7 +23,7 @@ const elapsedLabel = (isoTimestamp: string | null): string | null => {
   if (Number.isNaN(started)) return null;
 
   const minutes = Math.max(0, Math.round((Date.now() - started) / 60000));
-  if (minutes < 1) return 'just now';
+  if (minutes < 1) return 'agora';
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);
   const remainder = minutes % 60;
@@ -63,14 +63,14 @@ const CaptainTableCard = ({
         : 'border-amber-400 bg-amber-50 text-amber-900';
 
   const statusLabel = isBilled
-    ? 'Billed'
+    ? 'Conta fechada'
     : ownership === 'mine'
-      ? 'Mine'
+      ? 'Minha'
       : ownership === 'free'
-        ? 'Free'
+        ? 'Livre'
         : ownerName
           ? ownerName
-          : 'Occupied';
+          : 'Ocupada';
 
   const statusBadgeVariant = isBilled
     ? 'secondary'
