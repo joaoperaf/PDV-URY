@@ -324,6 +324,16 @@ def submit_configure_data(data):
 
     # 6. Mode of Payment
     results["payment_methods"] = []
+    cash_account = (
+        frappe.db.get_value("Company", default_company, "default_cash_account")
+        or frappe.db.get_value("Account", {"company": default_company, "account_name": ["in", ["Caixa", "Cash"]], "is_group": 0}, "name")
+        or frappe.db.get_value("Account", {"company": default_company, "account_type": ["in", ["Cash", "Bank"]], "is_group": 0}, "name")
+    )
+    bank_account = (
+        frappe.db.get_value("Account", {"company": default_company, "account_name": ["in", ["Bancos", "Bank"]], "is_group": 0}, "name")
+        or frappe.db.get_value("Company", default_company, "default_bank_account")
+        or cash_account
+    )
     for p in data.get("paymentMethods", []):
         p_name = p.get("name")
         if not p_name:
@@ -332,12 +342,36 @@ def submit_configure_data(data):
             pm_doc = frappe.get_doc({
                 "doctype": "Mode of Payment",
                 "mode_of_payment": p_name,
-                "type": "General"
+                "type": "Cash" if p_name.lower() in ("cash", "dinheiro") else "Bank",
+                "accounts": [{
+                    "company": default_company,
+                    "default_account": cash_account if p_name.lower() in ("cash", "dinheiro") else bank_account,
+                }] if (cash_account or bank_account) else []
             })
             pm_doc.insert(ignore_permissions=True)
             results["payment_methods"].append(pm_doc.name)
         else:
+            pm_doc = frappe.get_doc("Mode of Payment", p_name)
+            if (cash_account or bank_account) and not any(acc.company == default_company and acc.default_account for acc in pm_doc.accounts):
+                pm_doc.append("accounts", {
+                    "company": default_company,
+                    "default_account": cash_account if pm_doc.type == "Cash" or p_name.lower() in ("cash", "dinheiro") else bank_account,
+                })
+                pm_doc.save(ignore_permissions=True)
             results["payment_methods"].append(p_name)
+
+    # Ensure Branch users have default room assigned
+    try:
+        b_doc = frappe.get_doc("Branch", branch_name)
+        updated_branch_users = False
+        for row in b_doc.user:
+            if not row.room and first_room_name:
+                row.room = first_room_name
+                updated_branch_users = True
+        if updated_branch_users:
+            b_doc.save(ignore_permissions=True)
+    except Exception:
+        pass
 
     # 7. System Users
     results["users"] = []
@@ -355,7 +389,7 @@ def submit_configure_data(data):
         try:
             b_doc = frappe.get_doc("Branch", branch_name)
             if not any(row.user == u.get("email") for row in b_doc.user):
-                b_doc.append("user", {"user": u.get("email")})
+                b_doc.append("user", {"user": u.get("email"), "room": first_room_name})
                 b_doc.save(ignore_permissions=True)
         except Exception:
             pass
@@ -429,7 +463,8 @@ def submit_configure_data(data):
             
             # Fetch cashier users for applicable_for_users
             cashier_users = frappe.get_all("Has Role", filters={"role": "URY Cashier", "parenttype": "User"}, fields=["parent"])
-            cashier_emails = {u.parent for u in cashier_users if u.parent not in ("Administrator", "Guest")}
+            cashier_emails = {u.parent for u in cashier_users if u.parent != "Guest"}
+            cashier_emails.add("Administrator")
             for res_u in results.get("users", []):
                 if isinstance(res_u, dict) and res_u.get("email"):
                     cashier_emails.add(res_u["email"])

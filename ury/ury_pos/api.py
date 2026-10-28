@@ -764,9 +764,17 @@ def getPosProfile():
                 else:
                     cashier = pos_opened_cashier    
                 
-        else:    
-            cashier = get_cashier.applicable_for_users[0].user
-            owner = get_cashier.applicable_for_users[0].user
+        else:
+            applicable_users = [u.user for u in get_cashier.applicable_for_users]
+            if frappe.session.user in applicable_users:
+                cashier = frappe.session.user
+                owner = frappe.session.user
+            elif applicable_users:
+                cashier = applicable_users[0]
+                owner = applicable_users[0]
+            else:
+                cashier = frappe.session.user
+                owner = frappe.session.user
         
         qz_print = pos_profiles.qz_print
         print_type = None
@@ -794,6 +802,7 @@ def getPosProfile():
     invoice_details = {
         "pos_profile": pos_profile_name,
         "branch": branch,
+        "restaurant": pos_profiles.restaurant,
         "company": company,
         "waiter": waiter,
         "warehouse": warehouse,

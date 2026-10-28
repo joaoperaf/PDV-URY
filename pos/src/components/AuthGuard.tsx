@@ -52,7 +52,7 @@ const AuthGuard: React.FC<Props> = ({ children }) => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Access Denied</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Acesso Negado</h2>
           <p className="text-gray-600">{authError || configError}</p>
         </div>
       </div>
@@ -69,8 +69,8 @@ const AuthGuard: React.FC<Props> = ({ children }) => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="text-amber-600 text-xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Configuration Error</h2>
-          <p className="text-gray-600">POS Profile not found or not configured.</p>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Erro de Configuração</h2>
+          <p className="text-gray-600">Perfil de PDV não encontrado ou não configurado.</p>
         </div>
       </div>
     );
@@ -81,9 +81,9 @@ const AuthGuard: React.FC<Props> = ({ children }) => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="text-amber-600 text-xl mb-4">🔒</div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Permission Required</h2>
-          <p className="text-gray-600">You do not have permission to access this application.</p>
-          <p className="text-sm text-gray-500 mt-2">Required roles: {allowedRoles.join(', ')}</p>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Permissão Necessária</h2>
+          <p className="text-gray-600">Você não tem permissão para acessar este aplicativo.</p>
+          <p className="text-sm text-gray-500 mt-2">Funções necessárias: {allowedRoles.join(', ')}</p>
           <Button 
             variant="outline"
             className="mt-4"
@@ -97,7 +97,7 @@ const AuthGuard: React.FC<Props> = ({ children }) => {
             }}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Recheck Permissions
+            Verificar Permissões Novamente
           </Button>
         </div>
       </div>
