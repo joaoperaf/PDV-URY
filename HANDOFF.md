@@ -63,15 +63,17 @@ Como o sistema rodará localmente neste notebook via Docker:
   - Remotes `origin` e `upstream` configurados.
   - Tag `v0.2.1-original` criada no commit base (`cabe174`).
   - **Node.js v20.18.3 LTS** e **Yarn 1.22.22** instalados fisicamente em `/mnt/hd/tools/node` (com symlinks em `~/.local/bin` e todos os caches em `/mnt/hd/.cache`, ocupando 0 MB no SSD).
-  - Script [`scripts/setup-docker-hd.sh`](./scripts/setup-docker-hd.sh) criado para instalar o Docker, Docker Compose v2, GitHub CLI (`gh`) e `rclone` já configurando `"data-root": "/mnt/hd/docker"`.
+  - **Docker v29.1.3** e **Docker Compose v2.40.3** instalados e ativos, com `Docker Root Dir: /mnt/hd/docker` confirmado.
+  - **GitHub CLI (`gh` 2.45.0)** e **Rclone (`1.60.1`)** instalados para autenticação Git e sincronização de backups em nuvem.
 
 ---
 
 ## 6. Histórico de Sessões / Últimos Passos
 
-### [2026-10-28] — Passo 2 (Em andamento): Instalação Node/Yarn no HD e Script do Docker (Antigravity)
+### [2026-10-28] — Passo 2 Concluído: Docker em `/mnt/hd/docker`, Node 20/Yarn e Ferramentas (Antigravity)
 - Instalado Node.js v20.18.3 e Yarn 1.22.22 em `/mnt/hd/tools/node` com caches globais apontando para `/mnt/hd/.cache/npm`, `/mnt/hd/.cache/yarn` e `/mnt/hd/.cache/corepack`.
-- Criado o script [`scripts/setup-docker-hd.sh`](./scripts/setup-docker-hd.sh) que configura `/etc/docker/daemon.json` com `"data-root": "/mnt/hd/docker"` antes de iniciar o serviço do Docker.
+- Criado e executado o script [`scripts/setup-docker-hd.sh`](./scripts/setup-docker-hd.sh), configurando `/etc/docker/daemon.json` com `"data-root": "/mnt/hd/docker"` e instalando `docker.io`, `docker-compose-v2`, `gh` e `rclone`.
+- Verificado que `Docker Root Dir` está em `/mnt/hd/docker` e o SSD (`/`) permanece intacto (92 GB livres).
 
 ### [2026-10-28] — Passo 1: Estruturação Inicial, Proteção do SSD e Protocolo Multi-LLM (Antigravity)
 - Clonado o repositório `joaoperaf/PDV-URY` e movido fisicamente para `/mnt/hd/projetos/PDV-URY` (com symlink em `~/PDV-URY`) para poupar o SSD de 116 GB.
@@ -82,6 +84,6 @@ Como o sistema rodará localmente neste notebook via Docker:
 ---
 
 ## 7. Próximos Passos Planejados
-- [ ] **Passo 2:** Instalar e configurar o **Docker** apontando seu `data-root` para `/mnt/hd/docker` (preservando o SSD) + configurar cache do Node/Yarn em `/mnt/hd/.cache`.
+- [x] **Passo 2:** Instalar e configurar o **Docker** apontando seu `data-root` para `/mnt/hd/docker` (preservando o SSD) + configurar cache do Node/Yarn em `/mnt/hd/.cache`.
 - [ ] **Passo 3:** Subir o ambiente Docker do Frappe/ERPNext v15 + URY e configurar rotina automática de backup do banco de dados (local em `/mnt/hd/Backups/pdv-ury` + nuvem).
 - [ ] **Passo 4:** Definir e iniciar as primeiras customizações de código no PDV-URY em branches dedicadas.
