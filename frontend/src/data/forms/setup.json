@@ -2,25 +2,25 @@
   "fields": [
     {
       "id": "company_name",
-      "label": "Company Name",
+      "label": "Nome da Empresa",
       "type": "text",
-      "placeholder": "e.g. URY Restaurant",
+      "placeholder": "Ex.: Restaurante URY",
       "required": true,
       "validations": ["required", "minLength:3"],
       "triggers": ["company_abbr"]
     },
     {
       "id": "company_abbr",
-      "label": "Company Abbreviation",
+      "label": "Sigla da Empresa",
       "type": "text",
-      "placeholder": "e.g. URY",
+      "placeholder": "Ex.: URY",
       "required": true,
       "validations": ["required", "maxLength:5"],
-      "description": "Used as a short prefix for your invoice numbers. Auto-filled from your company name — edit if you'd like something different."
+      "description": "Usada como prefixo curto na numeração das suas faturas. Preenchida automaticamente a partir do nome da empresa — edite se preferir outra."
     },
     {
       "id": "language",
-      "label": "Your Language",
+      "label": "Seu Idioma",
       "type": "select",
       "optionsKey": "languages",
       "required": true,
@@ -28,7 +28,7 @@
     },
     {
       "id": "country",
-      "label": "Your Country",
+      "label": "Seu País",
       "type": "select",
       "optionsKey": "countries",
       "required": true,
@@ -37,7 +37,7 @@
     },
     {
       "id": "timezone",
-      "label": "Timezone",
+      "label": "Fuso Horário",
       "type": "select",
       "optionsKey": "timezones",
       "required": true,
@@ -45,7 +45,7 @@
     },
     {
       "id": "currency",
-      "label": "Currency",
+      "label": "Moeda",
       "type": "select",
       "optionsKey": "currencies",
       "required": true,
@@ -53,32 +53,32 @@
     },
     {
       "id": "chart_of_accounts",
-      "label": "Chart of Accounts",
+      "label": "Plano de Contas",
       "type": "select",
       "optionsKey": "charts_of_accounts",
       "required": false,
       "validations": [],
-      "description": "A template for how your income and expenses get categorized. We've picked one for your country — you usually don't need to change this."
+      "description": "Um modelo de como suas receitas e despesas são categorizadas. Selecionamos um para o seu país — normalmente você não precisa alterar."
     },
     {
       "id": "fy_start_date",
-      "label": "Financial Year Begins On",
+      "label": "Início do Ano Fiscal",
       "type": "date",
       "required": true,
       "validations": ["required"],
-      "description": "When your financial year starts. Most businesses use the default for their country — change this only if your accountant asks you to."
+      "description": "Quando seu ano fiscal começa. A maioria das empresas usa o padrão do país — altere apenas se o seu contador solicitar."
     }
   ],
   "installationTypes": [
     {
       "id": "minimal",
-      "title": "Minimal Installation",
-      "description": "We'll walk you through setting up your branch, tables, menu and user in a moment. (Recommended for first-time setup)."
+      "title": "Instalação Guiada (Mínima)",
+      "description": "Vamos guiá-lo na configuração da sua filial, mesas, cardápio e usuários em instantes. (Recomendado para o primeiro acesso)."
     },
     {
       "id": "advanced",
-      "title": "Advanced Installation",
-      "description": "Skip the walkthrough and configure everything yourself in the full admin panel."
+      "title": "Instalação Avançada",
+      "description": "Pular o passo a passo e configurar tudo manualmente no painel administrativo completo."
     }
   ]
 }

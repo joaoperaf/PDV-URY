@@ -1,51 +1,51 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "URY Room Schema",
-  "description": "Form and data schema for URY Restaurant Room management",
+  "title": "Esquema de Salão / Ambiente URY",
+  "description": "Esquema de formulário e dados para gerenciamento de Salões do Restaurante URY",
   "type": "object",
   "properties": {
     "room_name": {
       "type": "string",
-      "title": "Room Name",
-      "placeholder": "e.g. VIP Lounge",
+      "title": "Nome do Salão / Ambiente",
+      "placeholder": "Ex.: Salão VIP",
       "minLength": 2
     },
     "room_type": {
       "type": "string",
-      "title": "Room Type",
+      "title": "Tipo de Ambiente",
       "enum": ["Indoor", "Outdoor", "Rooftop", "Private Dining", "Bar Area"],
       "default": "Indoor"
     },
     "branch": {
       "type": "string",
-      "title": "Branch",
+      "title": "Filial",
       "enum": ["Main Branch", "Downtown Branch", "Beachfront Outpost", "Express Outlet"],
       "default": "Main Branch"
     },
     "number_of_tables": {
       "type": "integer",
-      "title": "Number of Tables",
+      "title": "Quantidade de Mesas",
       "default": 0,
       "minimum": 0
     },
     "printer_config": {
       "type": "object",
-      "title": "Printer Configuration",
+      "title": "Configuração de Impressora",
       "properties": {
         "kot_printing": {
           "type": "boolean",
-          "title": "Enable KOT Printing",
+          "title": "Habilitar Impressão de Comanda (KOT)",
           "default": true
         },
         "print_format": {
           "type": "string",
-          "title": "Print Format",
+          "title": "Formato de Impressão",
           "enum": ["Standard KOT", "Detailed KOT", "Bar Ticket", "Kitchen Display"],
           "default": "Standard KOT"
         },
         "block_takeaway_printing": {
           "type": "boolean",
-          "title": "Block Takeaway Printing",
+          "title": "Bloquear Impressão de Pedidos Para Viagem",
           "default": false
         }
       },

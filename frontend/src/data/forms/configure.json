@@ -1,38 +1,38 @@
 [
   {
     "id": "branch",
-    "label": "Branch",
+    "label": "Filial",
     "route": "/app/branch/new-branch-1",
-    "description": "Configure your restaurant branches."
+    "description": "Configure as filiais do seu restaurante."
   },
   {
     "id": "ury-room",
-    "label": "URY Room",
+    "label": "Salão / Ambiente",
     "route": "/app/ury-room/new-ury-room-1",
-    "description": "Set up rooms or areas in your restaurant."
+    "description": "Configure os salões ou áreas do seu restaurante."
   },
   {
     "id": "ury-table",
-    "label": "URY Table",
+    "label": "Mesas",
     "route": "/app/ury-table/new-ury-table-1",
-    "description": "Configure tables for dine-in orders."
+    "description": "Configure as mesas para atendimento no salão."
   },
   {
     "id": "ury-menu",
-    "label": "URY Menu",
+    "label": "Cardápio",
     "route": "/app/ury-menu/new-ury-menu-1",
-    "description": "Add menu items, categories, and prices."
+    "description": "Adicione itens do cardápio, categorias e preços."
   },
   {
     "id": "mode-of-payment",
-    "label": "Mode of Payment",
+    "label": "Formas de Pagamento",
     "route": "/app/mode-of-payment/new-mode-of-payment-1",
-    "description": "Set up payment methods like Cash, Card, UPI."
+    "description": "Configure meios de pagamento como Dinheiro, Cartão e PIX."
   },
   {
     "id": "user",
-    "label": "User",
+    "label": "Usuários",
     "route": "/app/user/new-user-1",
-    "description": "Add staff and assign roles."
+    "description": "Cadastre a equipe e atribua funções."
   }
 ]
