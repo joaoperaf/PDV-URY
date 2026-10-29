@@ -6,13 +6,10 @@ import { SidebarContainer, SidebarActiveIndicator, sidebarItemVariants, cn } fro
 import {
   LayoutDashboard,
   UtensilsCrossed,
-  Grid3X3,
-  Map,
   Building2,
   SlidersHorizontal,
   Users,
   ChevronDown,
-  FileText,
   Settings,
   Store,
   BarChart3,
@@ -29,17 +26,14 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Painel Inicial', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Cardápio', path: '/menu', icon: UtensilsCrossed },
-  { label: 'Mesas', path: '/table', icon: Grid3X3 },
-  { label: 'Salões / Ambientes', path: '/room', icon: Map },
+  { label: 'Agregadores / Delivery', path: '/aggregator', icon: Store },
   { label: 'Filiais', path: '/branch', icon: Building2 },
 ];
 
 const SETTINGS_ITEMS: NavItem[] = [
   { label: 'Perfil de PDV', path: '/pos-profile', icon: SlidersHorizontal },
   { label: 'Usuários', path: '/user', icon: Users },
-  { label: 'Agregadores / Apps', path: '/aggregator', icon: Store },
-  { label: 'Config. DRE Diário', path: '/report-settings', icon: FileText },
-  { label: 'Unid. de Produção', path: '/production-unit', icon: Grid }
+  { label: 'Unid. de Produção (KDS)', path: '/production-unit', icon: Grid }
 ];
 
 const reportGroups = groupReports(reportsRegistry);

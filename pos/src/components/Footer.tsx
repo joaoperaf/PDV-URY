@@ -3,7 +3,7 @@ import {
   LayoutDashboard,
   LayoutGrid,
   ClipboardList,
-  Table,
+  ChefHat,
   Settings,
 } from 'lucide-react';
 import { cn } from '@ury/ui';
@@ -12,10 +12,10 @@ import { t } from '../i18n';
 const Footer = () => {
 
   const navItems = [
-    { icon: LayoutDashboard, label: t('footer.dashboard'), path: '/dashboard' },
     { icon: LayoutGrid, label: t('footer.pos'), path: '/pos' },
-    { icon: Table, label: t('footer.tables'), path: '/tables' },
     { icon: ClipboardList, label: t('footer.orders'), path: '/orders' },
+    { icon: ChefHat, label: 'Cozinha (KDS)', path: '/kitchen' },
+    { icon: LayoutDashboard, label: t('footer.dashboard'), path: '/dashboard' },
     { icon: Settings, label: t('footer.settings'), path: '/settings', hidden: true },
   ].filter((item) => !item.hidden);
 

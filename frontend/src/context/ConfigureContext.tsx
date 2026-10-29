@@ -56,7 +56,7 @@ export interface UserData {
 
 export type SectionId = 'branch' | 'rooms' | 'tables' | 'menu' | 'payment' | 'users';
 
-export const SECTION_ORDER: SectionId[] = ['branch', 'rooms', 'tables', 'menu', 'payment', 'users'];
+export const SECTION_ORDER: SectionId[] = ['branch', 'menu', 'payment', 'users'];
 
 /** Sections with no safe "use the defaults" floor — an empty payment-methods
  * list or empty menu breaks POS Profile creation, so these can't be skipped,

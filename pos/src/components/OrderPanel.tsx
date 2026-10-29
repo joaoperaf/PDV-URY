@@ -39,7 +39,6 @@ const OrderPanel = () => {
     orderComment,
     setOrderComment,
     noOfPax,
-    setNoOfPax,
     lastModifiedTime
   } = usePOSStore();
   const user = useRootStore((state: RootState) => state.user);
@@ -150,17 +149,6 @@ const OrderPanel = () => {
     }
   };
 
-  const MIN_PAX = 1;
-  const MAX_PAX = 50;
-
-  const handlePaxDecrement = () => {
-    setNoOfPax(Math.max(MIN_PAX, noOfPax - 1));
-  };
-
-  const handlePaxIncrement = () => {
-    setNoOfPax(Math.min(MAX_PAX, noOfPax + 1));
-  };
-
   const EmptyCartUI = () => (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
       <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
@@ -200,30 +188,6 @@ const OrderPanel = () => {
         <OrderTabs disabled={isInteractionDisabled} />
         <OrderTypeSelect disabled={isInteractionDisabled} />
         <div className="mt-3"><CustomerSelect disabled={isInteractionDisabled} /></div>
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">{t('cart.pax')}</span>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handlePaxDecrement}
-              variant="outline"
-              size="icon"
-              className="w-8 h-8 rounded-full"
-              disabled={isInteractionDisabled || noOfPax <= MIN_PAX}
-            >
-              -
-            </Button>
-            <span className="w-6 text-center">{noOfPax}</span>
-            <Button
-              onClick={handlePaxIncrement}
-              variant="outline"
-              size="icon"
-              className="w-8 h-8 rounded-full"
-              disabled={isInteractionDisabled || noOfPax >= MAX_PAX}
-            >
-              +
-            </Button>
-          </div>
-        </div>
       </div>
       
       {orderLoading ? (

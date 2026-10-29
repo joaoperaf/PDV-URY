@@ -124,7 +124,7 @@ const Header = () => {
         </div>
 
         {/* Search Bar */}
-        {location.pathname !== '/dashboard' ? (
+        {location.pathname !== '/dashboard' && location.pathname !== '/kitchen' ? (
           <div className="px-4 py-2 flex-1 flex items-center max-w-2xl mx-8 bg-gray-50 hover:bg-gray-100 border border-input rounded-md">
             <Input
               ref={searchInputRef}
@@ -180,7 +180,7 @@ const Header = () => {
                     onClick={() => window.location.href = '/ury/dashboard'}
                   >
                     <Monitor className="w-4 h-4 me-3" />
-                    Switch to Dashboard
+                    Painel de Gestão (/ury)
                   </Button>
                   <Button
                     variant="ghost"

@@ -1,4 +1,4 @@
-import { Globe, Phone, ShoppingBag, Truck, Utensils } from "lucide-react";
+import { Globe, Phone, ShoppingBag, Truck } from "lucide-react";
 
 export type OrderType = "Dine In" | "Take Away" | "Delivery" | "Phone In" | "Aggregators";
 
@@ -10,9 +10,14 @@ export type OrderTypes= {
 
 export const ORDER_TYPES: OrderTypes[] = [
     {
-        label: "Dine In",
-        value: "Dine In",
-        icon: Utensils
+        label: "Delivery",
+        value: "Delivery",
+        icon: Truck
+    },
+    {
+        label: "Aggregators",
+        value: "Aggregators",
+        icon: Globe
     },
     {
         label: "Take Away",
@@ -20,37 +25,27 @@ export const ORDER_TYPES: OrderTypes[] = [
         icon: ShoppingBag
     },
     {
-        label: "Delivery",
-        value: "Delivery",
-        icon: Truck
-    },
-    {
         label: "Phone In",
         value: "Phone In",
         icon: Phone
-    },
-    {
-        label: "Aggregators",
-        value: "Aggregators",
-        icon: Globe
     }
 ]
 
 export const DINE_IN="Dine In"
-export const DEFAULT_ORDER_TYPE="Take Away"
+export const DEFAULT_ORDER_TYPE="Delivery"
 export const DEFAULT_PAYMENT_MODE="Cash"
 
 export type OrderStatusType = "Draft" | "Unbilled" | "Recently Paid" | "Paid" | "Consolidated" | "Return";
 
-// Base status types that are always available
+// Base status types for Delivery / Takeaway operation (no Dine-In table "Unbilled" tab)
 export const BASE_ORDER_STATUS_TYPES = [
     {
         label: "Draft",
         value: "Draft"
     },
     {
-        label: "Unbilled",
-        value: "Unbilled"
+        label: "Recently Paid",
+        value: "Recently Paid"
     }
 ];
 
@@ -79,13 +74,8 @@ export const EXTENDED_ORDER_STATUS_TYPES = [
 ];
 
 // Function to get order status types based on POS profile settings
-export const getOrderStatusTypes = (viewAllStatus?: number, paidLimit?: number) => {
+export const getOrderStatusTypes = (viewAllStatus?: number, _paidLimit?: number) => {
     let statusTypes = [...BASE_ORDER_STATUS_TYPES];
-    
-    // Add Recently Paid if paid_limit > 0
-    if (paidLimit && paidLimit > 0) {
-        statusTypes.push(...RECENTLY_PAID_STATUS_TYPE);
-    }
     
     // Add extended statuses if view_all_status is enabled
     if (viewAllStatus === 1) {

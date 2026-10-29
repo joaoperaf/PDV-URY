@@ -1,5 +1,5 @@
 import { useConfigure, SectionId } from '../../context/ConfigureContext';
-import { Building2, Map, Grid3X3, UtensilsCrossed, CreditCard, Users, Check } from 'lucide-react';
+import { Building2, UtensilsCrossed, CreditCard, Users, Check } from 'lucide-react';
 
 interface SidebarItem {
   id: SectionId;
@@ -9,8 +9,6 @@ interface SidebarItem {
 
 const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'branch', label: 'Filial', icon: Building2 },
-  { id: 'rooms', label: 'Salões', icon: Map },
-  { id: 'tables', label: 'Mesas', icon: Grid3X3 },
   { id: 'menu', label: 'Cardápio', icon: UtensilsCrossed },
   { id: 'payment', label: 'Pagamentos', icon: CreditCard },
   { id: 'users', label: 'Usuários', icon: Users },

@@ -72,15 +72,22 @@ Como o sistema rodará localmente neste notebook via Docker:
     - **URL Principal / Login:** `http://localhost:8000/login`
     - **Usuário:** `Administrator` | **Senha:** `admin`
     - **Painel Gestão URY:** `http://localhost:8000/ury`
-    - **PDV v2 (React):** `http://localhost:8000/pos`
-    - **Cozinha KDS/KOT (Mosaic):** `http://localhost:8000/mosaic`
-    - **Autoatendimento:** `http://localhost:8000/order`
+    - **PDV v2 (React):** `http://localhost:8000/pos` (inclui aba nativa **Cozinha KDS** em `/pos/kitchen`)
+    - **Cardápio Digital Público (WhatsApp):** `http://localhost:8000/order`
+    - **Cozinha KDS Standalone (Mosaic):** `http://localhost:8000/mosaic`
   - **Backup Automático do Banco de Dados:**
     - Script [`scripts/backup-db.sh`](./scripts/backup-db.sh) testado e agendado no `crontab` (a cada 4 horas), salvando em `/mnt/hd/Backups/pdv-ury/` e pronto para sincronizar com Google Drive (`rclone config` -> remote `gdrive`).
 
 ---
 
 ## 6. Histórico de Sessões / Últimos Passos
+
+### [2026-10-29] — Passo 5 (Etapa 1): Enxugamento para Operação 100% Delivery, KDS Integrado ao PDV e Cardápio Digital via WhatsApp (Antigravity)
+- **Remoção de Mesas, Salões e Garçom (`frontend/` e `pos/`):** Ocultados/removidos os módulos de Mesas (`Table`), Salões (`Room`), App de Garçom (`Captain`), contador de pessoas (`Pax`) na sacola e widgets de ocupação de mesas/garçons nos dashboards (`/ury/dashboard` e `/pos/dashboard`).
+- **Enxugamento de Relatórios (`/ury/reports`):** Removidos os 5 relatórios voltados a atendimento de salão/indústria (`employee-sales`, `employee-item-wise-sales`, `completed-work-orders`, `item-wise-purchase-history` e `daily-pnl` manual), mantendo os 12 relatórios essenciais de vendas, canais de delivery, ticket médio, horários de pico, produtos e clientes.
+- **KDS Integrado na Barra do PDV (`/pos/kitchen`):** Criada a página [`pos/src/pages/Kitchen.tsx`](./pos/src/pages/Kitchen.tsx) acessível diretamente pelo menu inferior do PDV (`/pos`), permitindo acompanhar comandas em preparo e despachadas em tempo real sem sair do PDV.
+- **Agregadores / Apps de Entrega (`AggregatorPage.tsx` e `ury/ury_pos/api.py`):** Corrigida a moeda de criação de Lista de Preços de `INR` para `BRL`, adicionados atalhos rápidos (`iFood`, `99Food`, `Rappi`, `WhatsApp`, `Aiqfome`), corrigido `getAggregatorItem` para herdar o cardápio ativo da loja com categorias/imagens e vincular automaticamente conta bancária padrão no `getAggregatorMOP`.
+- **Cardápio Digital Compartilhável (`/order`):** Criado o endpoint público `ury.ury_pos.api.get_public_menu` e a vitrine digital [`self-order/src/layouts/PublicDigitalMenu.tsx`](./self-order/src/layouts/PublicDigitalMenu.tsx), permitindo compartilhar o link `/order` com clientes para montar a sacola (Delivery ou Retirada) e enviar o pedido formatado via WhatsApp.
 
 ### [2026-10-28] — Passo 4 Concluído: Tradução Completa para Português do Brasil (PT-BR) em 4 Etapas (Antigravity)
 - **Etapa 1 (ERPNext Desk + PDV Principal `/pos`):** Configurado idioma padrão `pt-BR` no banco Frappe (`System Settings` e usuário `Administrator`), criado `pos/src/i18n/locales/pt-BR.json` com mais de 410 chaves traduzidas, registrado `pt-BR` como idioma padrão no i18next do PDV e formatador de moeda global em `packages/core/src/format.ts` (`pt-BR`, `R$`).

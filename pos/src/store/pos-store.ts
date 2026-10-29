@@ -258,12 +258,17 @@ const getInitialTabsState = () => {
           ...tab,
           name: typeof tab.name === 'string' ? tab.name.replace(/^Order /, 'Tab ') : tab.name
         }));
+        const activeState = data.activeTabState || {};
+        if (activeState.selectedOrderType === 'Dine In') {
+          activeState.selectedOrderType = DEFAULT_ORDER_TYPE;
+          activeState.selectedTable = null;
+        }
         return {
           tabOrder: correctedTabOrder,
           activeTabId: data.activeTabId,
           nextTabNumber: data.nextTabNumber,
           heldTabs: data.heldTabs || {},
-          ...data.activeTabState
+          ...activeState
         };
       }
     }
@@ -312,8 +317,8 @@ export const usePOSStore = create<POSStore>((set, get) => ({
   posProfile: null,
   customerGroups: [],
   territories: [],
-  currency: storage.getItem('currency') || 'INR',
-  currencySymbol: storage.getItem('currencySymbol') || null,
+  currency: storage.getItem('currency') || 'BRL',
+  currencySymbol: storage.getItem('currencySymbol') || 'R$',
   tableOrder: null,
   isInitializing: true,
   isUpdatingOrder: false,
@@ -362,7 +367,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
         set({ 
           posProfile: profile, 
           profileLoading: false,
-          currency: profile.currency || 'INR'
+          currency: profile.currency || 'BRL'
         });
         if (!storage.getItem('currencySymbol')) {
           await get().fetchCurrencySymbol();
@@ -377,7 +382,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       set({ 
         posProfile: combinedProfile, 
         profileLoading: false,
-        currency: combinedProfile.currency || 'INR'
+        currency: combinedProfile.currency || 'BRL'
       });
       
       if (!storage.getItem('currencySymbol')) {

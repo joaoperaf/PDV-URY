@@ -54,28 +54,30 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, loading }) => {
 export const KPIGrid: React.FC<KPIGridProps> = ({ summary, loading }) => {
   const todaySales = summary?.today_sales ?? 0;
   const ordersToday = summary?.today_orders ?? 0;
-  const occupiedTables = summary?.occupied_tables ?? 0;
-  const totalTables = summary?.total_tables ?? 0;
   const aov = summary?.avg_order_value ?? 0;
   const activeCashiers = summary?.active_cashiers ?? 0;
   const pendingOrders = summary?.pending_kitchen_orders ?? 0;
   const totalMenuItems = summary?.total_menu_items ?? 0;
-
-  const occupancyRate = totalTables > 0 ? Math.round((occupiedTables / totalTables) * 100) : 0;
 
   return (
     <section className="w-full">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <LinkCard
           logoSrc={uryPosLogo}
-          label="URY PDV"
+          label="ABRIR PDV / CAIXA"
           href="/pos"
         />
 
         <LinkCard
           logoSrc={uryMosaicLogo}
-          label="URY MOSAIC (KDS)"
-          href="/mosaic"
+          label="COZINHA (KDS)"
+          href="/pos/kitchen"
+        />
+
+        <LinkCard
+          logoSrc={uryPosLogo}
+          label="CARDÁPIO DIGITAL"
+          href="/order"
         />
 
         <KPICard
@@ -91,26 +93,20 @@ export const KPIGrid: React.FC<KPIGridProps> = ({ summary, loading }) => {
         />
 
         <KPICard
-          title="Ocupação de Mesas"
-          value={`${occupancyRate}%`}
-          loading={loading}
-        />
-
-        <KPICard
-          title="Mesas Ocupadas"
-          value={`${occupiedTables} / ${totalTables}`}
-          loading={loading}
-        />
-
-        <KPICard
           title="Ticket Médio"
           value={formatCurrency(aov)}
           loading={loading}
         />
 
         <KPICard
-          title="Pedidos Pendentes (Cozinha)"
-          value={`${pendingOrders} KOTs`}
+          title="Pedidos na Cozinha (KDS)"
+          value={`${pendingOrders} em preparo`}
+          loading={loading}
+        />
+
+        <KPICard
+          title="Itens no Cardápio / Caixas"
+          value={`${totalMenuItems} itens • ${activeCashiers} caixa(s)`}
           loading={loading}
         />
       </div>

@@ -6,12 +6,9 @@ import ConfigurePage from './pages/Setup/ConfigurePage';
 import DashboardLayout from './components/layout/DashboardLayout';
 import { DashboardPage } from './pages/Dashboard/DashboardPage';
 import { MenuPage } from './pages/Dashboard/MenuPage';
-import { TablePage } from './pages/Dashboard/TablePage';
-import { RoomPage } from './pages/Dashboard/RoomPage';
 import { PosProfilePage } from './pages/Dashboard/PosProfilePage';
 import { UserPage } from './pages/Dashboard/UserPage';
 import { BranchPage } from './pages/Dashboard/BranchPage';
-import { ReportSettingsPage } from './pages/Dashboard/ReportSettingsPage';
 import ProductionUnitPage from './pages/Dashboard/ProductionUnitPage';
 import AggregatorPage from './pages/Dashboard/AggregatorPage';
 import { RoleGuard } from './components/RoleGuard';
@@ -27,14 +24,9 @@ import { ServiceWiseSales } from './pages/Reports/ServiceWiseSales';
 import { CancelledInvoices } from './pages/Reports/CancelledInvoices';
 import { AverageBillValue } from './pages/Reports/AverageBillValue';
 import { ItemWiseSales } from './pages/Reports/ItemWiseSales';
-import { ItemWisePurchaseHistory } from './pages/Reports/ItemWisePurchaseHistory';
 import { CustomerData } from './pages/Reports/CustomerData';
 import { DaywiseCustomerDetails } from './pages/Reports/DaywiseCustomerDetails';
 import { RepeatedCustomers } from './pages/Reports/RepeatedCustomers';
-import { EmployeeSales } from './pages/Reports/EmployeeSales';
-import { EmployeeItemWiseSales } from './pages/Reports/EmployeeItemWiseSales';
-import { CompletedWorkOrders } from './pages/Reports/CompletedWorkOrders';
-import { DailyPnl } from './pages/Reports/DailyPnl';
 
 interface WizardStatus {
   step1_complete: boolean;
@@ -123,12 +115,9 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="menu" element={<MenuPage />} />
-          <Route path="table" element={<TablePage />} />
-          <Route path="room" element={<RoomPage />} />
           <Route path="pos-profile" element={<PosProfilePage />} />
           <Route path="user" element={<UserPage />} />
           <Route path="branch" element={<BranchPage />} />
-          <Route path="report-settings" element={<ReportSettingsPage />} />
           <Route path="production-unit" element={<ProductionUnitPage />} />
           <Route path="aggregator" element={<AggregatorPage />} />
 
@@ -152,26 +141,12 @@ function App() {
             <Route path="cancelled-invoices" element={<CancelledInvoices />} />
             <Route path="average-bill-value" element={<AverageBillValue />} />
             <Route path="item-wise-sales" element={<ItemWiseSales />} />
-            <Route
-              path="item-wise-purchase-history"
-              element={<ItemWisePurchaseHistory />}
-            />
             <Route path="customer-data" element={<CustomerData />} />
             <Route
               path="daywise-customer-details"
               element={<DaywiseCustomerDetails />}
             />
             <Route path="repeated-customers" element={<RepeatedCustomers />} />
-            <Route path="employee-sales" element={<EmployeeSales />} />
-            <Route
-              path="employee-item-wise-sales"
-              element={<EmployeeItemWiseSales />}
-            />
-            <Route
-              path="completed-work-orders"
-              element={<CompletedWorkOrders />}
-            />
-            <Route path="daily-pnl" element={<DailyPnl />} />
           </Route>
         </Route>
       </Route>

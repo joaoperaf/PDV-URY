@@ -894,29 +894,59 @@ def getAggregator():
 @frappe.whitelist()
 def getAggregatorItem(aggregator):
     branchName = getBranch()
-    aggregatorItem = []
-    aggregatorItemList = []
     priceList = frappe.db.get_value(
         "Aggregator Settings",
         {"customer": aggregator, "parent": branchName, "parenttype": "Branch"},
         "price_list",
     )
-    aggregatorItem = frappe.get_all(
-        "Item Price",
-        fields=["item_code", "item_name", "price_list_rate"],
-        filters={"selling": 1, "price_list": priceList},
-    )
-    aggregatorItemList = [
-        {
-            "item": item.item_code,
-            "item_name": item.item_name,
-            "rate": item.price_list_rate,
-            "item_image": frappe.db.get_value("Item", item.item, "image"),
-        }
-        for item in aggregatorItem
-        if not frappe.db.get_value("Item", item.item_code, "disabled")
-    ]
-    return aggregatorItemList
+
+    # Map of custom rates from Item Price for this aggregator's price list
+    custom_prices = {}
+    if priceList:
+        aggregator_prices = frappe.get_all(
+            "Item Price",
+            fields=["item_code", "item_name", "price_list_rate"],
+            filters={"selling": 1, "price_list": priceList},
+        )
+        for row in aggregator_prices:
+            custom_prices[row.item_code] = row
+
+    # Start from the restaurant's active menu so categories, images and courses work out of the box
+    try:
+        base_menu = resolve_restaurant_menu(branchName, order_type="Aggregators", cashier=True)
+        base_items = base_menu.get("items", [])
+    except Exception:
+        base_items = []
+
+    result = []
+    seen_codes = set()
+    for menu_item in base_items:
+        code = menu_item.get("item")
+        seen_codes.add(code)
+        rate = custom_prices[code].price_list_rate if code in custom_prices else menu_item.get("rate")
+        result.append(
+            {
+                **menu_item,
+                "rate": rate,
+            }
+        )
+
+    # Also include any Item Price entries that aren't in the active menu
+    for code, row in custom_prices.items():
+        if code not in seen_codes and not frappe.db.get_value("Item", code, "disabled"):
+            course = frappe.db.get_value("URY Menu Item", {"item": code}, "course")
+            result.append(
+                {
+                    "item": row.item_code,
+                    "item_name": _(row.item_name) if row.item_name else row.item_name,
+                    "rate": row.price_list_rate,
+                    "item_image": frappe.db.get_value("Item", row.item_code, "image"),
+                    "course": course,
+                    "course_label": _(course) if course else course,
+                }
+            )
+
+    return result
 
 @frappe.whitelist()
 def getAggregatorMOP(aggregator):
@@ -927,13 +957,29 @@ def getAggregatorMOP(aggregator):
         {"customer": aggregator, "parent": branchName, "parenttype": "Branch"},
         "mode_of_payments",
     )
+    if modeOfPayment:
+        company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value("Global Defaults", "default_company") or frappe.db.get_value("Company", {}, "name")
+        if company and not frappe.db.exists("Mode of Payment Account", {"parent": modeOfPayment, "company": company}):
+            default_acc = (
+                frappe.db.get_value("Company", company, "default_bank_account")
+                or frappe.db.get_value("Company", company, "default_cash_account")
+                or frappe.db.get_value("Account", {"company": company, "account_type": ["in", ["Bank", "Cash"]], "is_group": 0}, "name")
+            )
+            if default_acc:
+                mop_doc = frappe.get_doc("Mode of Payment", modeOfPayment)
+                mop_doc.append("accounts", {"company": company, "default_account": default_acc})
+                mop_doc.save(ignore_permissions=True)
+                frappe.db.commit()
+
     modeOfPaymentsList = []
     modeOfPaymentsList.append(
             {"mode_of_payment": modeOfPayment, "opening_amount": float(0)}
     )
     return modeOfPaymentsList
+
+
 @frappe.whitelist()
-def create_customer(customer_name, mobile_number=None, customer_group="Individual", territory="India"):
+def create_customer(customer_name, mobile_number=None, customer_group="Individual", territory="All Territories"):
     if not frappe.has_permission("Customer", "create"):
         frappe.throw("Not permitted to create customers", frappe.PermissionError)
         
@@ -945,6 +991,11 @@ def create_customer(customer_name, mobile_number=None, customer_group="Individua
         validate_phone_number(mobile_number, throw=True)
     except Exception:
         frappe.throw("Invalid mobile number format")
+
+    if not frappe.db.exists("Territory", territory):
+        territory = frappe.db.get_value("Territory", {}, "name") or "All Territories"
+    if not frappe.db.exists("Customer Group", customer_group):
+        customer_group = frappe.db.get_value("Customer Group", {}, "name") or "Individual"
 
     """Create a new customer"""
     try:
@@ -1597,3 +1648,58 @@ def merge_bills(primary_invoice, secondary_invoice):
             "status": "error",
             "message": str(e),
         }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_public_menu(branch=None):
+    """Retorna o cardápio público da loja para compartilhamento com clientes (Delivery / Retirada)."""
+    if not branch:
+        branch = frappe.db.get_value("URY Restaurant", {}, "branch") or frappe.db.get_value("Branch", {}, "name")
+
+    restaurant_doc = frappe.db.get_value(
+        "URY Restaurant",
+        {"branch": branch} if branch else {},
+        ["name", "active_menu", "branch"],
+        as_dict=True,
+    )
+
+    restaurant_name = restaurant_doc.name if restaurant_doc else (branch or "Péricles Burger")
+    active_menu = restaurant_doc.active_menu if restaurant_doc else None
+
+    if not active_menu:
+        active_menu = frappe.db.get_value("URY Menu", {"branch": branch} if branch else {}, "name")
+
+    items = []
+    if active_menu:
+        menu_rows = frappe.get_all(
+            "URY Menu Item",
+            filters={"parent": active_menu, "disabled": 0},
+            fields=["item", "item_name", "rate", "special_dish", "course"],
+            order_by="idx asc, item_name asc",
+        )
+        for row in menu_rows:
+            item_meta = frappe.db.get_value(
+                "Item", row.item, ["image", "description"], as_dict=True
+            ) or {}
+            items.append(
+                {
+                    "item": row.item,
+                    "item_name": _(row.item_name) if row.item_name else row.item_name,
+                    "rate": float(row.rate or 0),
+                    "special_dish": row.special_dish,
+                    "item_image": item_meta.get("image"),
+                    "description": item_meta.get("description") or "",
+                    "course": row.course,
+                    "course_label": _(row.course) if row.course else (row.course or "Geral"),
+                }
+            )
+
+    company_phone = frappe.db.get_value("Company", {}, "phone_no") or ""
+
+    return {
+        "restaurant_name": restaurant_name,
+        "branch": branch,
+        "menu_name": active_menu,
+        "whatsapp_phone": company_phone,
+        "items": items,
+    }

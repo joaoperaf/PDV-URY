@@ -3,6 +3,7 @@ import MobileQRLayout from './layouts/MobileQRLayout'
 import TabletLayout from './layouts/TabletLayout'
 import LandscapeKioskLayout from './layouts/LandscapeKioskLayout'
 import PortraitKioskLayout from './layouts/PortraitKioskLayout'
+import PublicDigitalMenu from './layouts/PublicDigitalMenu'
 import type { OrderingLayout } from './lib/api'
 
 const LAYOUTS: Record<OrderingLayout, typeof MobileQRLayout> = {
@@ -12,17 +13,9 @@ const LAYOUTS: Record<OrderingLayout, typeof MobileQRLayout> = {
   'Portrait Kiosk': PortraitKioskLayout,
 }
 
-/**
- * Layout-shell selector. A provisioned device (kiosk/tablet, resolved via
- * useDeviceBootstrap from a stored device credential) picks its layout from
- * the server-returned `deviceContext.layout` — never a client guess — and
- * skips straight to it with an already-resolved context, so it never
- * re-bootstraps via QR token. Anything else (no stored device credential —
- * the QR/mobile case) falls through to MobileQRLayout, which does its own
- * token/session bootstrap via useOrderingSession().
- */
 function App() {
   const { isDevice, deviceContext, deviceLoading, deviceError } = useDeviceBootstrap()
+  const hasQrToken = Boolean(new URLSearchParams(window.location.search).get('t'))
 
   if (isDevice) {
     if (deviceLoading) {
@@ -43,7 +36,11 @@ function App() {
     return <Layout initialContext={deviceContext} />
   }
 
-  return <MobileQRLayout />
+  if (hasQrToken) {
+    return <MobileQRLayout />
+  }
+
+  return <PublicDigitalMenu />
 }
 
 export default App

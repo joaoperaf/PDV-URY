@@ -124,7 +124,7 @@ export const AggregatorPage: React.FC = () => {
           doctype: 'Price List',
           price_list_name: newAggregatorName,
           selling: 1,
-          currency: 'INR'
+          currency: 'BRL'
         }
       }).catch((e: any) => {
         const errorMessage = e?.message || e?.responseJSON?.message || String(e);
@@ -371,19 +371,60 @@ export const AggregatorPage: React.FC = () => {
         </div>
       )}
 
+      {/* Integração API iFood (Preparado para Credenciais) */}
+      <Card className="p-6 rounded-lg border border-red-100 bg-red-50/30 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-600 text-white">
+                iFood API
+              </span>
+              <h3 className="text-base font-bold text-gray-900">
+                Integração Oficial iFood Developer (Recebimento Automático de Pedidos)
+              </h3>
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                Preparado • Aguardando Credenciais
+              </span>
+            </div>
+            <p className="text-xs text-gray-600 max-w-3xl">
+              Enquanto você não possui as credenciais da API oficial do Portal iFood Developer (Client ID, Client Secret e Merchant ID), os pedidos de apps podem ser lançados diretamente no PDV selecionando o tipo <strong>Agregadores</strong>. Assim que tiver a chave da API, basta conectá-la para que os pedidos caiam automaticamente na Cozinha (KDS) e no Caixa.
+            </p>
+          </div>
+        </div>
+      </Card>
+
       {/* Add Modal */}
       <Dialog open={isAddOpen} onOpenChange={(open) => !open && setIsAddOpen(false)}>
         <DialogContent className="max-w-md bg-white p-6 rounded-xl border border-gray-200 shadow-xl" onClose={() => setIsAddOpen(false)}>
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-gray-900">Adicionar Agregador</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-gray-900">Adicionar Canal / Agregador de Delivery</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreateAggregator} className="space-y-4 text-sm mt-4">
             <div>
               <label className="block font-semibold text-gray-700 mb-1.5">
-                Nome do Agregador <span className="text-red-500">*</span>
+                Atalhos Rápidos
+              </label>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {['iFood', '99Food', 'Rappi', 'WhatsApp', 'Aiqfome'].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setNewAggregatorName(preset)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                      newAggregatorName === preset
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                    }`}
+                  >
+                    + {preset}
+                  </button>
+                ))}
+              </div>
+              <label className="block font-semibold text-gray-700 mb-1.5">
+                Nome do Agregador / Canal <span className="text-red-500">*</span>
               </label>
               <Input
-                placeholder="Ex: iFood, Rappi"
+                placeholder="Ex: iFood, Rappi, WhatsApp"
                 value={newAggregatorName}
                 onChange={(e) => setNewAggregatorName(e.target.value)}
                 required
