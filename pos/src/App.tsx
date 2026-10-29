@@ -3,7 +3,6 @@ import AppLayout from './components/AppLayout';
 import Orders from './pages/Orders';
 import POS from './pages/POS';
 import Kitchen from './pages/Kitchen';
-import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import AuthGuard from './components/AuthGuard';
 import POSOpeningProvider from './components/POSOpeningProvider';
@@ -40,11 +39,11 @@ function App() {
               <Routes>
                 <Route element={<AppLayout />}>
                   <Route index element={<Navigate to="/pos" replace />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/pos" element={<POS />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/kitchen" element={<Kitchen />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="*" element={<Navigate to="/pos" replace />} />
                 </Route>
               </Routes>
             </Router>

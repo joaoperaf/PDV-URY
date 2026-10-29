@@ -114,7 +114,7 @@ const Header = () => {
       <div className="flex items-center justify-between h-16 px-6">
         {/* Logo */}
         <div className="flex items-center">
-        <Link to="/dashboard" className="flex items-center gap-3">
+        <Link to="/pos" className="flex items-center gap-3">
             <img
               src="/assets/ury/pos/ury_pos.png"
               alt="URY POS" 
@@ -124,7 +124,7 @@ const Header = () => {
         </div>
 
         {/* Search Bar */}
-        {location.pathname !== '/dashboard' && location.pathname !== '/kitchen' ? (
+        {location.pathname !== '/kitchen' ? (
           <div className="px-4 py-2 flex-1 flex items-center max-w-2xl mx-8 bg-gray-50 hover:bg-gray-100 border border-input rounded-md">
             <Input
               ref={searchInputRef}
