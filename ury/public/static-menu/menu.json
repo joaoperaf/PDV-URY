@@ -1,0 +1,52 @@
+{
+  "restaurantName": "Péricles Burger",
+  "whatsappPhone": "",
+  "currency": "BRL",
+  "items": [
+    {
+      "id": "burger",
+      "name": "Burger Péricles",
+      "description": "Nosso novo burger que leva o nome da casa!",
+      "category": "Hamburgers",
+      "price": 20,
+      "image": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=240&q=80",
+      "available": true
+    },
+    {
+      "id": "pizza",
+      "name": "Duplo Cheddar",
+      "description": "Duas carnes de 120gr com nosso delícioso molho cheddar!",
+      "category": "Hamburgers",
+      "price": 50,
+      "image": "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=240&q=80",
+      "available": true
+    },
+    {
+      "id": "fries",
+      "name": "Batata Frita",
+      "description": "Porção de batatas fritas",
+      "category": "Entradas",
+      "price": 25,
+      "image": "https://images.unsplash.com/photo-1630383249896-424e482df921?w=240&q=80",
+      "available": true
+    },
+    {
+      "id": "wings",
+      "name": "Wings",
+      "description": "Porção de asas de frango",
+      "category": "Entradas",
+      "price": 120,
+      "image": "https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=240&q=80",
+      "available": true
+    },
+    {
+      "id": "coffee",
+      "name": "Coffee",
+      "description": "Café",
+      "category": "Bebidas",
+      "price": 60,
+      "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=240&q=80",
+      "available": true
+    }
+  ]
+}

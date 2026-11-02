@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Cardápio digital do Péricles Burger">
+    <title>Péricles Burger | Cardápio</title>
+    <link rel="icon" href="assets/logo-pericles-burger.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-content">
+        <span class="eyebrow">CARDÁPIO DIGITAL · PEDIDOS PELO WHATSAPP</span>
+        <img class="brand-logo" src="assets/logo-pericles-burger.png" alt="Péricles Burger">
+        <p>Escolha seus favoritos e envie o pedido pelo WhatsApp.</p>
+        <label class="search-shell">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="search" class="search" type="search" placeholder="Buscar no cardápio..." aria-label="Buscar no cardápio">
+        </label>
+      </div>
+    </header>
+
+    <section id="item-details" class="item-details" aria-hidden="true"></section>
+    <div class="menu-layout">
+      <nav id="categories" class="categories" aria-label="Categorias"></nav>
+      <main>
+        <div class="menu-intro">
+          <div>
+            <span class="section-kicker">NOSSO MENU</span>
+            <h1>Escolha o seu pedido</h1>
+          </div>
+          <span id="menu-count" class="menu-count"></span>
+        </div>
+        <div id="menu-status" class="status" role="status" aria-live="polite">Carregando cardápio...</div>
+        <section id="menu" class="menu-grid" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <button id="cart-backdrop" class="cart-backdrop" type="button" aria-label="Fechar pedido"></button>
+    <aside id="cart-panel" class="cart-panel" aria-label="Seu pedido" aria-hidden="true">
+      <div class="cart-heading">
+        <div>
+          <span class="panel-kicker">SEU PEDIDO</span>
+          <strong>Revise seu pedido</strong>
+          <span id="cart-count" aria-live="polite">0 itens</span>
+        </div>
+        <button id="close-cart" class="icon-button" type="button" aria-label="Fechar pedido">×</button>
+      </div>
+      <div class="cart-scroll">
+        <div id="cart-items" class="cart-items"></div>
+        <form id="checkout-form">
+          <div class="form-heading">Dados para finalizar</div>
+          <input name="name" required autocomplete="name" placeholder="Seu nome *" aria-label="Seu nome">
+          <input name="phone" type="tel" autocomplete="tel" placeholder="Seu telefone" aria-label="Seu telefone">
+          <select name="type" aria-label="Tipo de pedido">
+            <option value="delivery">Entrega</option>
+            <option value="pickup">Retirada no balcão</option>
+          </select>
+          <div id="delivery-address-field">
+            <input name="address" autocomplete="street-address" placeholder="Endereço de entrega" aria-label="Endereço de entrega">
+          </div>
+          <select name="payment" aria-label="Forma de pagamento">
+            <option>PIX</option>
+            <option>Cartão na entrega</option>
+            <option>Dinheiro</option>
+          </select>
+          <textarea name="notes" rows="2" placeholder="Observações do pedido" aria-label="Observações do pedido"></textarea>
+        </form>
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total" aria-live="polite"><span>Total:</span><strong id="cart-total">R$ 0,00</strong></div>
+        <button class="whatsapp-button" form="checkout-form" type="submit">Enviar pedido pelo WhatsApp <span aria-hidden="true">→</span></button>
+      </div>
+    </aside>
+
+    <button id="open-cart" class="floating-cart" type="button" aria-expanded="false">
+      <span>Ver pedido</span>
+      <strong id="floating-total">R$ 0,00</strong>
+    </button>
+    <script src="app.js"></script>
+  </body>
+</html>
