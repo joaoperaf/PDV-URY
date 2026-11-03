@@ -203,7 +203,7 @@ const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
     <>
     {isOpen && (
       <div
-        className="fixed inset-0 z-20 bg-black/40 lg:hidden"
+        className="fixed inset-0 z-40 bg-black/40 lg:hidden"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -214,7 +214,7 @@ const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
       role="complementary"
       aria-label={t('cart.order_summary')}
       className={cn(
-        'bg-white border-gray-200 flex-col outline-none z-30',
+        'bg-white border-gray-200 flex-col outline-none z-[45]',
         // Mobile: bottom sheet
         'fixed inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl border-t shadow-2xl',
         // Tablet: drawer lateral
@@ -249,7 +249,7 @@ const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
         <EmptyCartUI />
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto px-6">
+          <div className="flex-1 overflow-y-auto px-4 md:px-6">
             {activeOrders.map((item) => (
               <div
                 key={item.uniqueId}
@@ -258,8 +258,8 @@ const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
                   isInteractionDisabled && "opacity-50"
                 )}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center justify-between gap-y-2">
+                  <div className="flex-1 min-w-[10rem]">
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium text-gray-900 text-sm">{item.name}</h3>
                     </div>
@@ -284,7 +284,7 @@ const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
                       onClick={() => handleEdit(item)}
                       variant="ghost"
                       size="icon"
-                      className="text-blue-600 hover:text-blue-700"
+                      className="text-blue-600 hover:text-blue-700 h-10 w-10 lg:h-9 lg:w-9"
                       title={t('cart.edit_item')}
                       disabled={isInteractionDisabled}
                     >
@@ -302,7 +302,7 @@ const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
                         }}
                         variant="outline"
                         size="icon"
-                        className="w-8 h-8 rounded-full"
+                        className="w-10 h-10 lg:w-8 lg:h-8 rounded-full"
                         disabled={isInteractionDisabled}
                       >
                         -
@@ -312,7 +312,7 @@ const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
                         onClick={() => updateQuantity(item.uniqueId!, Math.round((item.quantity + 1) * 1000) / 1000)}
                         variant="outline"
                         size="icon"
-                        className="w-8 h-8 rounded-full"
+                        className="w-10 h-10 lg:w-8 lg:h-8 rounded-full"
                         disabled={isInteractionDisabled}
                       >
                         +
@@ -323,7 +323,7 @@ const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
                       onClick={() => removeFromOrder(item.uniqueId!)}
                       variant="ghost"
                       size="icon"
-                      className="text-red-500 hover:text-red-600"
+                      className="text-red-500 hover:text-red-600 h-10 w-10 lg:h-9 lg:w-9"
                       disabled={isInteractionDisabled}
                     >
                       <Trash2 className="w-5 h-5" />

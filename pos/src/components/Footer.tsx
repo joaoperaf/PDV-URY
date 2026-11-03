@@ -21,15 +21,15 @@ const Footer = () => {
 
   return (
     <div className="bg-white border-t border-gray-200 py-2 relative z-30">
-      <nav className="max-w-screen-xl mx-auto px-4">
-        <div className="flex justify-center items-center gap-6">
+      <nav className="max-w-screen-xl mx-auto px-1 md:px-4">
+        <div className="flex justify-around md:justify-center items-center gap-0 md:gap-6">
           {/* 1ª Posição: Ícone de Casinha (Início / Painel Principal /ury) */}
           <a
             href="/ury/dashboard"
-            className="flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            className="flex flex-col items-center justify-center min-h-11 min-w-0 flex-1 md:flex-none p-1 md:p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <Home className="w-5 h-5" />
-            <span className="text-xs mt-1">Início</span>
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">Início</span>
           </a>
 
           {/* Abas internas do PDV */}
@@ -39,13 +39,13 @@ const Footer = () => {
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  'flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors',
+                  'flex flex-col items-center justify-center min-h-11 min-w-0 flex-1 md:flex-none p-1 md:p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors',
                   isActive && 'text-blue-600 font-semibold'
                 )
               }
             >
               <item.icon className="w-5 h-5" />
-              <span className="text-xs mt-1">{item.label}</span>
+              <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">{item.label}</span>
             </NavLink>
           ))}
 
@@ -54,10 +54,10 @@ const Footer = () => {
             href="/menu"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            className="flex flex-col items-center justify-center min-h-11 min-w-0 flex-1 md:flex-none p-1 md:p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <Smartphone className="w-5 h-5" />
-            <span className="text-xs mt-1">Cardápio Digital</span>
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">Cardápio Digital</span>
           </a>
         </div>
       </nav>

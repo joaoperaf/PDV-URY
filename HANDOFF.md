@@ -83,11 +83,24 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 6. Histórico de Sessões / Últimos Passos
 
 ### [2026-11-03] — Issue #1: painel do pedido responsivo no PDV
-- `OrderPanel` agora é responsivo: fixo à direita em desktop (≥1024px), drawer lateral em tablet (md) e bottom sheet em mobile. Props `isOpen`/`onClose`; fecha por botão X, clique no fundo ou Esc; foco vai ao painel ao abrir e volta ao botão de origem ao fechar.
-- `POS.tsx`: `pe-96` virou `lg:pe-96`; barra inferior (< lg) com itens, total e botão do pedido.
-- `ScreenSizeProvider`: rota `/pos` isenta do bloqueio "Desktop Only" abaixo de 1024px (`/orders` e `/kitchen` seguem bloqueadas).
-- Nova chave i18n `common.close` (pt-BR, en, fr, ar).
-- Validado: `tsc --noEmit` e `vite build`. **Pendente:** teste manual em viewport desktop, tablet e mobile (critério de aceite da issue). `Orders.tsx` ainda usa `w-96 fixed` / `pe-96`.
+- **Status: EM ANDAMENTO (branch `feat/issue-1-responsive-order-panel`, não mergeada; issue #1 segue aberta).**
+- `OrderPanel`: fixo à direita em desktop (≥1024px), drawer lateral em tablet (md) e bottom sheet em mobile. Props `isOpen`/`onClose`; fecha por X, clique no fundo ou Esc; foco vai ao painel ao abrir e volta ao botão de origem ao fechar. z-index (`z-40` fundo / `z-[45]` painel) fica acima do `Footer` (`z-30`).
+- `POS.tsx`: `pe-96` virou `lg:pe-96`; barra de resumo (itens + total + botão do pedido) no fluxo, acima do Footer, visível só < lg; faixa horizontal de categorias (`< md`) substitui a sidebar.
+- `Sidebar`: oculta < md (`hidden md:flex`, `md:w-52 lg:w-64`); `getCategoryLabel` agora é exportado.
+- `Header`: padding/margens menores < md; nome do usuário e atalho ⌘K ocultos < md.
+- `Footer`: itens distribuídos igualmente em telas pequenas, rótulos menores e truncados, altura mínima 44px.
+- `OrderPanel` (carrinho): botões +/−/editar/remover com 40px < lg (32px desktop); linha do item quebra em telas estreitas.
+- `ScreenSizeProvider`: rota `/pos` isenta do bloqueio "Desktop Only" < 1024px (`/orders` e `/kitchen` seguem bloqueadas).
+- i18n: nova chave `common.close` (pt-BR, en, fr, ar).
+- Validado apenas: `tsc --noEmit` e `yarn build`. **NÃO foi validado visualmente** — o último teste manual do usuário ainda apontava que a tela "só diminuía"; os ajustes de categorias/footer/carrinho foram feitos depois e não foram testados.
+- **Atenção:** o build servido é `ury/public/pos` (ignorado pelo git). Após qualquer alteração, rodar `yarn build` em `pos/` e recarregar com Ctrl+Shift+R.
+
+#### Para retomar (próximos passos da issue #1)
+1. Testar `/ury/pos` em 1280px (desktop), 820px (tablet) e 390px (mobile) e anotar o que ainda está inutilizável.
+2. Ajustar o que falhar. Candidatos conhecidos: `ProductDialog`, cards do cardápio (botão de opções `min-h-8`), filtros rápidos, `OrderTabs`/`OrderTypeSelect` em telas estreitas.
+3. Conferir critérios de aceite da issue: carrinho visível sem sobrepor menu (desktop), drawer (tablet), painel inferior sem overflow horizontal (mobile), total/finalizar sempre alcançáveis, foco ao abrir/fechar.
+4. Atualizar esta entrada, commitar, abrir PR para `version-2` e fechar a issue #1.
+5. Fora do escopo desta issue: `Orders.tsx` ainda usa `w-96 fixed` / `pe-96`; `/orders` e `/kitchen` seguem bloqueadas < 1024px.
 
 ### [2026-11-03] — iFood: base de polling implementada
 - Criados os DocTypes singleton `iFood Settings` e `iFood Event Log`.
