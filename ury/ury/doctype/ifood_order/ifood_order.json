@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-11-03 15:00:00.000000",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "order_id",
+  "merchant_id",
+  "display_id",
+  "order_status",
+  "order_type",
+  "order_created_at",
+  "event_id",
+  "external_status",
+  "last_sync_status",
+  "last_sync_error",
+  "last_synced_at",
+  "mapping_status",
+  "unmapped_codes",
+  "payload",
+  "fetched_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "order_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "iFood Order ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "merchant_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Merchant ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "display_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Display ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "order_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "iFood Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "order_type",
+   "fieldtype": "Data",
+   "label": "Order Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "order_created_at",
+   "fieldtype": "Datetime",
+   "label": "Order Created At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "event_id",
+   "fieldtype": "Data",
+   "label": "Source Event ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "external_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "External Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_sync_status",
+   "fieldtype": "Select",
+   "label": "Last Sync Status",
+   "options": "Success\nFailed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_sync_error",
+   "fieldtype": "Small Text",
+   "label": "Last Sync Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_synced_at",
+   "fieldtype": "Datetime",
+   "label": "Last Synced At",
+   "read_only": 1
+  },
+  {
+   "default": "Pending Mapping",
+   "fieldname": "mapping_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Mapping Status",
+   "options": "Pending Mapping\nReady to Import\nImported\nCancelled\nFailed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unmapped_codes",
+   "fieldtype": "Small Text",
+   "label": "Unmapped iFood Codes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payload",
+   "fieldtype": "Long Text",
+   "label": "Order Payload",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fetched_at",
+   "fieldtype": "Datetime",
+   "label": "Fetched At",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-03 15:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "URY",
+ "name": "iFood Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "URY Admin",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

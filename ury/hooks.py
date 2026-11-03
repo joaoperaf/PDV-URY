@@ -207,7 +207,8 @@ doc_events = {
 scheduler_events = {
     "cron":{
 		"* * * * *":[
-			"ury.ury.api.ury_kot_validation.kotValidationThread"
+			"ury.ury.api.ury_kot_validation.kotValidationThread",
+			"ury.ury.api.ifood.poll_ifood_events_scheduled"
 		]
 	}
 # 	"all": [

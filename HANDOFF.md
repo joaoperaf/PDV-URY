@@ -82,6 +82,32 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-03] — iFood: base de polling implementada
+- Criados os DocTypes singleton `iFood Settings` e `iFood Event Log`.
+- Implementado o cliente backend OAuth Client Credentials, com `Client Secret` protegido por campo `Password` e token armazenado somente no cache do Frappe.
+- Implementado polling em `GET /order/v1.0/events:polling` e ACK em `POST /order/v1.0/events/acknowledgment`, usando o header opcional `x-polling-merchants`, com execução agendada a cada minuto.
+- Eventos são persistidos de forma idempotente antes do ACK em `POST /order/v1.0/events/acknowledgment`, permitindo reprocessar ACKs sem duplicar registros.
+- Ainda não há criação de POS Invoice, confirmação do pedido ou envio ao KDS; esta etapa é somente o inbox confiável de eventos.
+- Corrigida a normalização dos timestamps ISO do iFood para o formato aceito pelo MariaDB. O teste local recebeu e confirmou 2 eventos de teste; o scheduler continua executando sem erros.
+- Criado o DocType `iFood Order` para armazenar cada pedido uma única vez, com payload completo, identificadores, tipo, status e timestamps.
+- O polling agora consulta `GET /order/v1.0/orders/{orderId}` para eventos pendentes, salva os detalhes e marca o evento como `Processed`; falhas ficam registradas no próprio evento.
+- Validada a busca dos detalhes dos pedidos de teste: 4 pedidos iFood foram armazenados e os 6 eventos correspondentes ficaram `Processed`.
+- Analisado o payload real: itens usam `externalCode`, adicionais aparecem aninhados em `options`/`customizations`, e pedidos de teste podem estar pré-pagos online. Criado o DocType `iFood Item Mapping` para vincular códigos do catálogo iFood aos itens ERP antes da criação da POS Invoice.
+- O `iFood Order` agora calcula `mapping_status`: pedidos com códigos desconhecidos ficam `Pending Mapping`; quando todos os códigos estiverem vinculados, passam a `Ready to Import`. Os códigos pendentes ficam visíveis no campo `unmapped_codes`.
+- A classificação foi aplicada aos 4 pedidos de teste atuais, sem criar faturas incorretas. O próximo passo é preencher os mapeamentos do catálogo de teste ou implementar a importação automática do catálogo real.
+- Para o teste ponta a ponta, foram criados mapeamentos temporários `1334 -> Burguinho` e `8849 -> Burger`; os adicionais permanecem nas observações da comanda, não viram estoque fictício.
+- Implementada a importação automática dos pedidos `Ready to Import`: cria uma `POS Invoice` Draft do tipo `Aggregators`, registra o pagamento iFood online sem cobrança local e gera o KOT. O pedido de teste `1877` criou `AGG-00003` e `KOT-URY-00007`, em `Ready For Prepare`.
+- O polling agora executa também a importação automática após buscar os detalhes; pedidos sem mapeamento continuam bloqueados.
+- Validados `py_compile`, JSON dos DocTypes, `git diff --check`, migração/reload dos DocTypes no site `ury.localhost` e execução do polling autenticado.
+- Implementado o primeiro retorno de status ao iFood: ao marcar um KOT de uma POS Invoice com `custom_aggregator_id` como `Served`, o backend chama `POST /order/v1.0/orders/{orderId}/readyToPickup`.
+- O resultado da sincronização é gravado em `iFood Order` (`external_status`, `last_sync_status`, `last_sync_error` e `last_synced_at`), com proteção contra reenvio de `READY_TO_PICKUP` e registro explícito de falhas.
+- Validado no pedido de teste `2128`: KOT `KOT-URY-00008` foi servido e o iFood respondeu com sucesso; o pedido ficou `READY_TO_PICKUP`.
+- Implementada confirmação automática após a importação da POS Invoice (`POST /order/v1.0/orders/{orderId}/confirm`), com proteção contra reenvio e registro de falhas.
+- Eventos recebidos pelo polling agora atualizam o `external_status` do `iFood Order`, incluindo cancelamentos (`CAN -> CANCELLED`), sem cancelar automaticamente a venda local antes de definir a política financeira.
+- Política de cancelamento definida: pedidos iFood em rascunho são cancelados automaticamente; pedidos já enviados ao KDS cancelam a venda e os KOTs; faturas submetidas são canceladas pelo fluxo padrão do ERPNext; todos os casos geram registro e alerta para usuários com papel `URY Admin` ou `System Manager`.
+- Implementado `cancel_local_ifood_order`, acionado por eventos `CAN` e por pedidos já recebidos como `CANCELLED`; o status local passa a `Cancelled` e o pedido não é importado quando o cancelamento chega antes da criação da fatura.
+- Validados `py_compile`, JSON do DocType, `git diff --check`, reload do DocType e polling autenticado após a alteração.
+
 ### [2026-11-03] — Roteamento automático de novos produtos para o KDS
 - Corrigida a geração de KOT para que itens cujo grupo ainda não esteja cadastrado em uma unidade de produção sejam encaminhados automaticamente à cozinha padrão da filial.
 - O pedido continua registrando um aviso de configuração, mas não deixa mais o produto fora do KDS silenciosamente.
@@ -200,3 +226,4 @@ Como o sistema rodará localmente neste notebook via Docker:
 - [x] **Passo 3:** Subir o ambiente Docker do Frappe/ERPNext v15 + URY, compilar frontends e configurar rotina automática de backup do banco de dados em `/mnt/hd/Backups/pdv-ury`.
 - [x] **Passo 4:** Traduzir 100% do sistema (PDV, KDS Mosaic, Autoatendimento, Captain, Painel Gerencial, Wizard, 17 Relatórios e Backend Frappe) para Português do Brasil (`PT-BR`, tag `v0.3.0-ptbr`).
 - [ ] **Passo 5:** Realizar a configuração inicial do restaurante (Péricles Burger) e iniciar novas customizações de regras de negócio / fluxo operacional.
+- [ ] **iFood — próxima etapa:** preencher as credenciais no `iFood Settings`, gerar um pedido de teste no Developer Portal e validar o recebimento no `iFood Event Log` antes de implementar o mapeamento para POS Invoice/KDS.

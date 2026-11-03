@@ -26,6 +26,16 @@ def serve_kot(name, time=None):
     frappe.db.set_value("URY KOT", name, "production_time", production_time_minutes)
     frappe.db.set_value("URY KOT", name, "order_status", "Served")
 
+    if kot_doc.invoice:
+        aggregator_id = frappe.db.get_value(
+            "POS Invoice", kot_doc.invoice, "custom_aggregator_id"
+        )
+        if aggregator_id:
+            from ury.ury.api.ifood import mark_ifood_order_ready
+
+            ifood_sync = mark_ifood_order_ready(aggregator_id)
+            return {"status": "Served", "ifood": ifood_sync}
+
 
 # Function to mark it as verified in a cancel type KOT.
 # The verifying user is derived from the session and must hold a manager-level
@@ -240,4 +250,3 @@ def served_kot_list():
         "audio_alert": audio_alert,
         "daily_order_number":daily_order_number
     }
-
