@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Trash2, Edit, FrownIcon, Plus, Loader2, MessageSquare } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Trash2, Edit, FrownIcon, Plus, Loader2, MessageSquare, X } from 'lucide-react';
 import { usePOSStore } from '../store/pos-store';
 import { cn } from '@ury/ui';
 import { formatCurrency, parseFrappeError, flt } from '@ury/core';
@@ -17,7 +17,13 @@ import { showToast } from '@ury/ui';
 import { DINE_IN } from '../data/order-types';
 import { t } from '../i18n';
 
-const OrderPanel = () => {
+interface OrderPanelProps {
+  /** Abre o painel como drawer/sheet em telas < lg. Em lg+ o painel é sempre visível. */
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+const OrderPanel = ({ isOpen = false, onClose }: OrderPanelProps) => {
   const { 
     activeOrders, 
     removeFromOrder, 
@@ -45,6 +51,18 @@ const OrderPanel = () => {
   const [editingItem, setEditingItem] = useState<typeof activeOrders[0] | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Foco ao abrir e fechamento por Escape (apenas quando exibido como drawer/sheet)
+  useEffect(() => {
+    if (!isOpen) return;
+    panelRef.current?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !showCommentDialog && !editingItem) onClose?.();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose, showCommentDialog, editingItem]);
 
   const calculateItemTotal = (item: typeof activeOrders[0]) => {
     const basePrice = item.selectedVariant?.price || item.price;
@@ -182,8 +200,44 @@ const OrderPanel = () => {
   const isInteractionDisabled = isOrderInteractionDisabled() || isSubmitting;
 
   return (
-    <div className="w-96 bg-white border-s border-gray-200 flex flex-col fixed top-16 bottom-16 end-0 z-10">
+    <>
+    {isOpen && (
+      <div
+        className="fixed inset-0 z-20 bg-black/40 lg:hidden"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+    )}
+    <div
+      ref={panelRef}
+      tabIndex={-1}
+      role="complementary"
+      aria-label={t('cart.order_summary')}
+      className={cn(
+        'bg-white border-gray-200 flex-col outline-none z-30',
+        // Mobile: bottom sheet
+        'fixed inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl border-t shadow-2xl',
+        // Tablet: drawer lateral
+        'md:inset-x-auto md:end-0 md:top-16 md:bottom-0 md:max-h-none md:w-96 md:rounded-none md:border-t-0 md:border-s',
+        // Desktop: painel fixo permanente
+        'lg:bottom-16 lg:z-10 lg:shadow-none lg:flex',
+        isOpen ? 'flex' : 'hidden'
+      )}
+    >
       <div className="p-4 border-b border-gray-200 flex-shrink-0">
+        {onClose && (
+          <div className="flex justify-end -mt-1 mb-2 lg:hidden">
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              aria-label={t('common.close')}
+              title={t('common.close')}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        )}
         <OrderTabs disabled={isInteractionDisabled} />
         <OrderTypeSelect disabled={isInteractionDisabled} />
         <div className="mt-3"><CustomerSelect disabled={isInteractionDisabled} /></div>
@@ -360,6 +414,7 @@ const OrderPanel = () => {
         initialComment={orderComment}
       />
     </div>
+    </>
   );
 };
 

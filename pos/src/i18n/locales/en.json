@@ -2,6 +2,7 @@
   "common": {
     "loading": "Loading...",
     "cancel": "Cancel",
+    "close": "Close",
     "save": "Save",
     "apply": "Apply",
     "change": "Change",

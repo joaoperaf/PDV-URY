@@ -82,6 +82,13 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-03] — Issue #1: painel do pedido responsivo no PDV
+- `OrderPanel` agora é responsivo: fixo à direita em desktop (≥1024px), drawer lateral em tablet (md) e bottom sheet em mobile. Props `isOpen`/`onClose`; fecha por botão X, clique no fundo ou Esc; foco vai ao painel ao abrir e volta ao botão de origem ao fechar.
+- `POS.tsx`: `pe-96` virou `lg:pe-96`; barra inferior (< lg) com itens, total e botão do pedido.
+- `ScreenSizeProvider`: rota `/pos` isenta do bloqueio "Desktop Only" abaixo de 1024px (`/orders` e `/kitchen` seguem bloqueadas).
+- Nova chave i18n `common.close` (pt-BR, en, fr, ar).
+- Validado: `tsc --noEmit` e `vite build`. **Pendente:** teste manual em viewport desktop, tablet e mobile (critério de aceite da issue). `Orders.tsx` ainda usa `w-96 fixed` / `pe-96`.
+
 ### [2026-11-03] — iFood: base de polling implementada
 - Criados os DocTypes singleton `iFood Settings` e `iFood Event Log`.
 - Implementado o cliente backend OAuth Client Credentials, com `Client Secret` protegido por campo `Password` e token armazenado somente no cache do Frappe.
