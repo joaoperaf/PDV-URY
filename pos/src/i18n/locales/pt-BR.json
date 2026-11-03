@@ -13,6 +13,8 @@
     "loading_tables": "Carregando mesas...",
     "loading_menu_items": "Carregando itens do cardápio...",
     "error_loading_menu_items": "Erro ao carregar itens do cardápio",
+    "error_loading_pos": "Não foi possível carregar o PDV",
+    "retry": "Tentar novamente",
     "loading_rooms": "Carregando salões...",
     "no_rooms_found": "Nenhum salão encontrado",
     "no_tables_found": "Nenhuma mesa encontrada",
@@ -33,7 +35,11 @@
     "logout": "Sair"
   },
   "menu": {
-    "special_items": "Destaques do Dia"
+    "special_items": "Destaques do Dia",
+    "add_item": "Adicionar",
+    "options": "Opções",
+    "open_options": "Abrir opções",
+    "in_cart": "no pedido"
   },
   "pos_sidebar": {
     "categories": "Categorias",
@@ -43,7 +49,9 @@
     "empty_title": "Seu pedido está vazio",
     "empty_subtitle": "Adicione itens para iniciar o pedido",
     "click_to_add": "Clique nos itens para adicioná-los",
-    "double_click_hint": "Clique duas vezes para opções e adicionais",
+    "options_hint": "Use “Opções” para escolher adicionais e personalizações",
+    "order_summary": "Resumo do pedido",
+    "items": "itens",
     "clear_cart": "Limpar pedido",
     "total": "Total",
     "add_new_order": "Enviar Pedido",
@@ -64,7 +72,8 @@
     "enter_cancel_reason": "Informe o motivo do cancelamento",
     "print": "Imprimir",
     "payment": "Pagamento",
-    "order_actions": "Ações do pedido"
+    "order_actions": "Ações do pedido",
+    "cancel_reason": "Motivo do cancelamento"
   },
   "payment": {
     "title": "Pagamento",
@@ -83,6 +92,14 @@
     "short_by": "Faltam {{amount}}",
     "change_due": "Troco: {{amount}}",
     "success": "Pagamento confirmado: {{amount}} recebido"
+  },
+  "payment_modes": {
+    "cash": "Dinheiro",
+    "credit_card": "Cartão de crédito",
+    "debit_card": "Cartão de débito",
+    "pix": "Pix",
+    "bank_transfer": "Transferência bancária",
+    "check": "Cheque"
   },
   "pos": {
     "not_opened_title": "Caixa Fechado",
@@ -426,6 +443,8 @@
     "recently_paid": "Pagos Recentemente",
     "paid": "Pago",
     "consolidated": "Consolidado",
-    "return": "Devolução / Estorno"
+    "return": "Devolução / Estorno",
+    "dispatched": "Despachado",
+    "cancelled": "Cancelado"
   }
 }

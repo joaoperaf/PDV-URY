@@ -171,17 +171,27 @@ export default function Orders() {
     switch (status) {
       case 'Draft':
       case 'Unbilled':
-        return 'secondary';
+        return 'danger';
+      case 'Dispatched':
+        return 'warning';
       case 'Recently Paid':
       case 'Paid':
       case 'Consolidated':
-        return 'default';
+        return 'success';
       case 'Return':
         return 'destructive';
+      case 'Cancelled':
+        return 'danger';
       default:
         return 'default';
     }
   };
+
+  const getDisplayedStatus = (order: POSInvoice) =>
+    (order.status === 'Draft' || order.status === 'Unbilled') &&
+    order.operational_status === 'Dispatched'
+      ? 'Dispatched'
+      : order.status;
 
   async function handleCancelOrder() {
     if (!selectedOrder) return;
@@ -370,7 +380,7 @@ export default function Orders() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       {/* Left Sidebar - Order Types */}
       <OrderStatusSidebar
         selectedStatus={selectedStatus}
@@ -378,7 +388,7 @@ export default function Orders() {
       />
 
       {/* Middle Section - Order Cards */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden pe-96">
+      <div className="flex-1 flex flex-col h-full overflow-hidden pe-96">
         <div className="flex-1 overflow-y-auto bg-gray-50 p-4 pb-40">
           {orderLoading ? (
             <div className="flex items-center justify-center h-full">
@@ -446,8 +456,8 @@ export default function Orders() {
                         </p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
-                        <Badge variant={getBadgeVariant(order.status)}>
-                          {t(`order_status_types.${order.status.toLowerCase().replace(/ /g, '_')}`)}
+                        <Badge variant={getBadgeVariant(getDisplayedStatus(order))}>
+                          {t(`order_status_types.${getDisplayedStatus(order).toLowerCase().replace(/ /g, '_')}`)}
                         </Badge>
                       </div>
                     </div>
@@ -521,7 +531,7 @@ export default function Orders() {
       </div>
 
       {/* Right Section - Order Details */}
-      <div className="w-96 bg-white border-s border-gray-200 flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+      <div className="w-96 bg-white border-s border-gray-200 flex flex-col fixed top-16 bottom-16 end-0 z-10">
         {!selectedOrder ? (
           <div className="text-center h-full flex flex-col items-center justify-center text-gray-500 p-6">
             <p className="text-lg font-medium mb-2">{t('order.select_to_view')}</p>
@@ -577,8 +587,8 @@ export default function Orders() {
                       )}
                     </>
                   )}
-                  <Badge variant={getBadgeVariant(selectedOrder.status)}>
-                    {t(`order_status_types.${selectedOrder.status.toLowerCase().replace(/ /g, '_')}`)}
+                  <Badge variant={getBadgeVariant(getDisplayedStatus(selectedOrder))}>
+                    {t(`order_status_types.${getDisplayedStatus(selectedOrder).toLowerCase().replace(/ /g, '_')}`)}
                   </Badge>
                 </div>
               </div>
@@ -681,6 +691,13 @@ export default function Orders() {
                 </div>
               </div>
 
+              {selectedOrder.status === 'Cancelled' && selectedOrder.cancel_reason && (
+                <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                  <h3 className="text-sm font-semibold text-red-800">{t('order.cancel_reason')}</h3>
+                  <p className="mt-1 text-sm text-red-700">{selectedOrder.cancel_reason}</p>
+                </div>
+              )}
+
               {/* Order Items */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('order.items_title')}</h3>
@@ -737,13 +754,7 @@ export default function Orders() {
                 {isOrderEditable(selectedOrder.status) && (
                   <Button
                     className="flex-1"
-                    onClick={() => {
-                      if (String(selectedOrder.invoice_printed) === '0') {
-                        showToast.error(t('errors.please_print_first'));
-                        return;
-                      }
-                      setShowPaymentDialog(true);
-                    }}
+                    onClick={() => setShowPaymentDialog(true)}
                   >
                     {t('order.payment')}
                   </Button>

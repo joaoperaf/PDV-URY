@@ -7,6 +7,7 @@ export * from './components/textarea';
 export * from './components/select';
 export * from './components/badge';
 export * from './components/spinner';
+export * from './components/state-message';
 export * from './components/loader';
 export { default as Loader } from './components/loader';
 export * from './components/card';

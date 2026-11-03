@@ -27,7 +27,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Painel Inicial', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Cardápio', path: '/menu', icon: UtensilsCrossed },
   { label: 'Agregadores / Delivery', path: '/aggregator', icon: Store },
-  { label: 'Filiais', path: '/branch', icon: Building2 },
+  { label: 'Dados da Loja', path: '/branch', icon: Building2 },
 ];
 
 const SETTINGS_ITEMS: NavItem[] = [

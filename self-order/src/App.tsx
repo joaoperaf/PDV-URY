@@ -3,7 +3,6 @@ import MobileQRLayout from './layouts/MobileQRLayout'
 import TabletLayout from './layouts/TabletLayout'
 import LandscapeKioskLayout from './layouts/LandscapeKioskLayout'
 import PortraitKioskLayout from './layouts/PortraitKioskLayout'
-import PublicDigitalMenu from './layouts/PublicDigitalMenu'
 import type { OrderingLayout } from './lib/api'
 
 const LAYOUTS: Record<OrderingLayout, typeof MobileQRLayout> = {
@@ -40,7 +39,8 @@ function App() {
     return <MobileQRLayout />
   }
 
-  return <PublicDigitalMenu />
+  window.location.replace('/menu')
+  return null
 }
 
 export default App

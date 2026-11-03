@@ -57,10 +57,10 @@ export const BranchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setIsLoading(true);
       try {
         const res = await call<any>('ury.ury.api.minimal.business_setup.get_branches');
-        if (res && Array.isArray(res)) {
-          setBranches(res);
-        } else if (res?.message && Array.isArray(res.message)) {
-          setBranches(res.message);
+        const list = Array.isArray(res) ? res : (Array.isArray(res?.message) ? res.message : []);
+        setBranches(list);
+        if (list.length === 1 && activeBranchId === 'all') {
+          setActiveBranchId(list[0].id || list[0].name);
         }
       } catch {
         // Handle error without fallback

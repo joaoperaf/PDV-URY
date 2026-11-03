@@ -1,6 +1,8 @@
 import { FC } from 'react';
-import { cn } from '@ury/ui';
+import { Button, cn } from '@ury/ui';
 import { formatCurrency } from '@ury/core';
+import { SlidersHorizontal } from 'lucide-react';
+import { t } from '../i18n';
 
 interface MenuCardProps {
   id: string;
@@ -9,7 +11,9 @@ interface MenuCardProps {
   item_image: string | null;
   course?: string;
   item: string;
-  onClick?: () => void;
+  quantityInCart?: number;
+  onAdd?: () => void;
+  onOpenOptions?: () => void;
   disabled?: boolean;
 }
 
@@ -18,17 +22,33 @@ const MenuCard: FC<MenuCardProps> = ({
   price, 
   item_image, 
   course, 
-  onClick,
+  quantityInCart = 0,
+  onAdd,
+  onOpenOptions,
   disabled 
 }) => {
   return (
-    <div
+    <article
       className={cn(
-        "bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-56 flex flex-col",
-        disabled && "opacity-50 cursor-not-allowed pointer-events-none"
+        "relative bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow h-56 flex flex-col",
+        disabled && "opacity-50"
       )}
-      onClick={disabled ? undefined : onClick}
     >
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={disabled ? undefined : onAdd}
+        disabled={disabled}
+        className="flex min-h-0 flex-1 flex-col text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+        aria-label={`${t('menu.add_item')}: ${name}`}
+      >
+      {quantityInCart > 0 && (
+        <span className="absolute start-2 top-2 z-10 inline-flex min-h-8 min-w-8 items-center justify-center rounded-full bg-primary px-2 text-sm font-bold text-primary-foreground shadow-sm">
+          {quantityInCart}
+          <span className="sr-only"> {t('menu.in_cart')}</span>
+        </span>
+      )}
+
       {/* Image section - fixed height */}
       <div className="h-24">
         {item_image ? (
@@ -74,12 +94,31 @@ const MenuCard: FC<MenuCardProps> = ({
 
         {/* Price section - pushed to bottom */}
         <div className="mt-auto pt-2">
-          <span className="text-sm font-semibold text-gray-900 tabular-nums">
-            {formatCurrency(price)}
-          </span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-gray-900 tabular-nums">
+              {formatCurrency(price)}
+            </span>
+            <span className="text-xs font-medium text-primary-600">
+              {t('menu.add_item')}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={disabled ? undefined : onOpenOptions}
+        disabled={disabled}
+        className="absolute end-2 top-2 inline-flex min-h-8 min-w-8 items-center justify-center gap-1 rounded-md bg-white/95 px-2 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-gray-200 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        aria-label={`${t('menu.open_options')}: ${name}`}
+        title={t('menu.open_options')}
+      >
+        <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+        <span className="sr-only sm:not-sr-only">{t('menu.options')}</span>
+      </Button>
+    </article>
   );
 };
 

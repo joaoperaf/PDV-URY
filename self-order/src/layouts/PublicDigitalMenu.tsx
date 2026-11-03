@@ -36,6 +36,7 @@ export default function PublicDigitalMenu() {
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false)
   const [copiedLink, setCopiedLink] = useState<boolean>(false)
   const [copiedOrder, setCopiedOrder] = useState<boolean>(false)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   // Customer checkout fields
   const [deliveryType, setDeliveryType] = useState<'Delivery' | 'Retirada'>('Delivery')
@@ -154,7 +155,7 @@ export default function PublicDigitalMenu() {
     setTimeout(() => setCopiedLink(false), 2500)
   }
 
-  const buildWhatsAppMessage = () => {
+  const buildWhatsAppMessage = (invoiceId?: string) => {
     const storeName = data?.restaurant_name || 'Péricles Burger'
     const lines: string[] = [
       `🍔 *NOVO PEDIDO — ${storeName.toUpperCase()}*`,
@@ -162,6 +163,9 @@ export default function PublicDigitalMenu() {
       `*Tipo:* ${deliveryType === 'Delivery' ? '🛵 Entrega (Delivery)' : '🛍️ Retirada no Balcão'}`,
       `*Cliente:* ${customerName || 'Não informado'}`,
     ]
+    if (invoiceId) {
+      lines.push(`*Pedido:* ${invoiceId}`)
+    }
     if (customerPhone) {
       lines.push(`*Telefone:* ${customerPhone}`)
     }
@@ -190,11 +194,15 @@ export default function PublicDigitalMenu() {
     return lines.join('\n')
   }
 
-  const handleSendWhatsApp = (e: React.FormEvent) => {
+  const handleSendWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (cartRows.length === 0) return
+    if (cartRows.length === 0 || isSubmitting) return
     if (!customerName.trim()) {
       alert('Por favor, informe seu nome.')
+      return
+    }
+    if (!customerPhone.trim()) {
+      alert('Por favor, informe seu telefone/WhatsApp.')
       return
     }
     if (deliveryType === 'Delivery' && !address.trim()) {
@@ -202,15 +210,49 @@ export default function PublicDigitalMenu() {
       return
     }
 
-    const message = buildWhatsAppMessage()
-    const rawPhone = (data?.whatsapp_phone || '').replace(/\D/g, '')
-    const encoded = encodeURIComponent(message)
+    const whatsappWindow = window.open('', '_blank')
+    setIsSubmitting(true)
+    try {
+      const response = await call.post<{ message: { invoice: string } }>(
+        'ury.ury_pos.api.create_public_order',
+        {
+          items: cartRows.map((row) => ({
+            item: row.item.item,
+            qty: row.qty,
+            notes: row.notes,
+          })),
+          customer_name: customerName,
+          customer_phone: customerPhone,
+          delivery_type: deliveryType,
+          address,
+          neighborhood,
+          payment_method: paymentMethod,
+          change_for: changeFor,
+          order_notes: orderNotes,
+        },
+      )
+      const message = buildWhatsAppMessage(response.message.invoice)
+      const rawPhone = (data?.whatsapp_phone || '').replace(/\D/g, '')
+      const encoded = encodeURIComponent(message)
+      const phoneWithCountry = rawPhone.length >= 10
+        ? (rawPhone.startsWith('55') ? rawPhone : `55${rawPhone}`)
+        : ''
+      const whatsappUrl = phoneWithCountry
+        ? `https://wa.me/${phoneWithCountry}?text=${encoded}`
+        : `https://wa.me/?text=${encoded}`
 
-    if (rawPhone.length >= 10) {
-      const phoneWithCountry = rawPhone.startsWith('55') ? rawPhone : `55${rawPhone}`
-      window.open(`https://wa.me/${phoneWithCountry}?text=${encoded}`, '_blank')
-    } else {
-      window.open(`https://wa.me/?text=${encoded}`, '_blank')
+      if (whatsappWindow) {
+        whatsappWindow.location.href = whatsappUrl
+      } else {
+        window.open(whatsappUrl, '_blank')
+      }
+      setCart({})
+      setIsCartOpen(false)
+    } catch (error: any) {
+      whatsappWindow?.close()
+      alert(error?.message || 'Não foi possível registrar o pedido. Tente novamente.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -625,9 +667,10 @@ export default function PublicDigitalMenu() {
 
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-emerald-600 py-3.5 text-sm font-extrabold text-white shadow-md transition hover:bg-emerald-700"
+                  disabled={cartRows.length === 0 || isSubmitting}
+                  className="w-full rounded-xl bg-emerald-600 py-3.5 text-sm font-extrabold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  📲 Enviar Pedido pelo WhatsApp
+                  {isSubmitting ? 'Registrando pedido…' : '📲 Enviar Pedido pelo WhatsApp'}
                 </button>
 
                 <button

@@ -15,7 +15,9 @@ export interface POSInvoice {
   total_taxes_and_charges: number;
   customer: string;
   customer_name?: string;
-  status: 'Draft' | 'Unbilled' | 'Recently Paid' | 'Paid' | 'Consolidated' | 'Return';
+  status: 'Draft' | 'Unbilled' | 'Recently Paid' | 'Paid' | 'Consolidated' | 'Return' | 'Cancelled';
+  cancel_reason?: string | null;
+  operational_status?: 'Dispatched' | null;
   mobile_number: string;
   posting_date: string;
   rounded_total: number;

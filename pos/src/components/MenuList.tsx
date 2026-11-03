@@ -1,15 +1,16 @@
 import { useEffect, useMemo } from 'react';
-import { usePOSStore } from '../store/pos-store';
+import { MenuItem, usePOSStore } from '../store/pos-store';
 import MenuCard from './MenuCard';
-import { Spinner } from '@ury/ui';
+import { Spinner, StateMessage } from '@ury/ui';
 import { cn } from '@ury/ui';
 import { t } from '../i18n';
 
 interface MenuListProps {
-  onItemClick: (item: any) => void;
+  onAddItem: (item: MenuItem) => void;
+  onOpenItemOptions: (item: MenuItem) => void;
 }
 
-const MenuList: React.FC<MenuListProps> = ({ onItemClick }) => {
+const MenuList: React.FC<MenuListProps> = ({ onAddItem, onOpenItemOptions }) => {
   const {
     menuItems,
     menuLoading,
@@ -19,7 +20,8 @@ const MenuList: React.FC<MenuListProps> = ({ onItemClick }) => {
     quickFilter,
     fetchMenuItems,
     isMenuInteractionDisabled,
-    isOrderInteractionDisabled
+    isOrderInteractionDisabled,
+    getItemQuantityFromCart
   } = usePOSStore();
 
   useEffect(() => {
@@ -50,19 +52,21 @@ const MenuList: React.FC<MenuListProps> = ({ onItemClick }) => {
             <Spinner message={t('common.loading_menu_items')} />
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center h-96">
-            <div className="text-red-600 text-center">
-              <p className="text-lg font-medium">{t('common.error_loading_menu_items')}</p>
-              <p className="text-sm mt-2">{error}</p>
-            </div>
-          </div>
+          <StateMessage
+            variant="error"
+            title={t('common.error_loading_menu_items')}
+            description={error}
+            actionLabel={t('common.retry')}
+            onAction={() => fetchMenuItems()}
+            className="h-96"
+          />
         ) : filteredItems.length === 0 ? (
-          <div className="flex items-center justify-center h-96">
-            <div className="text-gray-500 text-center">
-              <p className="text-lg font-medium">{t('common.no_items_found')}</p>
-              <p className="text-sm mt-2">{t('common.try_adjusting_filters')}</p>
-            </div>
-          </div>
+          <StateMessage
+            variant="empty"
+            title={t('common.no_items_found')}
+            description={t('common.try_adjusting_filters')}
+            className="h-96"
+          />
         ) : (
           <div className={cn(
             "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3",
@@ -77,7 +81,9 @@ const MenuList: React.FC<MenuListProps> = ({ onItemClick }) => {
                 item_image={item.image}
                 course={item.course_label || item.course}
                 item={item.item}
-                onClick={() => onItemClick(item)}
+                quantityInCart={getItemQuantityFromCart(item)}
+                onAdd={() => onAddItem(item)}
+                onOpenOptions={() => onOpenItemOptions(item)}
                 disabled={isInteractionDisabled}
               />
             ))}

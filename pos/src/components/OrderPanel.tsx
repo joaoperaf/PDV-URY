@@ -167,9 +167,8 @@ const OrderPanel = () => {
         <Plus className="w-4 h-4" />
         <span className="text-sm font-medium">{t('cart.click_to_add')}</span>
       </div>
-
       <div className="mt-4 text-xs text-gray-400">
-        {t('cart.double_click_hint')}
+        {t('cart.options_hint')}
       </div>
     </div>
   );
@@ -183,7 +182,7 @@ const OrderPanel = () => {
   const isInteractionDisabled = isOrderInteractionDisabled() || isSubmitting;
 
   return (
-    <div className="w-96 bg-white border-s border-gray-200 flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+    <div className="w-96 bg-white border-s border-gray-200 flex flex-col fixed top-16 bottom-16 end-0 z-10">
       <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <OrderTabs disabled={isInteractionDisabled} />
         <OrderTypeSelect disabled={isInteractionDisabled} />
@@ -293,7 +292,11 @@ const OrderPanel = () => {
           </div>
           
           <div className="p-4 border-t border-gray-200 flex-shrink-0 bg-white">
-            <div className="flex justify-between items-center mb-4">
+            <div className="mb-3 flex items-center justify-between text-xs font-medium uppercase tracking-wide text-gray-500">
+              <span>{t('cart.order_summary')}</span>
+              <span>{activeOrders.reduce((sum, item) => sum + item.quantity, 0)} {t('cart.items')}</span>
+            </div>
+            <div className="flex justify-between items-center border-t border-gray-100 pt-3 mb-4">
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => setShowCommentDialog(true)}
@@ -305,18 +308,19 @@ const OrderPanel = () => {
                   )}
                   disabled={isInteractionDisabled}
                   title={orderComment ? t('cart.edit_comment') : t('cart.add_comment')}
+                  aria-label={orderComment ? t('cart.edit_comment') : t('cart.add_comment')}
                 >
                   <MessageSquare className="w-4 h-4" />
                 </Button>
-                <span className="text-lg font-semibold">{t('cart.total')}</span>
+                <span className="text-base font-semibold text-gray-700">{t('cart.total')}</span>
               </div>
-              <span className="text-lg font-semibold">{formatCurrency(total)}</span>
+              <span className="text-2xl font-bold tabular-nums text-gray-950">{formatCurrency(total)}</span>
             </div>
             <Button
               onClick={handleSubmit}
               variant="default"
-              size="default"
-              className="w-full"
+              size="lg"
+              className="w-full text-base font-semibold"
               disabled={isInteractionDisabled}
             >
               {isSubmitting ? (

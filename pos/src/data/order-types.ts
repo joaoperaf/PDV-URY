@@ -35,7 +35,7 @@ export const DINE_IN="Dine In"
 export const DEFAULT_ORDER_TYPE="Delivery"
 export const DEFAULT_PAYMENT_MODE="Cash"
 
-export type OrderStatusType = "Draft" | "Unbilled" | "Recently Paid" | "Paid" | "Consolidated" | "Return";
+export type OrderStatusType = "Draft" | "Unbilled" | "Recently Paid" | "Paid" | "Consolidated" | "Return" | "Cancelled";
 
 // Base status types for Delivery / Takeaway operation (no Dine-In table "Unbilled" tab)
 export const BASE_ORDER_STATUS_TYPES = [
@@ -46,6 +46,10 @@ export const BASE_ORDER_STATUS_TYPES = [
     {
         label: "Recently Paid",
         value: "Recently Paid"
+    },
+    {
+        label: "Cancelled",
+        value: "Cancelled"
     }
 ];
 

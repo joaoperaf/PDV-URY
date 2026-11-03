@@ -51,7 +51,7 @@ const Footer = () => {
 
           {/* Atalho direto para o Cardápio Digital do Cliente */}
           <a
-            href="/order"
+            href="/menu"
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"

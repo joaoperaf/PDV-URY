@@ -73,7 +73,7 @@ Como o sistema rodará localmente neste notebook via Docker:
     - **Usuário:** `Administrator` | **Senha:** `admin`
     - **Painel Gestão URY:** `http://localhost:8000/ury`
     - **PDV v2 (React):** `http://localhost:8000/pos` (inclui aba nativa **Cozinha KDS** em `/pos/kitchen`)
-    - **Cardápio Digital Público (WhatsApp):** `http://localhost:8000/order`
+    - **Cardápio Digital Público (WhatsApp):** `http://localhost:8000/menu`
     - **Cozinha KDS Standalone (Mosaic):** `http://localhost:8000/mosaic`
   - **Backup Automático do Banco de Dados:**
     - Script [`scripts/backup-db.sh`](./scripts/backup-db.sh) testado e agendado no `crontab` (a cada 4 horas), salvando em `/mnt/hd/Backups/pdv-ury/` e pronto para sincronizar com Google Drive (`rclone config` -> remote `gdrive`).
@@ -81,6 +81,80 @@ Como o sistema rodará localmente neste notebook via Docker:
 ---
 
 ## 6. Histórico de Sessões / Últimos Passos
+
+### [2026-11-03] — Roteamento automático de novos produtos para o KDS
+- Corrigida a geração de KOT para que itens cujo grupo ainda não esteja cadastrado em uma unidade de produção sejam encaminhados automaticamente à cozinha padrão da filial.
+- O pedido continua registrando um aviso de configuração, mas não deixa mais o produto fora do KDS silenciosamente.
+- Validada a sintaxe do backend e o `git diff --check`.
+
+### [2026-11-03] — Aba de pedidos cancelados
+- Adicionada a aba **Cancelados** em `/pos/orders`, logo abaixo de **Pagos Recentemente**.
+- A lista consulta `POS Invoice` com status `Cancelled` e exibe o motivo do cancelamento no detalhe.
+- Validado o build do POS, a sintaxe do backend e o `git diff --check`.
+
+### [2026-11-01] — Auditoria de UI/UX do PDV com UI Taste e Uizze UI
+- Realizada análise somente leitura das superfícies `/pos`, `/pos/kitchen`, `/mosaic`, `/ury` e `/order`, com foco em fluxo de venda, KDS, painel gerencial, acessibilidade, responsividade, estados e consistência visual.
+- Principais prioridades identificadas: tornar a adição/edição de itens explícita no PDV (sem depender de duplo clique), substituir o painel de pedido fixo por comportamento responsivo, completar estados de erro/empty/retry do KDS e painel, e reativar visualizações analíticas úteis no dashboard.
+- Nenhum código de produto foi alterado nesta auditoria; alterações locais pré-existentes foram preservadas.
+- Criadas 9 issues no fork `joaoperaf/PDV-URY`, priorizadas de P1 a P3, cobrindo fluxo do PDV, responsividade, estados do KDS, analytics, acessibilidade de pagamento, touch targets, semântica do KDS, performance N+1 e consistência visual.
+- Implementada a issue #9: removida a lógica de duplo clique do POS; cards agora têm ações semânticas separadas para `Adicionar` e `Opções`, com labels acessíveis e dica do carrinho atualizada. O build do POS passou; o lint dos arquivos alterados não tem erros, apenas warnings preexistentes de uso de elementos HTML nativos em `POS.tsx`.
+- Criadas 7 novas issues de melhoria visual com UI Taste/Uizze UI: #13 (hierarquia do POS), #11 (estados visuais), #12 (leitura do KDS), #16 (dashboard operacional), #10 (cardápio digital), #14 (tipografia/densidade) e #15 (motion). A issue #8 existente continua sendo a base para tokens e linguagem visual compartilhada.
+- Implementada a issue #13: o carrinho do POS ganhou resumo com contagem de itens, total com maior hierarquia tipográfica, botão de envio em tamanho destacado, ação de comentário com label acessível e feedback de quantidade nos cards do menu. Build e lint dos arquivos alterados passaram; inspeção visual em navegador ainda não foi realizada.
+- Iniciada a issue #11 no POS: criado o componente compartilhado `StateMessage` em `packages/ui` e aplicados estados padronizados de erro, vazio e retry no carregamento do POS/cardápio, removendo o bloco de erro duplicado. Typecheck do `@ury/ui`, lint dos arquivos alterados, build do POS e `git diff --check` passaram; a issue permanece aberta para aplicar o padrão às demais superfícies.
+- Retomado o `static-menu/` com foco em experiência mobile: carrinho convertido em bottom sheet, botão flutuante ocupa a largura útil com safe area, categorias e ações ganharam alvos de toque maiores, cards passaram a empilhar em telas estreitas, foco visível e estados ARIA foram reforçados. `node --check` e `git diff --check` passaram; inspeção visual em dispositivo/navegador ainda não foi realizada.
+- Integrado o cardápio estático ao Frappe em `/menu`: os assets foram publicados em `ury/public/static-menu`, criada a página `ury/www/menu.html`, e os atalhos do painel/PDV passaram a abrir essa rota. A tela antiga sem QR em `/order` agora é clicável e direciona para o novo cardápio; build do `self-order`, rota local, JSON e script publicados foram validados.
+- Ajustado o fallback de `/order` para redirecionar imediatamente para `/menu` quando não houver token de QR, tanto no bundle React quanto no HTML inicial, evitando que cache ou a mensagem antiga permaneçam visíveis. O fluxo com token continua carregando o autoatendimento.
+- Refinado visualmente o cardápio digital: cabeçalho com eyebrow e busca destacada, introdução do menu com contagem de itens, categorias traduzidas e mais legíveis, cards com hierarquia de categoria/nome/descrição/preço, estados de foco e movimento reduzido, backdrop para fechamento do carrinho e checkout com ação mais evidente. As alterações foram publicadas em `/menu`; `node --check`, `git diff --check`, rota, assets e `menu.json` foram validados. Não houve captura visual real em navegador nesta etapa.
+- Ajustado o carrinho lateral do cardápio: ao adicionar qualquer item, o painel abre automaticamente e permanece disponível para revisar quantidades e checkout; abertura, fechamento, backdrop e `aria-expanded`/`aria-hidden` agora usam o mesmo estado. Script publicado e validado com `node --check`.
+- Adaptado o painel lateral do pedido seguindo a direção visual da referência Dribbble fornecida pelo usuário: drawer elevado com cantos amplos, cabeçalho de checkout, itens em blocos suaves, steppers compactos, área de dados separada e rodapé fixo com total e ação principal escura. Não foram inventadas imagens de produtos; o painel mantém os dados reais do menu. HTML/CSS/JS publicados em `/menu` e validações de script/diff/rota concluídas; inspeção visual real em navegador ainda não foi possível.
+- Refeito o conteúdo do carrinho para o formato solicitado: cada item agora mostra imagem, nome, categoria, preço unitário, controle de quantidade e valor total da linha alinhado à direita. Imagens reais de referência culinária foram adicionadas ao contrato do `static-menu/menu.json`, reaproveitadas no cardápio e no drawer; os URLs responderam durante a validação. Alterações publicadas e `node --check`/`git diff --check` passaram.
+- Criado o fluxo de personalização por produto no `static-menu`: o botão do card agora abre um card expandido na própria página, sem nova janela, com foto, descrição, ponto da carne para hambúrgueres, observações, adicionais de carne/bacon/cebola caramelizada/queijo, quantidade e subtotal em tempo real. O item só entra no carrinho após confirmação, preservando as especificações no resumo lateral. Fluxo publicado em `/menu`; `node --check`, rota e `git diff --check` passaram.
+- Refinado o fluxo conforme feedback: qualquer clique no card do produto abre os detalhes; a personalização agora aparece como popup menor sobre o menu, com backdrop, animação curta, fechamento por `×`, clique fora e `Escape`. O popup mantém imagem, especificações e subtotal, sem abrir nova janela; alterações publicadas e validações de JavaScript/diff/rota concluídas.
+- Corrigido o comportamento do popup ao alterar o ponto da carne: antes o `innerHTML` completo era recriado, reiniciando a animação e aparentando fechar/reabrir. Agora ponto da carne, adicionais e quantidade atualizam somente o estado visual e o subtotal, preservando popup, posição e foco. Script publicado e validado.
+- Ajustado o fluxo de seleção rápida: os cards agora exibem `Adicionar`, que inclui o produto padrão diretamente no pedido; o clique em qualquer outra área do card continua abrindo o popup de personalização. O carrinho ganhou a ação `Editar`, que reabre as configurações do item e permite alterar ponto, adicionais, observações e quantidade. Fluxo publicado e validado com `node --check`/`git diff --check`.
+- Adicionada quantidade individual aos adicionais no popup: cada opção agora possui controles `− / quantidade / +`, permitindo selecionar, por exemplo, 3 carnes ou 3 queijos. O subtotal considera a quantidade de cada adicional, e o carrinho preserva e exibe essas quantidades ao editar ou revisar o item. Script/CSS publicados e validações concluídas.
+- Criadas as issues visuais #17 a #23 para o cardápio, priorizadas entre P1 e P3. Implementada e encerrada a #17: cabeçalho com hierarquia e acabamento refinados, cards com imagens maiores, preço/ação reorganizados, botão `Adicionar` com ícone e estados hover/focus mais consistentes. `node --check`, `git diff --check` e a rota `/menu` passaram.
+- Corrigido overflow visual dos cards reportado pelo usuário: a grade agora respeita uma largura mínima adequada para o conteúdo, os textos podem quebrar sem invadir o card vizinho, e o conteúdo interno pode encolher corretamente. Ajuste publicado no CSS e validado com `git diff --check` e rota de assets.
+- Reorganizada a navegação de categorias do cardápio: no desktop ela aparece como sidebar esquerda sticky, com estado ativo destacado e foco/hover consistentes; no mobile vira uma faixa horizontal rolável de chips com alvos de toque preservados. O filtro continua usando o mesmo estado e não houve duplicação de lógica. Estrutura/CSS publicados e validações de script, diff e rota concluídas.
+- Atualizado somente o logo do cardápio digital com `Downloads/Foto/Logo Tipográfico Pericles Burger.png`, publicado em `static-menu/assets` e `ury/public/static-menu/assets`. Os dois arquivos ficaram com o mesmo SHA-256 e o asset servido em `/menu` foi validado; logos do restante do sistema não foram alterados.
+- Redimensionado o novo logo do cardápio para o mesmo quadro do asset anterior (`1178×411`), ajustando o conteúdo visível com transparência e mantendo proporção. Os dois assets publicados têm o mesmo SHA-256; a imagem servida em `/menu` foi validada.
+- Aumentada a apresentação do logo no cabeçalho do cardápio: largura máxima de `320px` no desktop e `280px` no mobile, com altura proporcional e sem alterar os demais logos do sistema. CSS publicado e validado na rota de assets.
+
+### [2026-10-30] — Logo do dashboard atualizado
+- Substituída somente a imagem do logo do cabeçalho do dashboard `/ury` em `frontend/src/components/layout/Header.tsx`.
+- Atualizado `frontend/Public/logo-pericles-burger.png` com a nova arte tipográfica fornecida pelo usuário.
+- Ajustado o enquadramento para compensar o espaço transparente da imagem quadrada, mantendo aproximadamente a dimensão visual padrão do cabeçalho.
+- Reduzida a imagem interna de 74px para 56px para evitar o corte na parte superior do texto do logotipo.
+- O build do frontend foi concluído com sucesso.
+- Os logos do POS, KDS, cardápio digital e Frappe permanecem inalterados para validação gradual.
+
+### [2026-10-30] — Ajuste de escala do logo do dashboard
+- Atualizada a arte do dashboard com `Logotipo PERICLES Amarelo com Sublinhado.png`.
+- Removidas as margens transparentes da imagem e ajustado o cabeçalho para 112px de largura por 40px de altura, evitando corte e mantendo o logo maior.
+- O build do frontend foi concluído com sucesso; os demais logos permanecem inalterados.
+
+### [2026-10-30] — Logo aplicado ao POS e KDS
+- Aplicada a mesma logo aprovada em `pos/src/components/Header.tsx`, abrangendo o PDV e a tela de pedidos (`/pos/orders`), com asset em `pos/public/logo-pericles-burger.png`.
+- Aplicada a mesma logo em `mosaic/src/components/Header.vue`, com asset em `mosaic/src/assets/logos/logo-pericles-burger.png`.
+- Builds do POS e do KDS concluídos com sucesso; cardápio digital, POS legado e logos do Frappe permanecem inalterados.
+
+### [2026-10-30] — Cardápio digital integrado ao POS
+- Criado o endpoint público `ury.ury_pos.api.create_public_order`, que valida o cardápio ativo, cria/recupera o cliente e registra uma `POS Invoice` em estado `Draft`, sem pagamento confirmado.
+- O checkout público continua abrindo o WhatsApp com o resumo do pedido, agora incluindo o número da fatura/pedido; a operação fica disponível na aba `Pedidos` do POS para confirmação e pagamento.
+- O pedido público não gera baixa financeira nem KOT antes da confirmação no POS.
+- Build do cardápio digital concluído com sucesso; o endpoint público também foi validado com rejeição correta de carrinho vazio.
+
+### [2026-10-30] — Tradução das categorias do menu do POS
+- Ajustados os rótulos exibidos na barra lateral do POS: `Beverages` → `Bebidas`, `Starters` → `Entradas` e `Main Course(s)` → `Hamburgers`.
+- Os nomes internos das categorias permanecem inalterados para não afetar filtros, cardápio ou backend.
+- Build do POS concluído com sucesso. O typecheck completo ainda aponta erros preexistentes em `PaymentDialog.tsx`, `ProductDialog.tsx`, `TableMergeDialog.tsx` e `Table.tsx`.
+
+### [2026-10-30] — Novo cardápio estático econômico
+- Criada a pasta `static-menu/` com HTML, CSS, JavaScript e `menu.json`, sem dependência do Frappe, Docker, banco de dados ou notebook ligado.
+- O site oferece busca, categorias, carrinho, dados básicos do cliente e envio do pedido formatado para o WhatsApp.
+- Copiada a logo aprovada para `static-menu/assets/logo-pericles-burger.png`; produtos e preços iniciais foram preenchidos com os itens atualmente retornados pelo cardápio local.
+- A vitrine pública antiga foi desativada em `self-order/src/App.tsx` para acessos sem token; os fluxos internos com QR Code continuam preservados.
+- Validados `node --check`, `git diff --check`, carregamento via servidor HTTP local e build do `self-order`.
 
 ### [2026-10-29] — Passo 5 (Etapa 1): Enxugamento para Operação 100% Delivery, KDS Integrado ao PDV e Cardápio Digital via WhatsApp (Antigravity)
 - **Remoção de Mesas, Salões, Garçom e Dashboard Duplicado (`frontend/` e `pos/`):** Ocultados/removidos os módulos de Mesas (`Table`), Salões (`Room`), App de Garçom (`Captain`), contador de pessoas (`Pax`) na sacola, widgets de ocupação de mesas/garçons e o Dashboard duplicado dentro do `/pos` (mantendo apenas o Painel Principal em `/ury/dashboard`).
@@ -117,6 +191,10 @@ Como o sistema rodará localmente neste notebook via Docker:
 ---
 
 ## 7. Próximos Passos Planejados
+- [ ] **Auditoria UI/UX:** implementar e validar as prioridades da análise de 2026-11-01 em viewport desktop, tablet e mobile, começando pelo fluxo `/pos` → pedido → pagamento.
+- [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
+- [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
+- [x] **Passo 5 (parcial):** Substituído o logo do cabeçalho do dashboard `/ury` pela marca Péricles Burger, usando `frontend/Public/logo-pericles-burger.png`. O frontend foi recompilado com sucesso; os demais logos do sistema permanecem inalterados até validação visual.
 - [x] **Passo 1:** Clonar projeto no HD (`/mnt/hd`), criar tag `v0.2.1-original` e configurar protocolo Multi-LLM (`HANDOFF.md` + `AGENTS.MD`).
 - [x] **Passo 2:** Instalar e configurar o **Docker** apontando seu `data-root` para `/mnt/hd/docker` (preservando o SSD) + autenticar GitHub (`gh`).
 - [x] **Passo 3:** Subir o ambiente Docker do Frappe/ERPNext v15 + URY, compilar frontends e configurar rotina automática de backup do banco de dados em `/mnt/hd/Backups/pdv-ury`.

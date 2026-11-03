@@ -13,6 +13,8 @@
     "loading_tables": "Loading tables...",
     "loading_menu_items": "Loading menu items...",
     "error_loading_menu_items": "Error loading menu items",
+    "error_loading_pos": "Could not load the POS",
+    "retry": "Try again",
     "loading_rooms": "Loading rooms...",
     "no_rooms_found": "No rooms found",
     "no_tables_found": "No tables found",
@@ -33,7 +35,11 @@
     "logout": "Logout"
   },
   "menu": {
-    "special_items": "Special Items"
+    "special_items": "Special Items",
+    "add_item": "Add",
+    "options": "Options",
+    "open_options": "Open options",
+    "in_cart": "in order"
   },
   "pos_sidebar": {
     "categories": "Categories",
@@ -43,7 +49,9 @@
     "empty_title": "Your cart is empty",
     "empty_subtitle": "Add items to get started with your order",
     "click_to_add": "Click items to add them",
-    "double_click_hint": "Double-click for customization options",
+    "options_hint": "Use “Options” to choose add-ons and customizations",
+    "order_summary": "Order summary",
+    "items": "items",
     "clear_cart": "Clear cart",
     "total": "Total",
     "add_new_order": "Add New Order",
@@ -64,7 +72,8 @@
     "enter_cancel_reason": "Enter cancel reason",
     "print": "Print",
     "payment": "Payment",
-    "order_actions": "Order actions"
+    "order_actions": "Order actions",
+    "cancel_reason": "Cancellation reason"
   },
   "payment": {
     "title": "Payment",
@@ -83,6 +92,14 @@
     "short_by": "Short by {{amount}}",
     "change_due": "Change due: {{amount}}",
     "success": "Payment successful: {{amount}} received"
+  },
+  "payment_modes": {
+    "cash": "Cash",
+    "credit_card": "Credit card",
+    "debit_card": "Debit card",
+    "pix": "Pix",
+    "bank_transfer": "Bank transfer",
+    "check": "Check"
   },
   "pos": {
     "not_opened_title": "POS Not Opened",
@@ -426,6 +443,8 @@
     "recently_paid": "Recently Paid",
     "paid": "Paid",
     "consolidated": "Consolidated",
-    "return": "Return"
+    "return": "Return",
+    "dispatched": "Dispatched",
+    "cancelled": "Cancelled"
   }
 }

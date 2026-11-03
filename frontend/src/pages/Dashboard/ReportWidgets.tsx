@@ -41,7 +41,6 @@ export const ReportWidgets: React.FC<ReportWidgetsProps> = ({ recentTransactions
                   <tr>
                     <th className="px-5 py-3.5">Nº da Fatura</th>
                     <th className="px-5 py-3.5">Cliente</th>
-                    <th className="px-5 py-3.5">Mesa / Local</th>
                     <th className="px-5 py-3.5">Tipo de Pedido</th>
                     <th className="px-5 py-3.5">Data e Hora</th>
                     <th className="px-5 py-3.5">Status</th>
@@ -51,7 +50,7 @@ export const ReportWidgets: React.FC<ReportWidgetsProps> = ({ recentTransactions
                 <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
                   {recentTransactions.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-5 py-8 text-center text-gray-400">
+                      <td colSpan={6} className="px-5 py-8 text-center text-gray-400">
                         Nenhuma transação registrada hoje até o momento.
                       </td>
                     </tr>
@@ -60,19 +59,18 @@ export const ReportWidgets: React.FC<ReportWidgetsProps> = ({ recentTransactions
                       <tr key={tx.name} className="hover:bg-primary/10 transition-colors">
                         <td className="px-5 py-3.5 font-bold text-primary">{tx.name}</td>
                         <td className="px-5 py-3.5 text-gray-900 font-semibold">{tx.customer || 'Cliente Avulso'}</td>
-                        <td className="px-5 py-3.5 text-gray-600">{tx.restaurant_table || 'Balcão'}</td>
                         <td className="px-5 py-3.5">
                           <Badge
                             variant="outline"
                             className="border-primary/20 bg-primary/10 text-primary font-semibold"
                           >
-                            {tx.order_type || 'Salão'}
+                            {tx.order_type || 'Delivery'}
                           </Badge>
                         </td>
                         <td className="px-5 py-3.5 text-gray-500">{tx.posting_date} {tx.posting_time}</td>
                         <td className="px-5 py-3.5">
                           <Badge variant={tx.status === 'Paid' || tx.status === 'Submitted' ? 'success' : 'warning'}>
-                            {tx.status}
+                            {tx.status === 'Paid' ? 'Pago' : tx.status === 'Draft' ? 'Em Aberto' : tx.status}
                           </Badge>
                         </td>
                         <td className="px-5 py-3.5 text-right font-bold text-gray-900">

@@ -393,6 +393,8 @@ def getInvoiceForCashier(status, cashier, limit, limit_start):
     updatedlist = []
     limit = int(limit)+1
     limit_start = int(limit_start)
+    # KDS dispatch is an operational state, independent from POS Invoice.status.
+    # Keep the invoice financially open until payment.
     if status == "Draft":
         invoices = frappe.db.sql(
             """
@@ -400,7 +402,13 @@ def getInvoiceForCashier(status, cashier, limit, limit_start):
                 name, invoice_printed, grand_total, restaurant_table, custom_merged_tables,
                 cashier, waiter, net_total, posting_time, 
                 total_taxes_and_charges, customer, status, mobile_number, 
-                posting_date, rounded_total, order_type 
+                posting_date, rounded_total, order_type,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM `tabURY KOT` kot
+                    WHERE kot.invoice = `tabPOS Invoice`.name
+                      AND kot.order_status = 'Served'
+                      AND kot.docstatus = 1
+                ) THEN 'Dispatched' ELSE NULL END AS operational_status
             FROM `tabPOS Invoice` 
             WHERE branch = %s AND status = %s AND cashier = %s
             AND (invoice_printed = 1 OR (invoice_printed = 0 AND COALESCE(restaurant_table, '') = ''))
@@ -420,7 +428,13 @@ def getInvoiceForCashier(status, cashier, limit, limit_start):
                 name, invoice_printed, grand_total, restaurant_table, custom_merged_tables,
                 cashier, waiter, net_total, posting_time, 
                 total_taxes_and_charges, customer, status, mobile_number, 
-                posting_date, rounded_total, order_type 
+                posting_date, rounded_total, order_type,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM `tabURY KOT` kot
+                    WHERE kot.invoice = `tabPOS Invoice`.name
+                      AND kot.order_status = 'Served'
+                      AND kot.docstatus = 1
+                ) THEN 'Dispatched' ELSE NULL END AS operational_status
             FROM `tabPOS Invoice` 
             WHERE branch = %s AND status = %s AND cashier = %s
             AND (invoice_printed = 0 AND restaurant_table IS NOT NULL)
@@ -439,7 +453,13 @@ def getInvoiceForCashier(status, cashier, limit, limit_start):
                 name, invoice_printed, grand_total, restaurant_table, custom_merged_tables,
                 cashier, waiter, net_total, posting_time, 
                 total_taxes_and_charges, customer, status, mobile_number,
-                posting_date, rounded_total, order_type,additional_discount_percentage,discount_amount 
+                posting_date, rounded_total, order_type,additional_discount_percentage,discount_amount,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM `tabURY KOT` kot
+                    WHERE kot.invoice = `tabPOS Invoice`.name
+                      AND kot.order_status = 'Served'
+                      AND kot.docstatus = 1
+                ) THEN 'Dispatched' ELSE NULL END AS operational_status
             FROM `tabPOS Invoice` 
             WHERE branch = %s AND status = %s AND cashier = %s
             ORDER BY modified desc
@@ -449,6 +469,24 @@ def getInvoiceForCashier(status, cashier, limit, limit_start):
             as_dict=True,
         )
         updatedlist.extend(invoices)    
+    elif status == "Cancelled":
+        invoices = frappe.db.sql(
+            """
+            SELECT
+                name, invoice_printed, grand_total, restaurant_table, custom_merged_tables,
+                cashier, waiter, net_total, posting_time,
+                total_taxes_and_charges, customer, status, mobile_number,
+                posting_date, rounded_total, order_type, cancel_reason,
+                additional_discount_percentage, discount_amount
+            FROM `tabPOS Invoice`
+            WHERE branch = %s AND status = 'Cancelled' AND cashier = %s
+            ORDER BY modified desc
+            LIMIT %s OFFSET %s
+            """,
+            (branch, cashier, limit, limit_start),
+            as_dict=True,
+        )
+        updatedlist.extend(invoices)
     else:
         
         invoices = frappe.db.sql(
@@ -491,6 +529,12 @@ def getPosInvoice(status, limit, limit_start):
                 cashier, waiter, net_total, posting_time, 
                 total_taxes_and_charges, customer, status, mobile_number, 
                 posting_date, rounded_total, order_type,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM `tabURY KOT` kot
+                    WHERE kot.invoice = `tabPOS Invoice`.name
+                      AND kot.order_status = 'Served'
+                      AND kot.docstatus = 1
+                ) THEN 'Dispatched' ELSE NULL END AS operational_status,
                 custom_split_group, custom_split_from,
                 custom_merged_pos_invoice, custom_merged_total,
                 additional_discount_percentage, discount_amount
@@ -514,6 +558,12 @@ def getPosInvoice(status, limit, limit_start):
                 cashier, waiter, net_total, posting_time, 
                 total_taxes_and_charges, customer, status, mobile_number, 
                 posting_date, rounded_total, order_type,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM `tabURY KOT` kot
+                    WHERE kot.invoice = `tabPOS Invoice`.name
+                      AND kot.order_status = 'Served'
+                      AND kot.docstatus = 1
+                ) THEN 'Dispatched' ELSE NULL END AS operational_status,
                 custom_split_group, custom_split_from,
                 custom_merged_pos_invoice, custom_merged_total,
                 additional_discount_percentage, discount_amount
@@ -536,7 +586,14 @@ def getPosInvoice(status, limit, limit_start):
                 cashier, waiter, net_total, posting_time, 
                 total_taxes_and_charges, customer, status, mobile_number,
                 posting_date, rounded_total, order_type, additional_discount_percentage,
-                discount_amount, custom_split_group, custom_split_from,
+                discount_amount,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM `tabURY KOT` kot
+                    WHERE kot.invoice = `tabPOS Invoice`.name
+                      AND kot.order_status = 'Served'
+                      AND kot.docstatus = 1
+                ) THEN 'Dispatched' ELSE NULL END AS operational_status,
+                custom_split_group, custom_split_from,
                 custom_merged_pos_invoice, custom_merged_total
             FROM `tabPOS Invoice` 
             WHERE branch = %s AND status = %s 
@@ -547,6 +604,26 @@ def getPosInvoice(status, limit, limit_start):
             as_dict=True,
         )
         updatedlist.extend(invoices)    
+    elif status == "Cancelled":
+        invoices = frappe.db.sql(
+            """
+            SELECT
+                name, invoice_printed, grand_total, restaurant_table, custom_merged_tables,
+                cashier, waiter, net_total, posting_time,
+                total_taxes_and_charges, customer, status, mobile_number,
+                posting_date, rounded_total, order_type, cancel_reason,
+                additional_discount_percentage, discount_amount,
+                custom_split_group, custom_split_from,
+                custom_merged_pos_invoice, custom_merged_total
+            FROM `tabPOS Invoice`
+            WHERE branch = %s AND status = 'Cancelled'
+            ORDER BY modified desc
+            LIMIT %s OFFSET %s
+            """,
+            (branch, limit, limit_start),
+            as_dict=True,
+        )
+        updatedlist.extend(invoices)
     else:
         
         invoices = frappe.db.sql(
@@ -556,7 +633,14 @@ def getPosInvoice(status, limit, limit_start):
                 cashier, waiter, net_total, posting_time, 
                 total_taxes_and_charges, customer, status, mobile_number,
                 posting_date, rounded_total, order_type, additional_discount_percentage,
-                discount_amount, custom_split_group, custom_split_from,
+                discount_amount,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM `tabURY KOT` kot
+                    WHERE kot.invoice = `tabPOS Invoice`.name
+                      AND kot.order_status = 'Served'
+                      AND kot.docstatus = 1
+                ) THEN 'Dispatched' ELSE NULL END AS operational_status,
+                custom_split_group, custom_split_from,
                 custom_merged_pos_invoice, custom_merged_total
             FROM `tabPOS Invoice` 
             WHERE branch = %s AND status = %s 
@@ -620,6 +704,7 @@ def searchPosInvoice(query,status):
             "restaurant_table",
             "custom_merged_tables",
             "status",
+            "cancel_reason",
             "rounded_total",
             "net_total",
             "mobile_number",
@@ -1702,4 +1787,161 @@ def get_public_menu(branch=None):
         "menu_name": active_menu,
         "whatsapp_phone": company_phone,
         "items": items,
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def create_public_order(
+    items,
+    customer_name,
+    customer_phone,
+    delivery_type="Delivery",
+    address=None,
+    neighborhood=None,
+    payment_method=None,
+    change_for=None,
+    order_notes=None,
+):
+    """Create a public-menu order as an unpaid POS Invoice draft.
+
+    The customer still receives the formatted WhatsApp message, while the
+    invoice remains in the POS Orders queue for staff confirmation/payment.
+    Prices and item availability are always resolved from the active menu.
+    """
+    if isinstance(items, str):
+        items = json.loads(items)
+    if not isinstance(items, list) or not items:
+        frappe.throw(_("Add at least one item to the order."), frappe.ValidationError)
+    if len(items) > 50:
+        frappe.throw(_("The order contains too many different items."), frappe.ValidationError)
+
+    customer_name = (customer_name or "").strip()[:140]
+    customer_phone = (customer_phone or "").strip()[:40]
+    if not customer_name:
+        frappe.throw(_("Customer name is required."), frappe.ValidationError)
+    if not customer_phone:
+        frappe.throw(_("Customer phone is required."), frappe.ValidationError)
+    if delivery_type not in ("Delivery", "Retirada"):
+        frappe.throw(_("Invalid delivery type."), frappe.ValidationError)
+    if delivery_type == "Delivery" and not (address or "").strip():
+        frappe.throw(_("Delivery address is required."), frappe.ValidationError)
+
+    branch = frappe.db.get_value("URY Restaurant", {}, "branch") or frappe.db.get_value(
+        "Branch", {}, "name"
+    )
+    restaurant_doc = frappe.db.get_value(
+        "URY Restaurant",
+        {"branch": branch} if branch else {},
+        ["name", "active_menu", "branch"],
+        as_dict=True,
+    )
+    if not restaurant_doc or not restaurant_doc.active_menu:
+        frappe.throw(_("The restaurant has no active menu configured."), frappe.ValidationError)
+
+    pos_profile_name = frappe.db.get_value("POS Profile", {"branch": branch}, "name")
+    if not pos_profile_name:
+        frappe.throw(_("No POS Profile is configured for this branch."), frappe.ValidationError)
+    pos_profile = frappe.get_doc("POS Profile", pos_profile_name)
+
+    menu_rows = frappe.get_all(
+        "URY Menu Item",
+        filters={"parent": restaurant_doc.active_menu, "disabled": 0},
+        fields=["item", "item_name", "rate"],
+    )
+    menu_by_item = {row.item: row for row in menu_rows}
+    invoice_items = []
+    for raw_item in items:
+        item_code = raw_item.get("item") if isinstance(raw_item, dict) else None
+        try:
+            qty = float(raw_item.get("qty", 0))
+        except (TypeError, ValueError, AttributeError):
+            qty = 0
+        if not item_code or qty <= 0 or qty > 99:
+            frappe.throw(_("Invalid item quantity."), frappe.ValidationError)
+        menu_item = menu_by_item.get(item_code)
+        if not menu_item:
+            frappe.throw(_("Item {0} is not available on the active menu.").format(item_code), frappe.ValidationError)
+
+        item_meta = frappe.db.get_value(
+            "Item", item_code, ["item_name", "stock_uom", "description"], as_dict=True
+        ) or {}
+        invoice_items.append(
+            {
+                "item_code": item_code,
+                "item_name": item_meta.get("item_name") or menu_item.item_name or item_code,
+                "description": item_meta.get("description") or "",
+                "qty": qty,
+                "uom": item_meta.get("stock_uom"),
+                "stock_uom": item_meta.get("stock_uom"),
+                "rate": float(menu_item.rate or 0),
+                "warehouse": pos_profile.warehouse,
+                "comment": (raw_item.get("notes") or "")[:500],
+            }
+        )
+
+    customer = frappe.db.get_value("Customer", {"mobile_number": customer_phone}, "name")
+    if not customer:
+        customer = frappe.get_doc(
+            {
+                "doctype": "Customer",
+                "customer_name": customer_name,
+                "mobile_number": customer_phone,
+                "customer_group": frappe.db.exists("Customer Group", "Individual")
+                or frappe.db.get_value("Customer Group", {}, "name"),
+                "territory": frappe.db.exists("Territory", "All Territories")
+                or frappe.db.get_value("Territory", {}, "name"),
+            }
+        ).insert(ignore_permissions=True).name
+
+    invoice = frappe.new_doc("POS Invoice")
+    invoice.update(
+        {
+            "is_pos": 1,
+            "update_stock": 1,
+            "naming_series": frappe.db.get_value(
+                "URY Restaurant", restaurant_doc.name, "invoice_series_prefix"
+            ),
+            "restaurant": restaurant_doc.name,
+            "branch": branch,
+            "pos_profile": pos_profile_name,
+            "company": pos_profile.company,
+            "warehouse": pos_profile.warehouse,
+            "customer": customer,
+            "mobile_number": customer_phone,
+            "order_type": delivery_type if delivery_type == "Delivery" else "Take Away",
+            "selling_price_list": frappe.db.get_value(
+                "Price List", {"restaurant_menu": restaurant_doc.active_menu, "enabled": 1}, "name"
+            ),
+            "taxes_and_charges": frappe.db.get_value(
+                "URY Restaurant", restaurant_doc.name, "default_tax_template"
+            ),
+            "invoice_printed": 0,
+            "invoice_created": 0,
+            "custom_comments": "\n".join(
+                filter(
+                    None,
+                    [
+                        "[Pedido pelo cardápio digital]",
+                        f"Endereço: {(address or '').strip()}",
+                        f"Bairro/Referência: {(neighborhood or '').strip()}",
+                        f"Pagamento informado: {(payment_method or '').strip()}",
+                        f"Troco para: {(change_for or '').strip()}",
+                        f"Observações: {(order_notes or '').strip()}",
+                    ],
+                )
+            )[:1400],
+        }
+    )
+    for item in invoice_items:
+        invoice.append("items", item)
+
+    invoice.set_missing_values()
+    invoice.calculate_taxes_and_totals()
+    invoice.insert(ignore_permissions=True)
+
+    return {
+        "invoice": invoice.name,
+        "status": "Draft",
+        "grand_total": invoice.grand_total,
+        "message": _("Order received and awaiting payment confirmation."),
     }

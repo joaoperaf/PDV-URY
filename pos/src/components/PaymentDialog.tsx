@@ -24,6 +24,27 @@ interface PaymentDialogProps {
   discountAmount?: number;
 }
 
+function getPaymentModeLabel(mode: string): string {
+  const normalized = mode.trim().toLowerCase();
+  const translationKey: Record<string, string> = {
+    cash: 'payment_modes.cash',
+    dinheiro: 'payment_modes.cash',
+    'credit card': 'payment_modes.credit_card',
+    'cartão de crédito': 'payment_modes.credit_card',
+    'debit card': 'payment_modes.debit_card',
+    'cartão de débito': 'payment_modes.debit_card',
+    pix: 'payment_modes.pix',
+    'bank transfer': 'payment_modes.bank_transfer',
+    transferência: 'payment_modes.bank_transfer',
+    cheque: 'payment_modes.check',
+    check: 'payment_modes.check',
+  };
+
+  const key = translationKey[normalized];
+  return key ? t(key) : mode;
+}
+
+
 const PaymentDialog: React.FC<PaymentDialogProps> = ({
   onClose,
   grandTotal,
@@ -216,7 +237,9 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
                 const id = typeof mode === 'string' ? mode : mode.id;
                 return (
                   <div key={id} className="flex items-center gap-3">
-                    <span className="w-24 font-medium">{typeof mode === 'string' ? mode : mode.name}</span>
+                    <span className="w-24 font-medium">
+                      {getPaymentModeLabel(typeof mode === 'string' ? mode : mode.name)}
+                    </span>
                     <Input
                       type="number"
                       min="0"

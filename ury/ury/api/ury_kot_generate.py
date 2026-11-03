@@ -129,14 +129,18 @@ def process_items_for_kot(
 
     if productions:
         all_production_item_groups = get_all_production_item_groups(pos_profile.branch)
+        production_items_by_name = {}
         
-        # Iterate through each item and check if item group belongs to a production unit
+        # Keep the warning for visibility, but route unmatched products to the
+        # branch's default kitchen below so newly registered products are not
+        # silently omitted from the KDS.
         for item in kot_items:
             item_group = frappe.db.get_value("Item", item["item_code"], "item_group")
             item_code = item["item_code"]
             if item_group not in all_production_item_groups:
                 frappe.msgprint(
-                    f"Item group '{item_group}' for item '{item_code}' is not in any production."
+                    f"Item group '{item_group}' for item '{item_code}' is not in any production. "
+                    "Routing it to the default kitchen."
                 )
         for production in productions:
             productionItemGroupslist = frappe.get_all(
@@ -157,7 +161,28 @@ def process_items_for_kot(
                 if frappe.db.get_value("Item", item["item_code"], "item_group")
                 in productionItemGroups
             ]
+            production_items_by_name[production.name] = production_items
 
+        # Products whose item group was not configured in a production unit
+        # still need a KOT. Prefer the production linked to this POS Profile;
+        # otherwise use the first production configured for the branch.
+        assigned_item_codes = {
+            item["item_code"]
+            for production_items in production_items_by_name.values()
+            for item in production_items
+        }
+        unmatched_items = [
+            item for item in kot_items if item["item_code"] not in assigned_item_codes
+        ]
+        if unmatched_items:
+            default_production = next(
+                (production for production in productions if production.name == pos_profile.name),
+                productions[0],
+            )
+            production_items_by_name[default_production.name].extend(unmatched_items)
+
+        for production in productions:
+            production_items = production_items_by_name[production.name]
             if production_items:
                 invoice_exist = frappe.db.exists(
                     "URY KOT",

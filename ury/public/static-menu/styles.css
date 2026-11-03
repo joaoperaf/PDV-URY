@@ -83,6 +83,9 @@ main { min-width: 0; padding: 0; }
 .add-on-quantity button { width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 50%; background: white; color: var(--ink); font-size: 1rem; }
 .add-on-quantity > strong { min-width: 14px; text-align: center; font-size: .85rem; }
 .details-options textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 11px; resize: vertical; }
+.selection-summary { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid #e8c98f; border-radius: 12px; background: #fff8e9; }
+.selection-summary span { color: #a34a08; font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.selection-summary strong { color: var(--ink); font-size: .88rem; font-weight: 600; }
 .details-footer { display: flex; align-items: center; gap: 14px; justify-content: space-between; padding: 14px 20px 18px; }
 .detail-quantity { display: flex; align-items: center; gap: 12px; }
 .detail-quantity button { width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 50%; background: white; font-size: 1.2rem; }

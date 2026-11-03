@@ -8,6 +8,11 @@
     <title>Order</title>
   </head>
   <body>
+    <script>
+      if (!new URLSearchParams(window.location.search).has('t')) {
+        window.location.replace('/menu');
+      }
+    </script>
     <div id="root"></div>
     <script>
       window.csrf_token = "{{ csrf_token }}";

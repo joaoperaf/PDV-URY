@@ -1,7 +1,7 @@
 <template>
   <header class="bg-white p-4 flex justify-between items-center border-b border-gray-200">
     <router-link to="/" class="flex items-center cursor-pointer">
-      <img :src="imagePath" alt="Logo" class="ml-20 w-40 h-15 mr-2">
+      <img :src="imagePath" alt="Péricles Burger" class="ml-20 w-40 h-auto max-h-10 mr-2">
     </router-link>
     <div class="flex items-center gap-4">
       <button 
@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import urimosaicImage from "@/assets/logos/mosaic.jpg";
+import urimosaicImage from "@/assets/logos/logo-pericles-burger.png";
 
 export default {
   name: "Header",

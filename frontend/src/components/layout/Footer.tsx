@@ -56,7 +56,7 @@ export const Footer: React.FC = () => {
 
           {/* 5ª Posição: Cardápio Digital */}
           <a
-            href="/order"
+            href="/menu"
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"

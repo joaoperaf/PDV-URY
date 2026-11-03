@@ -10,6 +10,18 @@ interface SidebarProps {
   disabled?: boolean;
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  beverages: 'Bebidas',
+  starters: 'Entradas',
+  'main course': 'Hamburgers',
+  'main courses': 'Hamburgers',
+};
+
+const getCategoryLabel = (label: string, name: string) => {
+  const key = (name || label).trim().toLowerCase();
+  return CATEGORY_LABELS[key] || label;
+};
+
 const Sidebar = ({ disabled }: SidebarProps) => {
   const { selectedCategory, setSelectedCategory, menuItems, categories, orderComment, setOrderComment } = usePOSStore();
   const [showCommentDialog, setShowCommentDialog] = useState(false);
@@ -83,7 +95,7 @@ const Sidebar = ({ disabled }: SidebarProps) => {
                       courseName={category.name}
                       className="w-4 h-4 text-gray-500 flex-shrink-0"
                     />
-                    <span className="text-start">{category.label}</span>
+                    <span className="text-start">{getCategoryLabel(category.label, category.name)}</span>
                   </div>
                   <Badge variant="secondary" size="sm" className="text-xs text-gray-500 bg-gray-100 min-w-[24px] text-center">
                     {count}

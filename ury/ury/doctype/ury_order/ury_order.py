@@ -1917,13 +1917,11 @@ def cancel_order(invoice_id, reason):
         # If an exception occurs (e.g., "kot" app not found), it will be caught here without effecting execution
         pass
 
-    # Use standard Frappe cancel workflow instead of raw SQL
-    pos_invoice.db_set("cancel_reason", reason)
-    pos_invoice.cancel()
     if pos_invoice.docstatus == 1:
         # Submitted invoice: cancel through the standard document workflow so
         # on_cancel hooks run and GL/payment reversals and audit entries are
         # produced (docstatus=2 on the invoice and its items).
+        pos_invoice.db_set("cancel_reason", reason)
         pos_invoice.cancel()
         pos_invoice.db_set("cancel_reason", reason)
     else:

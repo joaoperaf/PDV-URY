@@ -85,6 +85,20 @@ function customizationTotal() {
   return (state.selectedItem.price + extras) * state.customization.quantity;
 }
 
+function customizationSummary() {
+  const customization = state.customization;
+  const extras = addOns
+    .filter((option) => customization.addOns[option.id] > 0)
+    .map((option) => `${customization.addOns[option.id]}x ${option.name}`);
+  const choices = [];
+  if (state.selectedItem?.category === 'Hamburgers') {
+    choices.push(`Carne: ${customization.meatPoint}`);
+  }
+  if (extras.length) choices.push(extras.join(', '));
+  if (customization.notes.trim()) choices.push('Com observações');
+  return choices.length ? choices.join(' · ') : 'Nenhuma personalização adicionada';
+}
+
 function renderDetails() {
   const item = state.selectedItem;
   const customization = state.customization;
@@ -139,6 +153,10 @@ function renderDetails() {
         </fieldset>
         <label class="notes-label" for="item-notes">Observações do pedido</label>
         <textarea id="item-notes" rows="2" placeholder="Ex.: sem molho, cortar ao meio...">${escapeHtml(customization.notes)}</textarea>
+        <div class="selection-summary" aria-live="polite">
+          <span>Resumo do item</span>
+          <strong data-customization-summary>${escapeHtml(customizationSummary())}</strong>
+        </div>
       </div>
       <div class="details-footer">
         <div class="detail-quantity">
@@ -167,6 +185,7 @@ function renderDetails() {
   }));
   details.querySelector('#item-notes').addEventListener('input', (event) => {
     state.customization.notes = event.target.value;
+    updateCustomizationSummary();
   });
   details.querySelectorAll('[data-detail-quantity]').forEach((button) => button.addEventListener('click', () => {
     state.customization.quantity = Math.max(1, state.customization.quantity + Number(button.dataset.detailQuantity));
@@ -204,6 +223,12 @@ function renderDetails() {
 function updateCustomizationTotal() {
   const totalElement = $('item-details').querySelector('[data-customization-total]');
   if (totalElement) totalElement.textContent = money(customizationTotal());
+  updateCustomizationSummary();
+}
+
+function updateCustomizationSummary() {
+  const summaryElement = $('item-details').querySelector('[data-customization-summary]');
+  if (summaryElement) summaryElement.textContent = customizationSummary();
 }
 
 function render() {

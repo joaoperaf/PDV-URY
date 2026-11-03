@@ -1,13 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { t } from '../i18n';
 import { Star, TrendingUp } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import OrderPanel from '../components/OrderPanel';
 import ProductDialog from '../components/ProductDialog';
 import MenuList from '../components/MenuList';
-import { usePOSStore } from '../store/pos-store';
+import { MenuItem, usePOSStore } from '../store/pos-store';
 import { cn } from '@ury/ui';
-import { Spinner } from '@ury/ui';
+import { Spinner, StateMessage } from '@ury/ui';
 import InitialLoader from '../components/InitialLoader';
 
 export default function POS() {
@@ -23,37 +23,16 @@ export default function POS() {
   } = usePOSStore();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const clickCountRef = useRef(0);
 
-  useEffect(() => {
-    return () => {
-      if (clickTimerRef.current) {
-        clearTimeout(clickTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleItemClick = (item: any) => {
+  const handleAddItem = (item: MenuItem) => {
     if (isMenuInteractionDisabled()) return;
-    
-    clickCountRef.current += 1;
-    
-    if (clickTimerRef.current) {
-      clearTimeout(clickTimerRef.current);
-    }
+    addToOrder({ ...item, quantity: 1 });
+  };
 
-    clickTimerRef.current = setTimeout(() => {
-      if (clickCountRef.current === 1) {
-        // Single click - add to cart
-        addToOrder({ ...item, quantity: 1 });
-      } else if (clickCountRef.current >= 2) {
-        // Double click - open dialog
-        setSelectedItem(item);
-        setIsDialogOpen(true);
-      }
-      clickCountRef.current = 0;
-    }, 250); // 250ms threshold for double click
+  const handleOpenItemOptions = (item: MenuItem) => {
+    if (isMenuInteractionDisabled()) return;
+    setSelectedItem(item);
+    setIsDialogOpen(true);
   };
 
   const QuickFilterButton = ({ filter, icon: Icon, label }: { 
@@ -83,18 +62,14 @@ export default function POS() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="text-xl font-semibold text-red-600 mb-2">Failed to load POS</p>
-          <p className="text-gray-600">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
+      <StateMessage
+        variant="error"
+        title={t('common.error_loading_pos')}
+        description={error}
+        actionLabel={t('common.retry')}
+        onAction={() => window.location.reload()}
+        className="h-screen"
+      />
     );
   }
 
@@ -106,21 +81,10 @@ export default function POS() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg font-medium text-red-600">{t('common.error_loading_menu_items')}</p>
-          <p className="text-sm text-gray-500 mt-2">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-1 overflow-hidden">
       <Sidebar disabled={isMenuInteractionDisabled()} />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden pe-96">
+      <div className="flex-1 flex flex-col h-full overflow-hidden pe-96">
         <div className="p-4 bg-white border-b border-gray-200">
           <div className="max-w-screen-xl mx-auto space-y-3">
             <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden">
@@ -138,7 +102,7 @@ export default function POS() {
           </div>
         </div>
 
-        <MenuList onItemClick={handleItemClick} />
+        <MenuList onAddItem={handleAddItem} onOpenItemOptions={handleOpenItemOptions} />
       </div>
       <OrderPanel />
       {isDialogOpen && <ProductDialog onClose={() => setIsDialogOpen(false)} />}
