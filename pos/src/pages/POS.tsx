@@ -105,7 +105,7 @@ export default function POS() {
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       <Sidebar disabled={isMenuInteractionDisabled()} />
       <div className="flex-1 flex flex-col h-full overflow-hidden lg:pe-96">
         <div className="p-4 bg-white border-b border-gray-200">

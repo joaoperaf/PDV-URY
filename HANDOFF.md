@@ -83,7 +83,9 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 6. Histórico de Sessões / Últimos Passos
 
 ### [2026-11-03] — Issue #1: painel do pedido responsivo no PDV
-- **Status: EM ANDAMENTO (branch `feat/issue-1-responsive-order-panel`, não mergeada; issue #1 segue aberta).**
+- **Status: VALIDADO VISUALMENTE em 1280/820/390px (2026-11-25), pendente apenas PR/merge para `version-2` e fechar a issue #1. Branch `feat/issue-1-responsive-order-panel`.**
+- Correções da validação (2026-11-25): `POS.tsx` raiz `flex-1` → `h-full` (layout não preenchia a altura em tablet/desktop, deixando faixa cinza); grade do cardápio agora `repeat(auto-fill,minmax(10rem,1fr))` (cards ficavam espremidos a 1280px por causa do painel fixo); `OrderTypeSelect` com `flex-wrap` (tipos de pedido cortados). Sem overflow horizontal nas 3 larguras; drawer (tablet) e bottom sheet (mobile) abrem com total/Enviar Pedido visíveis.
+- Testes visuais feitos com Chrome headless (puppeteer-core) e usuário de teste `claudeclaudinho@gmail.com` (precisa de role URY, linha na tabela Users da Branch e em Applicable for Users do POS Profile).
 - `OrderPanel`: fixo à direita em desktop (≥1024px), drawer lateral em tablet (md) e bottom sheet em mobile. Props `isOpen`/`onClose`; fecha por X, clique no fundo ou Esc; foco vai ao painel ao abrir e volta ao botão de origem ao fechar. z-index (`z-40` fundo / `z-[45]` painel) fica acima do `Footer` (`z-30`).
 - `POS.tsx`: `pe-96` virou `lg:pe-96`; barra de resumo (itens + total + botão do pedido) no fluxo, acima do Footer, visível só < lg; faixa horizontal de categorias (`< md`) substitui a sidebar.
 - `Sidebar`: oculta < md (`hidden md:flex`, `md:w-52 lg:w-64`); `getCategoryLabel` agora é exportado.
