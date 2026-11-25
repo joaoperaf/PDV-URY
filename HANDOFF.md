@@ -85,7 +85,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ### [2026-11-25] — Issue #19: carrinho do cardápio estático (`static-menu/`)
 - Branch `feat/issue-19-menu-cart`. Carrinho já tinha imagem/nome/preço, rodapé fixo com total + CTA WhatsApp; refinado: categoria, ponto da carne, adicionais (chips `2x Bacon`) e observação em linhas separadas (antes saíam coladas); quebra de texto longo; estado vazio com ícone, texto e botão "Ver cardápio"; formulário oculto e CTA desabilitado com carrinho vazio; `prefers-reduced-motion`.
 - Validado com Chrome headless (desktop 1280 / mobile 390), sem overflow horizontal, inclusive com observação longa e 3 adicionais. Testes manuais pelo usuário pendentes. Servir com `python3 -m http.server 8080` em `static-menu/`.
-- Observação (não alterada): o preço da linha usa `item.price * quantity` e não soma adicionais — conferir se é intencional.
+- Corrigido o cálculo/edição de adicionais e envio ao WhatsApp (`static-menu/app.js`, sincronizado em `ury/public/static-menu/`): o item no carrinho agora preserva seu `id` e `price` base originais, calculando preço unitário e total da linha via `rowUnitPrice`/`rowTotal` (`item.price + adicionais`), eliminando a soma duplicada ao clicar em `Editar` (e permitindo voltar ao preço base ao remover adicionais) e incluindo ponto da carne, adicionais e observações de cada item na mensagem enviada ao WhatsApp.
 
 ### [2026-11-03] — Issue #1: painel do pedido responsivo no PDV
 - **Status: CONCLUÍDO (2026-11-25). Validado visualmente em 1280/820/390px e manualmente pelo usuário; PR #26 mergeado na `version-2` e issue #1 fechada.** Pendentes não bloqueantes: busca do cabeçalho estreita e rótulos do rodapé truncados no mobile; `ProductDialog` e foco do painel não testados em navegador.

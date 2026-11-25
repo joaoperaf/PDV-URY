@@ -35,12 +35,21 @@ function visibleItems() {
 }
 
 function cartRows() { return Object.values(state.cart); }
-function total() { return cartRows().reduce((sum, row) => sum + row.item.price * row.quantity, 0); }
+function rowExtrasUnitTotal(row) {
+  return (row.details?.extras || []).reduce((sum, extra) => {
+    const option = addOns.find((addOn) => addOn.id === extra.id);
+    const unitPrice = extra.price ?? option?.price ?? 0;
+    return sum + unitPrice * (extra.quantity || 0);
+  }, 0);
+}
+function rowUnitPrice(row) { return row.item.price + rowExtrasUnitTotal(row); }
+function rowTotal(row) { return rowUnitPrice(row) * row.quantity; }
+function total() { return cartRows().reduce((sum, row) => sum + rowTotal(row), 0); }
 function count() { return cartRows().reduce((sum, row) => sum + row.quantity, 0); }
 
 function add(item) {
   const existing = state.cart[item.id];
-  state.cart[item.id] = { item, quantity: (existing?.quantity || 0) + 1 };
+  state.cart[item.id] = { id: item.id, item, quantity: (existing?.quantity || 0) + 1 };
   render();
   setCartOpen(true);
 }
@@ -54,7 +63,8 @@ function changeQuantity(id, amount) {
 }
 
 function openItemDetails(item, existing = null, cartKey = null) {
-  state.selectedItem = item;
+  const baseItem = state.menu?.items?.find((menuItem) => menuItem.id === item.id) || item;
+  state.selectedItem = baseItem;
   state.editingCartKey = cartKey;
   state.customization = {
     meatPoint: existing?.details?.meatPoint || 'Ao ponto',
@@ -195,17 +205,16 @@ function renderDetails() {
   details.querySelector('[data-confirm-item]').addEventListener('click', () => {
     const extras = addOns
       .filter((option) => state.customization.addOns[option.id] > 0)
-      .map((option) => ({ id: option.id, name: option.name, quantity: state.customization.addOns[option.id] }));
+      .map((option) => ({
+        id: option.id,
+        name: option.name,
+        price: option.price,
+        quantity: state.customization.addOns[option.id],
+      }));
     const key = state.editingCartKey || `${item.id}-${Date.now()}`;
     state.cart[key] = {
-      item: {
-        ...item,
-        id: key,
-        price: item.price + extras.reduce((sum, extra) => {
-          const option = addOns.find((addOn) => addOn.id === extra.id);
-          return sum + (option?.price || 0) * extra.quantity;
-        }, 0),
-      },
+      id: key,
+      item: { ...item },
       quantity: state.customization.quantity,
       details: {
         meatPoint: isBurger ? state.customization.meatPoint : '',
@@ -291,9 +300,9 @@ function render() {
         ${row.details?.meatPoint ? `<small class="cart-spec">Carne: ${escapeHtml(row.details.meatPoint)}</small>` : ''}
         ${row.details?.extras?.length ? `<ul class="cart-extras" aria-label="Adicionais">${row.details.extras.map((extra) => `<li>${extra.quantity}x ${escapeHtml(extra.name)}</li>`).join('')}</ul>` : ''}
         ${row.details?.notes ? `<small class="cart-spec cart-note">Obs.: ${escapeHtml(row.details.notes)}</small>` : ''}
-        <div class="quantity"><button type="button" data-minus="${row.item.id}" aria-label="Diminuir ${escapeHtml(row.item.name)}">−</button><span>${row.quantity}</span><button type="button" data-plus="${row.item.id}" aria-label="Aumentar ${escapeHtml(row.item.name)}">+</button><button class="edit-item" type="button" data-edit="${row.item.id}" aria-label="Editar ${escapeHtml(row.item.name)}">Editar</button></div>
+        <div class="quantity"><button type="button" data-minus="${row.id || row.item.id}" aria-label="Diminuir ${escapeHtml(row.item.name)}">−</button><span>${row.quantity}</span><button type="button" data-plus="${row.id || row.item.id}" aria-label="Aumentar ${escapeHtml(row.item.name)}">+</button><button class="edit-item" type="button" data-edit="${row.id || row.item.id}" aria-label="Editar ${escapeHtml(row.item.name)}">Editar</button></div>
       </div>
-      <div class="cart-line-price"><small>${money(row.item.price)} cada</small><strong class="cart-line-total">${money(row.item.price * row.quantity)}</strong></div>
+      <div class="cart-line-price"><small>${money(rowUnitPrice(row))} cada</small><strong class="cart-line-total">${money(rowTotal(row))}</strong></div>
     </div>
   `).join('') || `<div class="cart-empty"><span class="cart-empty-icon" aria-hidden="true">🛒</span><strong>Seu pedido está vazio</strong><p>Escolha seus favoritos no cardápio e eles aparecem aqui.</p><button type="button" class="cart-empty-action" id="cart-empty-close">Ver cardápio</button></div>`;
   $('cart-empty-close')?.addEventListener('click', () => $('close-cart').click());
@@ -319,6 +328,16 @@ function setCartOpen(isOpen) {
   $('open-cart').setAttribute('aria-expanded', String(isOpen));
 }
 
+function formatWhatsAppItem(row) {
+  const itemLines = [`• ${row.quantity}x ${row.item.name} — ${money(rowTotal(row))}`];
+  if (row.details?.meatPoint) itemLines.push(`  Ponto: ${row.details.meatPoint}`);
+  if (row.details?.extras?.length) {
+    itemLines.push(`  Adicionais: ${row.details.extras.map((extra) => `${extra.quantity}x ${extra.name}`).join(', ')}`);
+  }
+  if (row.details?.notes?.trim()) itemLines.push(`  Obs.: ${row.details.notes.trim()}`);
+  return itemLines.join('\n');
+}
+
 function sendWhatsApp(event) {
   event.preventDefault();
   if (!count()) return;
@@ -327,7 +346,7 @@ function sendWhatsApp(event) {
   const lines = [`🍔 *NOVO PEDIDO — ${state.menu.restaurantName.toUpperCase()}*`, `*Cliente:* ${form.get('name')}`, `*Tipo:* ${type}`];
   if (form.get('phone')) lines.push(`*Telefone:* ${form.get('phone')}`);
   if (type === 'Entrega' && form.get('address')) lines.push(`*Endereço:* ${form.get('address')}`);
-  lines.push('', '*ITENS:*', ...cartRows().map((row) => `• ${row.quantity}x ${row.item.name} — ${money(row.item.price * row.quantity)}`), '', `*TOTAL:* ${money(total())}`, `*Pagamento:* ${form.get('payment')}`);
+  lines.push('', '*ITENS:*', ...cartRows().map(formatWhatsAppItem), '', `*TOTAL:* ${money(total())}`, `*Pagamento:* ${form.get('payment')}`);
   if (form.get('notes')) lines.push(`*Observações:* ${form.get('notes')}`);
   const phone = String(state.menu.whatsappPhone || '').replace(/\D/g, '');
   if (!phone) {
