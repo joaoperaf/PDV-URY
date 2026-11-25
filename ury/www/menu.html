@@ -23,16 +23,33 @@
 
     <section id="item-details" class="item-details" aria-hidden="true"></section>
     <div class="menu-layout">
-      <nav id="categories" class="categories" aria-label="Categorias"></nav>
+      <nav id="categories" class="categories" aria-label="Categorias" aria-busy="true">
+        <span class="skeleton-pill" aria-hidden="true"></span>
+        <span class="skeleton-pill" aria-hidden="true"></span>
+        <span class="skeleton-pill" aria-hidden="true"></span>
+        <span class="skeleton-pill" aria-hidden="true"></span>
+      </nav>
       <main>
         <div class="menu-intro">
           <div>
             <h1>Escolha o seu pedido</h1>
           </div>
-          <span id="menu-count" class="menu-count"></span>
+          <span id="menu-count" class="menu-count" aria-live="polite">Carregando itens...</span>
         </div>
-        <div id="menu-status" class="status" role="status" aria-live="polite">Carregando cardápio...</div>
-        <div id="menu" class="menu-sections" aria-live="polite"></div>
+        <div id="menu-status" class="status status-loading" role="status" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <span>Carregando o cardápio...</span>
+        </div>
+        <div id="menu" class="menu-sections" aria-live="polite" aria-busy="true">
+          <div class="skeleton-section" aria-hidden="true">
+            <div class="skeleton-heading"></div>
+            <div class="menu-grid">
+              <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line lg"></div><div class="skeleton-line"></div><div class="skeleton-line sm"></div></div>
+              <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line lg"></div><div class="skeleton-line"></div><div class="skeleton-line sm"></div></div>
+              <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line lg"></div><div class="skeleton-line"></div><div class="skeleton-line sm"></div></div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
 
@@ -47,6 +64,7 @@
         <button id="close-cart" class="icon-button" type="button" aria-label="Fechar pedido">×</button>
       </div>
       <div class="cart-scroll">
+        <div id="order-sent-banner" class="order-sent-card" role="status" aria-live="polite" hidden></div>
         <div id="cart-items" class="cart-items"></div>
         <form id="checkout-form" novalidate>
           <h2 class="checkout-title">Finalizar pedido</h2>

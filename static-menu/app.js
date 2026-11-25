@@ -1,4 +1,4 @@
-const state = { menu: null, category: 'Todos', search: '', cart: {}, selectedItem: null, customization: null, editingCartKey: null };
+const state = { menu: null, category: 'Todos', search: '', cart: {}, selectedItem: null, customization: null, editingCartKey: null, orderSent: null };
 const $ = (id) => document.getElementById(id);
 const money = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 const menuUrl = new URL('menu.json', document.currentScript?.src || window.location.href);
@@ -39,16 +39,67 @@ const addOns = [
   { id: 'extra-cheese', name: 'Mais queijo', price: 6 },
 ];
 
+const stateIcons = {
+  error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4.5"/><path d="M12 16h.01"/></svg>',
+  emptySearch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/><path d="M8.5 11h5"/></svg>',
+  emptyCart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 12H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>',
+  success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.3 2.3 4.8-5"/></svg>',
+};
+
+function renderLoadingState() {
+  const categoryElement = $('categories');
+  const menuElement = $('menu');
+  const statusElement = $('menu-status');
+  categoryElement?.setAttribute('aria-busy', 'true');
+  menuElement?.setAttribute('aria-busy', 'true');
+  if (categoryElement) {
+    categoryElement.innerHTML = Array.from({ length: 4 }, () => '<span class="skeleton-pill" aria-hidden="true"></span>').join('');
+  }
+  if ($('menu-count')) $('menu-count').textContent = 'Carregando itens...';
+  if (statusElement) {
+    statusElement.setAttribute('role', 'status');
+    statusElement.className = 'status status-loading';
+    statusElement.innerHTML = '<span class="spinner" aria-hidden="true"></span><span>Carregando o cardápio...</span>';
+  }
+  if (menuElement) {
+    menuElement.innerHTML = `
+      <div class="skeleton-section" aria-hidden="true">
+        <div class="skeleton-heading"></div>
+        <div class="menu-grid">
+          ${Array.from({ length: 3 }, () => '<div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line lg"></div><div class="skeleton-line"></div><div class="skeleton-line sm"></div></div>').join('')}
+        </div>
+      </div>
+    `;
+  }
+}
+
 async function loadMenu() {
+  renderLoadingState();
   try {
     state.menu = await fetch(menuUrl).then((response) => {
       if (!response.ok) throw new Error('Não foi possível carregar o cardápio.');
       return response.json();
     });
+    $('categories')?.setAttribute('aria-busy', 'false');
+    $('menu')?.setAttribute('aria-busy', 'false');
     render();
   } catch (error) {
-    $('menu-status').className = 'status status-error';
-    $('menu-status').textContent = error.message;
+    $('categories')?.setAttribute('aria-busy', 'false');
+    $('menu')?.setAttribute('aria-busy', 'false');
+    if ($('categories')) $('categories').innerHTML = '';
+    if ($('menu')) $('menu').innerHTML = '';
+    if ($('menu-count')) $('menu-count').textContent = 'Cardápio indisponível';
+    const statusElement = $('menu-status');
+    statusElement.setAttribute('role', 'alert');
+    statusElement.className = 'status state-card state-error';
+    statusElement.innerHTML = `
+      <span class="state-icon">${stateIcons.error}</span>
+      <span class="state-badge">Falha no carregamento</span>
+      <strong>${escapeHtml(error.message || 'Não foi possível carregar o cardápio.')}</strong>
+      <p>Verifique sua conexão com a internet e tente carregar os itens novamente.</p>
+      <button type="button" class="state-action" id="retry-menu">Tentar novamente</button>
+    `;
+    $('retry-menu')?.addEventListener('click', loadMenu);
   }
 }
 
@@ -161,6 +212,7 @@ function count() { return cartRows().reduce((sum, row) => sum + row.quantity, 0)
 function add(item) {
   const existing = state.cart[item.id];
   state.cart[item.id] = { id: item.id, item, quantity: (existing?.quantity || 0) + 1 };
+  state.orderSent = null;
   render();
   setCartOpen(true);
 }
@@ -170,6 +222,7 @@ function changeQuantity(id, amount) {
   if (!row) return;
   row.quantity += amount;
   if (row.quantity <= 0) delete state.cart[id];
+  state.orderSent = null;
   render();
 }
 
@@ -334,6 +387,7 @@ function renderDetails() {
       },
     };
     if (state.editingCartKey && state.editingCartKey !== key) delete state.cart[state.editingCartKey];
+    state.orderSent = null;
     closeItemDetails();
     render();
     setCartOpen(true);
@@ -408,17 +462,51 @@ function render({ focusCategory = false, revealActiveCategory = false } = {}) {
 
   const items = visibleItems();
   const sections = menuSections();
-  const hasFilters = Boolean(state.search.trim()) || state.category !== 'Todos';
+  const totalAvailable = availableItems().length;
+  const query = state.search.trim();
+  const hasFilters = Boolean(query) || state.category !== 'Todos';
+  $('categories')?.setAttribute('aria-busy', 'false');
+  $('menu')?.setAttribute('aria-busy', 'false');
   $('menu-count').textContent = `${items.length} ${items.length === 1 ? 'item disponível' : 'itens disponíveis'}`;
-  $('menu-status').className = items.length ? 'status status-hidden' : 'status status-empty';
-  $('menu-status').innerHTML = items.length
-    ? ''
-    : `<strong>Nenhum item encontrado</strong><p>Tente outro termo na busca ou volte para todas as categorias.</p>${hasFilters ? '<button type="button" class="reset-filters" id="reset-filters">Limpar filtros</button>' : ''}`;
-  $('reset-filters')?.addEventListener('click', () => {
-    state.search = '';
-    $('search').value = '';
-    selectCategory('Todos', { focusCategory: true });
-  });
+  const statusElement = $('menu-status');
+  statusElement.setAttribute('role', 'status');
+  if (items.length) {
+    statusElement.className = 'status status-hidden';
+    statusElement.innerHTML = '';
+  } else if (!totalAvailable) {
+    statusElement.className = 'status state-card state-empty';
+    statusElement.innerHTML = `
+      <span class="state-icon">${stateIcons.emptySearch}</span>
+      <span class="state-badge">Cardápio em atualização</span>
+      <strong>Nenhum item disponível no momento</strong>
+      <p>Estamos atualizando os produtos disponíveis. Tente atualizar em alguns instantes.</p>
+      <button type="button" class="state-action" id="refresh-empty-menu">Atualizar cardápio</button>
+    `;
+    $('refresh-empty-menu')?.addEventListener('click', loadMenu);
+  } else {
+    const emptyTitle = query && state.category !== 'Todos'
+      ? `Nenhum resultado para “${escapeHtml(query)}” em ${escapeHtml(categoryLabel(state.category))}`
+      : query
+        ? `Nenhum item encontrado para “${escapeHtml(query)}”`
+        : 'Nenhum item disponível nesta categoria';
+    const emptyHint = query && state.category !== 'Todos'
+      ? 'Limpe os filtros para procurar em todas as seções do cardápio.'
+      : query
+        ? 'Confira a grafia ou experimente buscar por outro nome ou ingrediente.'
+        : 'Volte para todas as categorias para ver o restante do cardápio.';
+    statusElement.className = 'status state-card state-empty';
+    statusElement.innerHTML = `
+      <span class="state-icon">${stateIcons.emptySearch}</span>
+      <strong>${emptyTitle}</strong>
+      <p>${emptyHint}</p>
+      ${hasFilters ? '<button type="button" class="state-action" id="reset-filters">Limpar busca e filtros</button>' : ''}
+    `;
+    $('reset-filters')?.addEventListener('click', () => {
+      state.search = '';
+      $('search').value = '';
+      selectCategory('Todos', { focusCategory: true });
+    });
+  }
   $('menu').innerHTML = sections.map((section) => {
     const slug = String(section.id).toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const icon = categoryIcons[section.id] || '';
@@ -475,9 +563,14 @@ function render({ focusCategory = false, revealActiveCategory = false } = {}) {
       </div>
       <div class="cart-line-price"><small>${money(rowUnitPrice(row))} cada</small><strong class="cart-line-total">${money(rowTotal(row))}</strong></div>
     </div>
-  `).join('') || `<div class="cart-empty"><span class="cart-empty-icon" aria-hidden="true">🛒</span><strong>Seu pedido está vazio</strong><p>Escolha seus favoritos no cardápio e eles aparecem aqui.</p><button type="button" class="cart-empty-action" id="cart-empty-close">Ver cardápio</button></div>`;
-  $('cart-empty-close')?.addEventListener('click', () => $('close-cart').click());
+  `).join('') || `<div class="cart-empty"><span class="cart-empty-icon">${stateIcons.emptyCart}</span><strong>Seu pedido está vazio</strong><p>Escolha seus itens no cardápio, personalize como preferir e volte aqui para finalizar.</p><button type="button" class="cart-empty-action" id="cart-empty-close">Explorar cardápio</button></div>`;
+  $('cart-empty-close')?.addEventListener('click', () => {
+    $('close-cart').click();
+    $('search')?.focus();
+  });
   const isEmpty = count() === 0;
+  if (isEmpty) state.orderSent = null;
+  renderOrderSentBanner();
   $('checkout-form').hidden = isEmpty;
   document.querySelector('.cart-footer .whatsapp-button').disabled = isEmpty;
   if (!isEmpty) updateCheckoutSummary();
@@ -611,13 +704,45 @@ function formatWhatsAppItem(row) {
   return itemLines.join('\n');
 }
 
+function renderOrderSentBanner() {
+  const banner = $('order-sent-banner');
+  if (!banner) return;
+  if (!state.orderSent || !count()) {
+    banner.hidden = true;
+    banner.innerHTML = '';
+    return;
+  }
+  banner.hidden = false;
+  banner.innerHTML = `
+    <div class="order-sent-header">
+      <span class="order-sent-icon">${stateIcons.success}</span>
+      <div>
+        <span class="state-badge state-badge-success">Pedido encaminhado</span>
+        <strong>Confirme o envio no WhatsApp</strong>
+      </div>
+    </div>
+    <p>Abrimos a conversa com ${state.orderSent.count} ${state.orderSent.count === 1 ? 'item' : 'itens'} (${escapeHtml(state.orderSent.total)}). Envie a mensagem aberta no WhatsApp para a loja receber seu pedido.</p>
+    <div class="order-sent-actions">
+      <a class="order-sent-link" href="${escapeHtml(state.orderSent.url)}" target="_blank" rel="noopener">Abrir WhatsApp novamente</a>
+      <button type="button" class="order-sent-reset" id="start-new-order">Iniciar novo pedido</button>
+    </div>
+  `;
+  $('start-new-order')?.addEventListener('click', () => {
+    state.cart = {};
+    state.orderSent = null;
+    if ($('checkout-notes')) $('checkout-notes').value = '';
+    render();
+    setCartOpen(false);
+  });
+}
+
 function sendWhatsApp(event) {
   event.preventDefault();
   if (!count()) return;
   const alertBox = $('checkout-alert');
   if (alertBox) {
     alertBox.hidden = true;
-    alertBox.textContent = '';
+    alertBox.innerHTML = '';
   }
   if (!validateCheckoutForm()) return;
 
@@ -636,7 +761,7 @@ function sendWhatsApp(event) {
   const phone = String(state.menu.whatsappPhone || '').replace(/\D/g, '');
   if (!phone) {
     if (alertBox) {
-      alertBox.textContent = 'O número de WhatsApp da loja ainda não foi configurado no menu.json.';
+      alertBox.innerHTML = `${stateIcons.error}<div><strong>WhatsApp da loja não configurado</strong><span>Defina o campo whatsappPhone no menu.json para concluir o envio.</span></div>`;
       alertBox.hidden = false;
       alertBox.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
     } else {
@@ -645,7 +770,11 @@ function sendWhatsApp(event) {
     return;
   }
   const destination = `https://wa.me/${phone.startsWith('55') ? phone : `55${phone}`}`;
-  window.open(`${destination}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
+  const whatsappUrl = `${destination}?text=${encodeURIComponent(lines.join('\n'))}`;
+  window.open(whatsappUrl, '_blank', 'noopener');
+  state.orderSent = { url: whatsappUrl, total: money(total()), count: count(), type };
+  renderOrderSentBanner();
+  $('order-sent-banner')?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
 }
 
 $('search').addEventListener('input', (event) => { state.search = event.target.value; render(); });

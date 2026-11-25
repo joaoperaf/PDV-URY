@@ -82,6 +82,14 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-25] — Issue #22: estados de carregamento, erro, vazio e pedido enviado (`static-menu/`)
+- Branch `feat/issue-22-menu-states` (a partir da `feat/issue-21-menu-checkout`). Estados do cardápio padronizados com ícones SVG de traço uniforme, badges textuais (sem depender apenas de cor) e ações claras de recuperação:
+  - **Loading estável:** skeletons para categorias e cards no HTML inicial e em `renderLoadingState()`, mantendo a geometria estável com `aria-busy`.
+  - **Erro de carregamento:** estado `role="alert"` com explicação clara e botão `Tentar novamente` que refaz `loadMenu()` sem recarregar a página.
+  - **Busca/filtro vazio e cardápio sem itens:** mensagens contextuais informando o termo/categoria pesquisado com ação `Limpar busca e filtros` (e estado dedicado quando não há itens `available`).
+  - **Carrinho vazio:** substituído emoji isolado por ícone SVG consistente e ação `Explorar cardápio` retornando o foco para a busca.
+  - **Confirmação pós-envio:** cartão `#order-sent-banner` (`role="status"`) exibido no painel ao abrir o WhatsApp, orientando a confirmar o envio na conversa, com link direto `Abrir WhatsApp novamente` e botão `Iniciar novo pedido`. Alterações espelhadas em `ury/public/static-menu/` e `ury/www/menu.html`, e fluxo validado manualmente pelo usuário em `/menu`.
+
 ### [2026-11-25] — Issue #21: reorganização visual e acessibilidade do checkout (`static-menu/`)
 - Branch `feat/issue-21-menu-checkout` (a partir da `feat/issue-20-menu-sections`). Formulário do carrinho reorganizado em grupos semânticos (`<fieldset>`/`<legend>`): **Seus dados**, **Entrega ou retirada**, **Pagamento e observações**, com `<label>` visível em todos os campos e indicação explícita de campos obrigatórios (`*`) e opcionais.
 - Seleção de tipo de pedido convertida em controle segmentado (`Entrega` / `Retirada no balcão`), ocultando o endereço e exibindo orientação de balcão quando retirada está ativa (além de ajustar o rótulo `Cartão na entrega` / `Cartão na retirada`).
