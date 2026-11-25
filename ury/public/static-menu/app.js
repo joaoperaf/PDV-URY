@@ -480,6 +480,7 @@ function render({ focusCategory = false, revealActiveCategory = false } = {}) {
   const isEmpty = count() === 0;
   $('checkout-form').hidden = isEmpty;
   document.querySelector('.cart-footer .whatsapp-button').disabled = isEmpty;
+  if (!isEmpty) updateCheckoutSummary();
   $('cart-items').querySelectorAll('[data-minus]').forEach((button) => button.addEventListener('click', () => changeQuantity(button.dataset.minus, -1)));
   $('cart-items').querySelectorAll('[data-plus]').forEach((button) => button.addEventListener('click', () => changeQuantity(button.dataset.plus, 1)));
   $('cart-items').querySelectorAll('[data-edit]').forEach((button) => button.addEventListener('click', () => {
@@ -499,6 +500,107 @@ function setCartOpen(isOpen) {
   $('open-cart').setAttribute('aria-expanded', String(isOpen));
 }
 
+function currentOrderType() {
+  const checked = $('checkout-form')?.querySelector('[name="type"]:checked');
+  return checked?.value || $('checkout-form')?.querySelector('[name="type"]')?.value || 'delivery';
+}
+
+function setFieldError(inputId, errorId, message) {
+  const input = $(inputId);
+  const error = $(errorId);
+  if (!input || !error) return;
+  if (message) {
+    input.setAttribute('aria-invalid', 'true');
+    error.textContent = message;
+    error.hidden = false;
+  } else {
+    input.removeAttribute('aria-invalid');
+    error.textContent = '';
+    error.hidden = true;
+  }
+}
+
+function syncOrderTypeUI() {
+  const isDelivery = currentOrderType() === 'delivery';
+  const addressWrap = $('delivery-address-field');
+  const addressInput = $('checkout-address');
+  const pickupHint = $('pickup-hint');
+  const cardOption = $('card-payment-option');
+  if (addressWrap) addressWrap.hidden = !isDelivery;
+  if (addressInput) addressInput.required = isDelivery;
+  if (!isDelivery) setFieldError('checkout-address', 'error-address', '');
+  if (pickupHint) pickupHint.hidden = isDelivery;
+  if (cardOption) {
+    const label = isDelivery ? 'Cartão na entrega' : 'Cartão na retirada';
+    cardOption.value = label;
+    cardOption.textContent = label;
+  }
+  $('checkout-form')?.querySelectorAll('.type-choice').forEach((choice) => {
+    const radio = choice.querySelector('input');
+    if (radio) choice.classList.toggle('selected', radio.checked);
+  });
+  updateCheckoutSummary();
+}
+
+function updateCheckoutSummary() {
+  const summary = $('checkout-summary');
+  if (!summary) return;
+  if (!count()) {
+    summary.innerHTML = '';
+    return;
+  }
+  const isDelivery = currentOrderType() === 'delivery';
+  const typeLabel = isDelivery ? 'Entrega' : 'Retirada no balcão';
+  const address = $('checkout-address')?.value?.trim() || '';
+  const payment = $('checkout-payment')?.value || 'PIX';
+  const itemCount = count();
+  const destinationLine = isDelivery
+    ? (address ? escapeHtml(address) : '<span class="summary-pending">Informe o endereço acima</span>')
+    : 'No balcão da loja';
+  summary.innerHTML = `
+    <strong class="summary-heading">Resumo antes de enviar</strong>
+    <dl class="summary-list">
+      <div><dt>Itens</dt><dd>${itemCount} ${itemCount === 1 ? 'item' : 'itens'}</dd></div>
+      <div><dt>Recebimento</dt><dd>${escapeHtml(typeLabel)}</dd></div>
+      <div><dt>${isDelivery ? 'Endereço' : 'Local'}</dt><dd>${destinationLine}</dd></div>
+      <div><dt>Pagamento</dt><dd>${escapeHtml(payment)}</dd></div>
+      <div class="summary-total-row"><dt>Total</dt><dd>${money(total())}</dd></div>
+    </dl>
+  `;
+}
+
+function validateCheckoutForm() {
+  let firstInvalid = null;
+  const nameInput = $('checkout-name');
+  const nameValue = String(nameInput?.value || '').trim();
+  if (!nameValue) {
+    setFieldError('checkout-name', 'error-name', 'Informe seu nome para identificar o pedido.');
+    firstInvalid ||= nameInput;
+  } else {
+    setFieldError('checkout-name', 'error-name', '');
+  }
+
+  if (currentOrderType() === 'delivery') {
+    const addressInput = $('checkout-address');
+    const addressValue = String(addressInput?.value || '').trim();
+    if (!addressValue) {
+      setFieldError('checkout-address', 'error-address', 'Informe o endereço completo para entrega.');
+      firstInvalid ||= addressInput;
+    } else {
+      setFieldError('checkout-address', 'error-address', '');
+    }
+  } else {
+    setFieldError('checkout-address', 'error-address', '');
+  }
+
+  if (firstInvalid) {
+    firstInvalid.focus?.();
+    firstInvalid.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+  return true;
+}
+
 function formatWhatsAppItem(row) {
   const itemLines = [`• ${row.quantity}x ${row.item.name} — ${money(rowTotal(row))}`];
   if (row.details?.meatPoint) itemLines.push(`  Ponto: ${row.details.meatPoint}`);
@@ -512,16 +614,34 @@ function formatWhatsAppItem(row) {
 function sendWhatsApp(event) {
   event.preventDefault();
   if (!count()) return;
+  const alertBox = $('checkout-alert');
+  if (alertBox) {
+    alertBox.hidden = true;
+    alertBox.textContent = '';
+  }
+  if (!validateCheckoutForm()) return;
+
   const form = new FormData(event.currentTarget);
-  const type = form.get('type') === 'pickup' ? 'Retirada no balcão' : 'Entrega';
-  const lines = [`🍔 *NOVO PEDIDO — ${state.menu.restaurantName.toUpperCase()}*`, `*Cliente:* ${form.get('name')}`, `*Tipo:* ${type}`];
-  if (form.get('phone')) lines.push(`*Telefone:* ${form.get('phone')}`);
-  if (type === 'Entrega' && form.get('address')) lines.push(`*Endereço:* ${form.get('address')}`);
+  const isPickup = form.get('type') === 'pickup';
+  const type = isPickup ? 'Retirada no balcão' : 'Entrega';
+  const name = String(form.get('name') || '').trim();
+  const phoneField = String(form.get('phone') || '').trim();
+  const address = String(form.get('address') || '').trim();
+  const notes = String(form.get('notes') || '').trim();
+  const lines = [`🍔 *NOVO PEDIDO — ${state.menu.restaurantName.toUpperCase()}*`, `*Cliente:* ${name}`, `*Tipo:* ${type}`];
+  if (phoneField) lines.push(`*Telefone:* ${phoneField}`);
+  if (!isPickup && address) lines.push(`*Endereço:* ${address}`);
   lines.push('', '*ITENS:*', ...cartRows().map(formatWhatsAppItem), '', `*TOTAL:* ${money(total())}`, `*Pagamento:* ${form.get('payment')}`);
-  if (form.get('notes')) lines.push(`*Observações:* ${form.get('notes')}`);
+  if (notes) lines.push(`*Observações:* ${notes}`);
   const phone = String(state.menu.whatsappPhone || '').replace(/\D/g, '');
   if (!phone) {
-    window.alert('O WhatsApp ainda não está configurado neste cardápio.');
+    if (alertBox) {
+      alertBox.textContent = 'O número de WhatsApp da loja ainda não foi configurado no menu.json.';
+      alertBox.hidden = false;
+      alertBox.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      window.alert('O WhatsApp ainda não está configurado neste cardápio.');
+    }
     return;
   }
   const destination = `https://wa.me/${phone.startsWith('55') ? phone : `55${phone}`}`;
@@ -546,9 +666,17 @@ $('categories').addEventListener('keydown', (event) => {
     buttons[nextIndex].scrollIntoView?.({ behavior: reduced ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' });
   }
 });
-$('checkout-form').querySelector('[name="type"]').addEventListener('change', (event) => {
-  $('delivery-address-field').hidden = event.target.value !== 'delivery';
+$('checkout-form').querySelectorAll('[name="type"]').forEach((input) => {
+  input.addEventListener('change', syncOrderTypeUI);
 });
+$('checkout-name')?.addEventListener('input', () => {
+  if ($('checkout-name').value.trim()) setFieldError('checkout-name', 'error-name', '');
+});
+$('checkout-address')?.addEventListener('input', () => {
+  if ($('checkout-address').value.trim()) setFieldError('checkout-address', 'error-address', '');
+  updateCheckoutSummary();
+});
+$('checkout-payment')?.addEventListener('change', updateCheckoutSummary);
 $('open-cart').addEventListener('click', () => {
   setCartOpen(true);
 });

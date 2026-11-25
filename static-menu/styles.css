@@ -120,10 +120,10 @@ main { min-width: 0; padding: 0; scroll-margin-top: 76px; }
 .cart-panel.open { display: flex; flex-direction: column; }
 .cart-heading, .cart-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .cart-heading { padding-bottom: 20px; border-bottom: 1px solid var(--line); }
-.panel-kicker, .form-heading { display: block; color: #b66a24; font-size: .68rem; font-weight: 800; letter-spacing: .12em; }
+.panel-kicker { display: block; color: #8f3f08; font-size: .75rem; font-weight: 800; letter-spacing: .1em; }
 .cart-heading strong { display: block; margin-top: 3px; font-size: 1.5rem; letter-spacing: -.03em; }
 .cart-heading span { color: var(--muted); font-size: .85rem; }
-.cart-heading .panel-kicker { color: #b66a24; font-size: .68rem; }
+.cart-heading .panel-kicker { color: #8f3f08; font-size: .75rem; }
 .cart-heading .panel-kicker + strong + span { display: block; margin-top: 4px; }
 .icon-button { width: 44px; height: 44px; border: 0; border-radius: 10px; background: #fff8ed; color: var(--ink); font-size: 2rem; line-height: 1; }
 .cart-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 4px; }
@@ -140,15 +140,44 @@ main { min-width: 0; padding: 0; scroll-margin-top: 76px; }
 .quantity button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: white; color: var(--ink); font-size: 1.1rem; }
 .quantity span { min-width: 16px; text-align: center; font-weight: 700; }
 .quantity .edit-item { width: auto; height: 34px; border: 0; border-radius: 8px; padding: 0 8px; color: #a34a08; font-size: .75rem; font-weight: 700; }
-.form-heading { margin: 20px 0 10px; color: var(--ink); font-size: .76rem; letter-spacing: .1em; text-transform: uppercase; }
-.cart-footer { flex: 0 0 auto; padding-top: 16px; border-top: 1px solid var(--line); background: #fffdf9; }
-.cart-total { margin-bottom: 14px; padding: 12px 14px; border: 1px solid #e8c98f; border-radius: 14px; background: #fff3da; font-size: .95rem; }
+.cart-footer { flex: 0 0 auto; padding-top: 14px; border-top: 1px solid var(--line); background: #fffdf9; }
+.cart-total { margin-bottom: 10px; padding: 11px 14px; border: 1px solid #e8c98f; border-radius: 14px; background: #fff3da; font-size: .95rem; font-variant-numeric: tabular-nums; }
 .cart-total span { color: var(--ink); font-weight: 700; }
-.cart-total strong { color: #8f3f08; font-size: 1.5rem; }
-#checkout-form { display: grid; gap: 10px; }
-#checkout-form input, #checkout-form select, #checkout-form textarea { width: 100%; border: 1px solid #eadfd1; border-radius: 12px; padding: 12px 13px; background: white; }
-.whatsapp-button { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 56px; border: 0; border-radius: 14px; padding: 14px 16px; background: #176b3a; color: white; font-weight: 800; box-shadow: 0 8px 18px rgba(23,107,58,.2); transition: background .18s ease, transform .18s ease, box-shadow .18s ease; }
-.whatsapp-button:hover, .whatsapp-button:focus-visible { background: #12552e; box-shadow: 0 10px 22px rgba(23,107,58,.28); }
+.cart-total strong { color: #8f3f08; font-size: 1.45rem; }
+#checkout-form { display: grid; gap: 14px; margin-top: 10px; padding: 16px 0 8px; border-top: 1px solid var(--line); }
+.checkout-title { margin: 0; font-size: 1.12rem; letter-spacing: -.02em; }
+.checkout-group { display: grid; gap: 10px; margin: 0; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: white; }
+.checkout-group legend { float: left; width: 100%; margin-bottom: 2px; padding: 0; color: var(--ink); font-size: .88rem; font-weight: 800; }
+.field { display: grid; gap: 5px; clear: both; }
+.field label { color: var(--ink); font-size: .86rem; font-weight: 700; }
+.field-req { color: #9e1c1c; font-weight: 800; }
+.field-opt { color: var(--muted); font-size: .78rem; font-weight: 400; }
+#checkout-form input:not([type="radio"]), #checkout-form select, #checkout-form textarea { width: 100%; min-height: 44px; border: 1px solid #dfd2c1; border-radius: 11px; padding: 10px 12px; background: #fffdf9; color: var(--ink); transition: border-color .16s ease, background .16s ease; }
+#checkout-form input:not([type="radio"]):focus, #checkout-form select:focus, #checkout-form textarea:focus { border-color: var(--orange); background: white; }
+#checkout-form [aria-invalid="true"] { border-color: #b42318; background: #fff8f7; }
+.field-error { color: #9e1c1c; font-size: .8rem; font-weight: 700; line-height: 1.35; }
+.type-toggle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; clear: both; }
+.type-choice { position: relative; cursor: pointer; }
+.type-choice input { position: absolute; opacity: 0; pointer-events: none; }
+.type-choice span { display: flex; align-items: center; justify-content: center; min-height: 44px; border: 1px solid #dfd2c1; border-radius: 11px; padding: 8px 10px; background: #fffdf9; color: var(--muted); font-size: .88rem; font-weight: 700; text-align: center; transition: border-color .16s ease, background .16s ease, color .16s ease; }
+.type-choice input:focus-visible + span { outline: 3px solid #f5b400; outline-offset: 2px; }
+.type-choice.selected span { border-color: var(--ink); background: var(--ink); color: #ffe8ad; }
+.pickup-hint { margin: 0; border-radius: 10px; padding: 9px 11px; background: #fff8ea; color: #5b4a38; font-size: .84rem; }
+.checkout-summary { display: grid; gap: 8px; padding: 13px 14px; border: 1px solid #e8c98f; border-radius: 14px; background: #fff8ea; }
+.summary-heading { color: #8f3f08; font-size: .82rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.summary-list { display: grid; gap: 6px; margin: 0; font-size: .86rem; font-variant-numeric: tabular-nums; }
+.summary-list div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.summary-list dt { color: var(--muted); }
+.summary-list dd { margin: 0; color: var(--ink); font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+.summary-pending { color: #9e1c1c; font-weight: 600; }
+.summary-total-row { margin-top: 2px; padding-top: 6px; border-top: 1px dashed #e2c590; }
+.summary-total-row dt, .summary-total-row dd { color: #8f3f08; font-size: .95rem; font-weight: 800; }
+.checkout-alert { padding: 11px 12px; border: 1px solid #e5b3ae; border-radius: 12px; background: #fff5f4; color: #9e1c1c; font-size: .85rem; font-weight: 700; }
+.whatsapp-button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 54px; border: 0; border-radius: 14px; padding: 12px 16px; background: #176b3a; color: white; font-weight: 800; box-shadow: 0 8px 18px rgba(33,26,18,.16); transition: background .18s ease, transform .18s ease, box-shadow .18s ease; }
+.whatsapp-cta-label { display: inline-flex; align-items: center; gap: 9px; text-align: left; }
+.whatsapp-cta-label svg { width: 20px; height: 20px; flex: 0 0 auto; }
+.whatsapp-hint { display: block; margin-top: 7px; color: var(--muted); font-size: .78rem; text-align: center; }
+.whatsapp-button:hover, .whatsapp-button:focus-visible { background: #12552e; box-shadow: 0 10px 22px rgba(33,26,18,.22); }
 .whatsapp-button:active { transform: translateY(1px); }
 .floating-cart { position: fixed; right: 18px; bottom: 18px; z-index: 6; display: none; min-height: 52px; gap: 14px; border: 0; border-radius: 999px; padding: 14px 18px; background: var(--orange); color: white; box-shadow: 0 6px 20px #0003; }
 .floating-cart.visible { display: flex; }
@@ -215,5 +244,6 @@ main { min-width: 0; padding: 0; scroll-margin-top: 76px; }
 .cart-empty p { max-width: 28ch; margin: 0; color: var(--muted); }
 .cart-empty-action { margin-top: 8px; min-height: 44px; border: 1px solid #e8c98f; border-radius: 12px; padding: 0 18px; background: white; color: #8f3f08; font-weight: 700; cursor: pointer; }
 .whatsapp-button:disabled { opacity: .5; cursor: not-allowed; }
+.whatsapp-button:disabled + .whatsapp-hint { opacity: .55; }
 @media (prefers-reduced-motion: reduce) { .cart-panel, .cart-backdrop { transition: none; animation: none; } }
-#checkout-form[hidden] { display: none; }
+[hidden] { display: none !important; }

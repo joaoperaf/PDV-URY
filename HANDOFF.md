@@ -82,6 +82,11 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-25] — Issue #21: reorganização visual e acessibilidade do checkout (`static-menu/`)
+- Branch `feat/issue-21-menu-checkout` (a partir da `feat/issue-20-menu-sections`). Formulário do carrinho reorganizado em grupos semânticos (`<fieldset>`/`<legend>`): **Seus dados**, **Entrega ou retirada**, **Pagamento e observações**, com `<label>` visível em todos os campos e indicação explícita de campos obrigatórios (`*`) e opcionais.
+- Seleção de tipo de pedido convertida em controle segmentado (`Entrega` / `Retirada no balcão`), ocultando o endereço e exibindo orientação de balcão quando retirada está ativa (além de ajustar o rótulo `Cartão na entrega` / `Cartão na retirada`).
+- Adicionados validação acessível (`aria-invalid`, `aria-describedby` e mensagens `role="alert"` com foco automático no primeiro campo pendente), bloco dinâmico **Resumo antes de enviar** (`#checkout-summary`) e CTA explícito **Abrir WhatsApp e enviar pedido** com ícone SVG e texto de apoio. Alterações espelhadas em `ury/public/static-menu/` e `ury/www/menu.html`, e fluxo validado manualmente pelo usuário em `/menu`.
+
 ### [2026-11-25] — Issue #20: seções e categorias do cardápio estático (`static-menu/`)
 - Branch `feat/issue-20-menu-sections` (a partir da `feat/issue-19-menu-cart`). Corpo do cardápio organizado em seções editoriais semânticas (`<section>` com título `<h2>`, subtítulo conciso, ícone SVG de traço uniforme e contagem de opções) para **Hambúrgueres**, **Entradas** e **Bebidas**, além de suporte nativo à seção/filtro **Mais pedidos** quando houver itens com `"featured": true` no `menu.json` (documentado em `static-menu/README.md`).
 - Grade de produtos ajustada para `repeat(auto-fill, minmax(260px, 1fr))` para evitar cards esticados em seções com 1 ou 2 itens; adicionado indicador `X no pedido` nos cards já presentes na sacola.
