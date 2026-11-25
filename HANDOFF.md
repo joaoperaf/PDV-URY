@@ -82,9 +82,15 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-25] — Issue #20: seções e categorias do cardápio estático (`static-menu/`)
+- Branch `feat/issue-20-menu-sections` (a partir da `feat/issue-19-menu-cart`). Corpo do cardápio organizado em seções editoriais semânticas (`<section>` com título `<h2>`, subtítulo conciso, ícone SVG de traço uniforme e contagem de opções) para **Hambúrgueres**, **Entradas** e **Bebidas**, além de suporte nativo à seção/filtro **Mais pedidos** quando houver itens com `"featured": true` no `menu.json` (documentado em `static-menu/README.md`).
+- Grade de produtos ajustada para `repeat(auto-fill, minmax(260px, 1fr))` para evitar cards esticados em seções com 1 ou 2 itens; adicionado indicador `X no pedido` nos cards já presentes na sacola.
+- Navegação de categorias refinada: ícones SVG consistentes + contadores tabulares por categoria, foco preservado na seleção por teclado, suporte a setas (`ArrowLeft`/`ArrowRight`/`ArrowUp`/`ArrowDown`/`Home`/`End`), faixa horizontal sticky estendida até `860px` (cobrindo tablet e mobile) com rolagem automática do chip ativo e botão `Limpar filtros` no estado vazio de busca/categoria.
+- Contraste ajustado para passar sem alertas de contraste/texto pequeno no detector visual, alterações espelhadas em `ury/public/static-menu/` e `ury/www/menu.html`, e fluxo validado manualmente pelo usuário em `/menu`.
+
 ### [2026-11-25] — Issue #19: carrinho do cardápio estático (`static-menu/`)
 - Branch `feat/issue-19-menu-cart`. Carrinho já tinha imagem/nome/preço, rodapé fixo com total + CTA WhatsApp; refinado: categoria, ponto da carne, adicionais (chips `2x Bacon`) e observação em linhas separadas (antes saíam coladas); quebra de texto longo; estado vazio com ícone, texto e botão "Ver cardápio"; formulário oculto e CTA desabilitado com carrinho vazio; `prefers-reduced-motion`.
-- Validado com Chrome headless (desktop 1280 / mobile 390), sem overflow horizontal, inclusive com observação longa e 3 adicionais. Testes manuais pelo usuário pendentes. Servir com `python3 -m http.server 8080` em `static-menu/`.
+- Validado com Chrome headless (desktop 1280 / mobile 390) e manualmente pelo usuário em `/menu`, sem overflow horizontal, inclusive com observação longa e 3 adicionais. Servir com `python3 -m http.server 8080` em `static-menu/`.
 - Corrigido o cálculo/edição de adicionais e envio ao WhatsApp (`static-menu/app.js`, sincronizado em `ury/public/static-menu/`): o item no carrinho agora preserva seu `id` e `price` base originais, calculando preço unitário e total da linha via `rowUnitPrice`/`rowTotal` (`item.price + adicionais`), eliminando a soma duplicada ao clicar em `Editar` (e permitindo voltar ao preço base ao remover adicionais) e incluindo ponto da carne, adicionais e observações de cada item na mensagem enviada ao WhatsApp.
 
 ### [2026-11-03] — Issue #1: painel do pedido responsivo no PDV

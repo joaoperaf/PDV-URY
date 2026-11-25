@@ -5,6 +5,7 @@ Este site não depende do Frappe, Docker, banco de dados ou notebook ligado.
 ## Alterar produtos
 
 Edite `menu.json`. Para ocultar um item temporariamente, use `"available": false`.
+Para destacar um produto na seção **Mais pedidos**, adicione `"featured": true` ao item correspondente.
 Depois de editar, publique novamente a pasta `static-menu` no GitHub Pages, Cloudflare Pages ou Netlify.
 
 Preencha `whatsappPhone` com o número da loja, incluindo DDD. Exemplo: `"5511999999999"`.

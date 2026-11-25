@@ -2,7 +2,36 @@ const state = { menu: null, category: 'Todos', search: '', cart: {}, selectedIte
 const $ = (id) => document.getElementById(id);
 const money = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 const menuUrl = new URL('menu.json', document.currentScript?.src || window.location.href);
-const categoryLabels = { Todos: 'Todos', Hamburgers: 'Hambúrgueres', Starters: 'Entradas', Beverages: 'Bebidas' };
+const FEATURED_CATEGORY = 'featured';
+const categoryAliases = {
+  Hamburgers: 'Hamburgers',
+  'Hambúrgueres': 'Hamburgers',
+  Starters: 'Entradas',
+  Entradas: 'Entradas',
+  Beverages: 'Bebidas',
+  Bebidas: 'Bebidas',
+};
+const categoryOrder = ['Hamburgers', 'Entradas', 'Bebidas'];
+const categoryLabels = {
+  Todos: 'Todos',
+  [FEATURED_CATEGORY]: 'Mais pedidos',
+  Hamburgers: 'Hambúrgueres',
+  Entradas: 'Entradas',
+  Bebidas: 'Bebidas',
+};
+const categoryDescriptions = {
+  [FEATURED_CATEGORY]: 'Favoritos da casa escolhidos pelos clientes.',
+  Hamburgers: 'Blends artesanais grelhados no ponto que você preferir.',
+  Entradas: 'Porções crocantes para abrir o apetite ou compartilhar.',
+  Bebidas: 'Opções para acompanhar o seu pedido.',
+};
+const categoryIcons = {
+  Todos: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg>',
+  [FEATURED_CATEGORY]: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.8l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L2.8 8l5-.7L10 2.8z"/></svg>',
+  Hamburgers: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5a6.5 5 0 0 1 13 0H3.5z"/><path d="M2.8 11.2h14.4"/><path d="M4 13.8h12a1.8 1.8 0 0 1-1.8 1.8H5.8A1.8 1.8 0 0 1 4 13.8z"/></svg>',
+  Entradas: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 9.5l1.3 7h6.4l1.3-7H5.5z"/><path d="M7.4 9.5V4.8"/><path d="M10 9.5V3.5"/><path d="M12.6 9.5V5.2"/></svg>',
+  Bebidas: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 6.5h9l-1 10H6.5l-1-10z"/><path d="M4.5 6.5h11"/><path d="M10.5 6.5l1.3-3h2.2"/></svg>',
+};
 const addOns = [
   { id: 'extra-meat', name: 'Mais uma carne', price: 12 },
   { id: 'bacon', name: 'Bacon', price: 8 },
@@ -23,15 +52,97 @@ async function loadMenu() {
   }
 }
 
+function canonicalCategory(raw) {
+  return categoryAliases[raw] || raw || 'Outros';
+}
+
+function categoryLabel(category) {
+  return categoryLabels[canonicalCategory(category)] || categoryLabels[category] || category;
+}
+
+function availableItems() {
+  return state.menu.items.filter((item) => item.available);
+}
+
+function matchesSearch(item) {
+  const query = state.search.toLowerCase().trim();
+  if (!query) return true;
+  return `${item.name} ${item.description || ''} ${categoryLabel(item.category)}`.toLowerCase().includes(query);
+}
+
+function orderedProductCategories() {
+  const present = [...new Set(availableItems().map((item) => canonicalCategory(item.category)))];
+  return [
+    ...categoryOrder.filter((category) => present.includes(category)),
+    ...present.filter((category) => !categoryOrder.includes(category)),
+  ];
+}
+
+function hasFeaturedItems() {
+  return availableItems().some((item) => Boolean(item.featured));
+}
+
 function categories() {
-  return ['Todos', ...new Set(state.menu.items.filter((item) => item.available).map((item) => item.category))];
+  return [
+    'Todos',
+    ...(hasFeaturedItems() ? [FEATURED_CATEGORY] : []),
+    ...orderedProductCategories(),
+  ];
+}
+
+function itemsInCategory(category) {
+  const matching = availableItems().filter(matchesSearch);
+  if (category === 'Todos') return matching;
+  if (category === FEATURED_CATEGORY) return matching.filter((item) => Boolean(item.featured));
+  return matching.filter((item) => canonicalCategory(item.category) === category);
 }
 
 function visibleItems() {
-  const query = state.search.toLowerCase().trim();
-  return state.menu.items.filter((item) => item.available
-    && (state.category === 'Todos' || item.category === state.category)
-    && (!query || `${item.name} ${item.description}`.toLowerCase().includes(query)));
+  return itemsInCategory(state.category);
+}
+
+function menuSections() {
+  const hasQuery = Boolean(state.search.trim());
+  if (state.category === 'Todos') {
+    const sections = [];
+    if (!hasQuery && hasFeaturedItems()) {
+      const featured = itemsInCategory(FEATURED_CATEGORY);
+      if (featured.length) {
+        sections.push({
+          id: FEATURED_CATEGORY,
+          title: categoryLabel(FEATURED_CATEGORY),
+          description: categoryDescriptions[FEATURED_CATEGORY] || '',
+          items: featured,
+        });
+      }
+    }
+    orderedProductCategories().forEach((category) => {
+      const items = itemsInCategory(category);
+      if (items.length) {
+        sections.push({
+          id: category,
+          title: categoryLabel(category),
+          description: hasQuery ? '' : (categoryDescriptions[category] || ''),
+          items,
+        });
+      }
+    });
+    return sections;
+  }
+  const items = visibleItems();
+  if (!items.length) return [];
+  return [{
+    id: state.category,
+    title: categoryLabel(state.category),
+    description: hasQuery ? '' : (categoryDescriptions[state.category] || ''),
+    items,
+  }];
+}
+
+function itemCartQuantity(itemId) {
+  return cartRows()
+    .filter((row) => row.item.id === itemId)
+    .reduce((sum, row) => sum + row.quantity, 0);
 }
 
 function cartRows() { return Object.values(state.cart); }
@@ -101,7 +212,7 @@ function customizationSummary() {
     .filter((option) => customization.addOns[option.id] > 0)
     .map((option) => `${customization.addOns[option.id]}x ${option.name}`);
   const choices = [];
-  if (state.selectedItem?.category === 'Hamburgers') {
+  if (canonicalCategory(state.selectedItem?.category) === 'Hamburgers') {
     choices.push(`Carne: ${customization.meatPoint}`);
   }
   if (extras.length) choices.push(extras.join(', '));
@@ -114,7 +225,7 @@ function renderDetails() {
   const customization = state.customization;
   if (!item || !customization) return;
   const details = $('item-details');
-  const isBurger = item.category === 'Hamburgers';
+  const isBurger = canonicalCategory(item.category) === 'Hamburgers';
   details.classList.add('visible');
   details.setAttribute('aria-hidden', 'false');
   details.setAttribute('role', 'dialog');
@@ -126,7 +237,7 @@ function renderDetails() {
       <div class="details-product">
         <img class="details-image" src="${escapeHtml(item.image || '')}" alt="${escapeHtml(item.name)}">
         <div class="details-copy">
-          <span class="card-category">${escapeHtml(categoryLabels[item.category] || item.category)}</span>
+          <span class="card-category">${escapeHtml(categoryLabel(item.category))}</span>
           <h2>${escapeHtml(item.name)}</h2>
           <p>${escapeHtml(item.description || 'Escolha como você quer seu pedido.')}</p>
           <strong class="details-base-price">${money(item.price)} <small>unidade</small></strong>
@@ -240,35 +351,95 @@ function updateCustomizationSummary() {
   if (summaryElement) summaryElement.textContent = customizationSummary();
 }
 
-function render() {
-  const categoryElement = $('categories');
-  categoryElement.innerHTML = categories().map((category) =>
-    `<button class="category ${category === state.category ? 'active' : ''}" data-category="${escapeHtml(category)}" aria-pressed="${category === state.category}">${escapeHtml(categoryLabels[category] || category)}</button>`
-  ).join('');
-  categoryElement.querySelectorAll('button').forEach((button) => {
-    button.addEventListener('click', () => { state.category = button.dataset.category; render(); });
-  });
-
-  const items = visibleItems();
-  $('menu-count').textContent = `${items.length} ${items.length === 1 ? 'item disponível' : 'itens disponíveis'}`;
-  $('menu-status').className = items.length ? 'status' : 'status status-empty';
-  $('menu-status').textContent = items.length ? '' : 'Nenhum item encontrado. Tente outra busca ou categoria.';
-  $('menu').innerHTML = items.map((item) => `
+function renderCard(item) {
+  const inCart = itemCartQuantity(item.id);
+  return `
     <article class="card" data-open-item="${escapeHtml(item.id)}" tabindex="0" role="button" aria-label="Personalizar ${escapeHtml(item.name)}">
-      <img class="card-image" src="${escapeHtml(item.image || '')}" alt="" loading="lazy">
+      <div class="card-image-wrap">
+        <img class="card-image" src="${escapeHtml(item.image || '')}" alt="" loading="lazy">
+        ${inCart > 0 ? `<span class="card-in-cart" aria-label="${inCart} no pedido">${inCart} no pedido</span>` : ''}
+      </div>
       <div class="card-content">
         <div>
-          <div class="card-category">${escapeHtml(categoryLabels[item.category] || item.category)}</div>
-          <h2>${escapeHtml(item.name)}</h2>
+          <h3>${escapeHtml(item.name)}</h3>
           <p>${escapeHtml(item.description || '')}</p>
         </div>
         <div class="card-bottom">
           <span class="price">${money(item.price)}</span>
-          <button class="add-button" data-add="${item.id}" type="button" aria-label="Adicionar ${escapeHtml(item.name)} ao pedido"><span aria-hidden="true">+</span> Adicionar</button>
+          <button class="add-button" data-add="${escapeHtml(item.id)}" type="button" aria-label="Adicionar ${escapeHtml(item.name)} ao pedido"><span aria-hidden="true">+</span> Adicionar</button>
         </div>
       </div>
     </article>
-  `).join('');
+  `;
+}
+
+function selectCategory(nextCategory, { focusCategory = false } = {}) {
+  state.category = nextCategory;
+  render({ focusCategory, revealActiveCategory: true });
+  const mainEl = document.querySelector('main');
+  if (mainEl && mainEl.getBoundingClientRect?.().top < 0) {
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    mainEl.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  }
+}
+
+function render({ focusCategory = false, revealActiveCategory = false } = {}) {
+  const availableCategories = categories();
+  if (!availableCategories.includes(state.category)) state.category = 'Todos';
+
+  const categoryElement = $('categories');
+  const categoryHadFocus = Boolean(document.activeElement && categoryElement.contains?.(document.activeElement));
+  categoryElement.innerHTML = availableCategories.map((category) => {
+    const isActive = category === state.category;
+    const itemCount = itemsInCategory(category).length;
+    const icon = categoryIcons[category] || '';
+    const label = categoryLabel(category);
+    return `<button class="category ${isActive ? 'active' : ''}" type="button" data-category="${escapeHtml(category)}" aria-pressed="${isActive}">${icon ? `<span class="category-icon">${icon}</span>` : ''}<span class="category-label">${escapeHtml(label)}</span><span class="category-count" aria-label="${itemCount} ${itemCount === 1 ? 'item' : 'itens'}">${itemCount}</span></button>`;
+  }).join('');
+  categoryElement.querySelectorAll('button').forEach((button) => {
+    button.addEventListener('click', () => selectCategory(button.dataset.category));
+  });
+  const activeCategoryButton = categoryElement.querySelector('.category.active');
+  if (focusCategory || categoryHadFocus) activeCategoryButton?.focus?.({ preventScroll: true });
+  if (revealActiveCategory) {
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    activeCategoryButton?.scrollIntoView?.({ behavior: reduced ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' });
+  }
+
+  const items = visibleItems();
+  const sections = menuSections();
+  const hasFilters = Boolean(state.search.trim()) || state.category !== 'Todos';
+  $('menu-count').textContent = `${items.length} ${items.length === 1 ? 'item disponível' : 'itens disponíveis'}`;
+  $('menu-status').className = items.length ? 'status status-hidden' : 'status status-empty';
+  $('menu-status').innerHTML = items.length
+    ? ''
+    : `<strong>Nenhum item encontrado</strong><p>Tente outro termo na busca ou volte para todas as categorias.</p>${hasFilters ? '<button type="button" class="reset-filters" id="reset-filters">Limpar filtros</button>' : ''}`;
+  $('reset-filters')?.addEventListener('click', () => {
+    state.search = '';
+    $('search').value = '';
+    selectCategory('Todos', { focusCategory: true });
+  });
+  $('menu').innerHTML = sections.map((section) => {
+    const slug = String(section.id).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const icon = categoryIcons[section.id] || '';
+    return `
+      <section class="menu-section" id="section-${escapeHtml(slug)}" aria-labelledby="heading-${escapeHtml(slug)}">
+        <header class="section-header">
+          <div class="section-title-row">
+            <div class="section-heading">
+              ${icon ? `<span class="section-icon">${icon}</span>` : ''}
+              <h2 id="heading-${escapeHtml(slug)}">${escapeHtml(section.title)}</h2>
+            </div>
+            <span class="section-count">${section.items.length} ${section.items.length === 1 ? 'opção' : 'opções'}</span>
+          </div>
+          ${section.description ? `<p class="section-description">${escapeHtml(section.description)}</p>` : ''}
+        </header>
+        <div class="menu-grid">
+          ${section.items.map(renderCard).join('')}
+        </div>
+      </section>
+    `;
+  }).join('');
   $('menu').querySelectorAll('[data-add]').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -296,7 +467,7 @@ function render() {
       <img class="cart-item-image" src="${escapeHtml(row.item.image || '')}" alt="" loading="lazy">
       <div class="cart-item-details">
         <strong>${escapeHtml(row.item.name)}</strong>
-        <small class="cart-category">${escapeHtml(categoryLabels[row.item.category] || row.item.category)}</small>
+        <small class="cart-category">${escapeHtml(categoryLabel(row.item.category))}</small>
         ${row.details?.meatPoint ? `<small class="cart-spec">Carne: ${escapeHtml(row.details.meatPoint)}</small>` : ''}
         ${row.details?.extras?.length ? `<ul class="cart-extras" aria-label="Adicionais">${row.details.extras.map((extra) => `<li>${extra.quantity}x ${escapeHtml(extra.name)}</li>`).join('')}</ul>` : ''}
         ${row.details?.notes ? `<small class="cart-spec cart-note">Obs.: ${escapeHtml(row.details.notes)}</small>` : ''}
@@ -358,6 +529,23 @@ function sendWhatsApp(event) {
 }
 
 $('search').addEventListener('input', (event) => { state.search = event.target.value; render(); });
+$('categories').addEventListener('keydown', (event) => {
+  const buttons = [...$('categories').querySelectorAll('button')];
+  if (!buttons.length) return;
+  const currentIndex = buttons.indexOf(document.activeElement);
+  if (currentIndex === -1) return;
+  let nextIndex = -1;
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextIndex = (currentIndex + 1) % buttons.length;
+  else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+  else if (event.key === 'Home') nextIndex = 0;
+  else if (event.key === 'End') nextIndex = buttons.length - 1;
+  if (nextIndex !== -1) {
+    event.preventDefault();
+    buttons[nextIndex].focus();
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    buttons[nextIndex].scrollIntoView?.({ behavior: reduced ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' });
+  }
+});
 $('checkout-form').querySelector('[name="type"]').addEventListener('change', (event) => {
   $('delivery-address-field').hidden = event.target.value !== 'delivery';
 });
