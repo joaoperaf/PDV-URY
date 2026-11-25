@@ -83,7 +83,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 6. Histórico de Sessões / Últimos Passos
 
 ### [2026-11-03] — Issue #1: painel do pedido responsivo no PDV
-- **Status: VALIDADO VISUALMENTE em 1280/820/390px (2026-11-25), pendente apenas PR/merge para `version-2` e fechar a issue #1. Branch `feat/issue-1-responsive-order-panel`.**
+- **Status: CONCLUÍDO (2026-11-25). Validado visualmente em 1280/820/390px e manualmente pelo usuário; PR #26 mergeado na `version-2` e issue #1 fechada.** Pendentes não bloqueantes: busca do cabeçalho estreita e rótulos do rodapé truncados no mobile; `ProductDialog` e foco do painel não testados em navegador.
 - Correções da validação (2026-11-25): `POS.tsx` raiz `flex-1` → `h-full` (layout não preenchia a altura em tablet/desktop, deixando faixa cinza); grade do cardápio agora `repeat(auto-fill,minmax(10rem,1fr))` (cards ficavam espremidos a 1280px por causa do painel fixo); `OrderTypeSelect` com `flex-wrap` (tipos de pedido cortados). Sem overflow horizontal nas 3 larguras; drawer (tablet) e bottom sheet (mobile) abrem com total/Enviar Pedido visíveis.
 - Testes visuais feitos com Chrome headless (puppeteer-core) e usuário de teste `claudeclaudinho@gmail.com` (precisa de role URY, linha na tabela Users da Branch e em Applicable for Users do POS Profile).
 - `OrderPanel`: fixo à direita em desktop (≥1024px), drawer lateral em tablet (md) e bottom sheet em mobile. Props `isOpen`/`onClose`; fecha por X, clique no fundo ou Esc; foco vai ao painel ao abrir e volta ao botão de origem ao fechar. z-index (`z-40` fundo / `z-[45]` painel) fica acima do `Footer` (`z-30`).
@@ -97,7 +97,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 - Validado apenas: `tsc --noEmit` e `yarn build`. **NÃO foi validado visualmente** — o último teste manual do usuário ainda apontava que a tela "só diminuía"; os ajustes de categorias/footer/carrinho foram feitos depois e não foram testados.
 - **Atenção:** o build servido é `ury/public/pos` (ignorado pelo git). Após qualquer alteração, rodar `yarn build` em `pos/` e recarregar com Ctrl+Shift+R.
 
-#### Para retomar (próximos passos da issue #1)
+#### Histórico dos passos da issue #1 (já concluídos)
 1. Testar `/ury/pos` em 1280px (desktop), 820px (tablet) e 390px (mobile) e anotar o que ainda está inutilizável.
 2. Ajustar o que falhar. Candidatos conhecidos: `ProductDialog`, cards do cardápio (botão de opções `min-h-8`), filtros rápidos, `OrderTabs`/`OrderTypeSelect` em telas estreitas.
 3. Conferir critérios de aceite da issue: carrinho visível sem sobrepor menu (desktop), drawer (tablet), painel inferior sem overflow horizontal (mobile), total/finalizar sempre alcançáveis, foco ao abrir/fechar.
@@ -239,6 +239,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ---
 
 ## 7. Próximos Passos Planejados
+- [x] **Issue #1 (painel responsivo):** concluída e mergeada (PR #26).
 - [ ] **Auditoria UI/UX:** implementar e validar as prioridades da análise de 2026-11-01 em viewport desktop, tablet e mobile, começando pelo fluxo `/pos` → pedido → pagamento.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
