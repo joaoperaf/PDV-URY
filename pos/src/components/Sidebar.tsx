@@ -17,7 +17,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'main courses': 'Hamburgers',
 };
 
-const getCategoryLabel = (label: string, name: string) => {
+export const getCategoryLabel = (label: string, name: string) => {
   const key = (name || label).trim().toLowerCase();
   return CATEGORY_LABELS[key] || label;
 };
@@ -42,9 +42,9 @@ const Sidebar = ({ disabled }: SidebarProps) => {
   };
 
   return (
-    <SidebarContainer disabled={disabled}>
+    <SidebarContainer disabled={disabled} className="hidden md:flex md:w-52 lg:w-64">
       {/* Categories List */}
-      <nav className="flex-1 p-6 overflow-y-auto">
+      <nav className="flex-1 p-4 lg:p-6 overflow-y-auto">
         <SidebarCard>
           {/* Section Title */}
           <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3 px-1">

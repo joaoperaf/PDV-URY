@@ -111,9 +111,9 @@ const Header = () => {
 
   return (
     <header className="bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between h-16 px-6">
+      <div className="flex items-center justify-between h-16 px-3 md:px-6">
         {/* Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center shrink-0">
         <Link to="/pos" className="flex items-center gap-3">
             <img
               src="/assets/ury/pos/logo-pericles-burger.png"
@@ -125,7 +125,7 @@ const Header = () => {
 
         {/* Search Bar */}
         {location.pathname !== '/kitchen' ? (
-          <div className="px-4 py-2 flex-1 flex items-center max-w-2xl mx-8 bg-gray-50 hover:bg-gray-100 border border-input rounded-md">
+          <div className="px-4 py-2 flex-1 flex items-center max-w-2xl mx-2 md:mx-8 bg-gray-50 min-w-0 hover:bg-gray-100 border border-input rounded-md">
             <Input
               ref={searchInputRef}
               placeholder={searchPlaceholder}
@@ -133,7 +133,7 @@ const Header = () => {
               value={searchValue}
               onChange={searchOnChange}
             />
-            <div className="flex items-center gap-2 text-gray-400">
+            <div className="hidden md:flex items-center gap-2 text-gray-400">
               <Command className="w-4 h-4" />
               <span>K</span>
             </div>
@@ -143,7 +143,7 @@ const Header = () => {
         )}
 
         {/* Right side actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* User menu */}
           <div className="relative" ref={userMenuRef}>
             <Button
@@ -154,7 +154,7 @@ const Header = () => {
               <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
                 <User className="w-4 h-4 text-white" />
               </div>
-              <span className="text-sm font-medium">{user?.full_name || 'User'}</span>
+              <span className="hidden md:inline text-sm font-medium">{user?.full_name || 'User'}</span>
               <ChevronDown className="w-4 h-4" />
             </Button>
 

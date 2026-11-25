@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { t } from '../i18n';
-import { Star, TrendingUp } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
+import { Star, TrendingUp, ShoppingCart } from 'lucide-react';
+import { formatCurrency, flt } from '@ury/core';
+import Sidebar, { getCategoryLabel } from '../components/Sidebar';
 import OrderPanel from '../components/OrderPanel';
 import ProductDialog from '../components/ProductDialog';
 import MenuList from '../components/MenuList';
 import { MenuItem, usePOSStore } from '../store/pos-store';
-import { cn } from '@ury/ui';
+import { cn, Button } from '@ury/ui';
 import { Spinner, StateMessage } from '@ury/ui';
 import InitialLoader from '../components/InitialLoader';
 
@@ -20,9 +21,21 @@ export default function POS() {
     error,
     isMenuInteractionDisabled,
     isInitializing,
+    activeOrders,
+    categories,
+    selectedCategory,
+    setSelectedCategory,
   } = usePOSStore();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const cartTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const closeCart = () => {
+    setIsCartOpen(false);
+    // Devolve o foco ao botão que abriu o painel
+    requestAnimationFrame(() => cartTriggerRef.current?.focus());
+  };
 
   const handleAddItem = (item: MenuItem) => {
     if (isMenuInteractionDisabled()) return;
@@ -34,6 +47,16 @@ export default function POS() {
     setSelectedItem(item);
     setIsDialogOpen(true);
   };
+
+  const cartCount = activeOrders.reduce((sum, item) => sum + item.quantity, 0);
+  const cartTotal = flt(
+    activeOrders.reduce((sum, item) => {
+      const base = item.selectedVariant?.price || item.price;
+      const addons = item.selectedAddons?.reduce((a, ad) => a + ad.price, 0) || 0;
+      return sum + (base + addons) * item.quantity;
+    }, 0),
+    2
+  );
 
   const QuickFilterButton = ({ filter, icon: Icon, label }: { 
     filter: 'all' | 'special';
@@ -82,9 +105,9 @@ export default function POS() {
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       <Sidebar disabled={isMenuInteractionDisabled()} />
-      <div className="flex-1 flex flex-col h-full overflow-hidden pe-96">
+      <div className="flex-1 flex flex-col h-full overflow-hidden lg:pe-96">
         <div className="p-4 bg-white border-b border-gray-200">
           <div className="max-w-screen-xl mx-auto space-y-3">
             <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden">
@@ -102,9 +125,52 @@ export default function POS() {
           </div>
         </div>
 
+        {/* Categorias (mobile): faixa horizontal com rolagem, substitui a sidebar < md */}
+        <div className="md:hidden flex shrink-0 gap-2 overflow-x-auto border-b border-gray-200 bg-white px-4 py-2" role="tablist" aria-label={t('pos_sidebar.categories')}>
+          {[{ name: '', label: t('common.all') }, ...categories.map((c) => ({ name: c.name, label: getCategoryLabel(c.label, c.name) }))].map((category) => {
+            const active = selectedCategory === category.name;
+            return (
+              <button
+                key={category.name || 'all'}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                disabled={isMenuInteractionDisabled()}
+                onClick={() => setSelectedCategory(category.name)}
+                className={cn(
+                  'shrink-0 min-h-11 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50',
+                  active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                )}
+              >
+                {category.label}
+              </button>
+            );
+          })}
+        </div>
+
         <MenuList onAddItem={handleAddItem} onOpenItemOptions={handleOpenItemOptions} />
+        {/* Barra de resumo (tablet/mobile): mantém total e acesso ao pedido sempre alcançáveis */}
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-gray-200 bg-white p-3 lg:hidden">
+          <div className="min-w-0">
+            <div className="text-xs text-gray-500">
+              {cartCount} {t('cart.items')}
+            </div>
+            <div className="text-lg font-bold tabular-nums text-gray-950">{formatCurrency(cartTotal)}</div>
+          </div>
+          <Button
+            ref={cartTriggerRef}
+            type="button"
+            size="lg"
+            onClick={() => setIsCartOpen(true)}
+            aria-expanded={isCartOpen}
+            className="gap-2 font-semibold"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {t('cart.order_summary')}
+          </Button>
+        </div>
       </div>
-      <OrderPanel />
+      <OrderPanel isOpen={isCartOpen} onClose={closeCart} />
       {isDialogOpen && <ProductDialog onClose={() => setIsDialogOpen(false)} />}
     </div>
   );
