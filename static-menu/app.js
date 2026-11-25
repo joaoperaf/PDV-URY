@@ -287,16 +287,19 @@ function render() {
       <img class="cart-item-image" src="${escapeHtml(row.item.image || '')}" alt="" loading="lazy">
       <div class="cart-item-details">
         <strong>${escapeHtml(row.item.name)}</strong>
-        <small>${escapeHtml(row.details?.extras?.length
-          ? row.details.extras.map((extra) => `${extra.quantity}x ${extra.name}`).join(', ')
-          : categoryLabels[row.item.category] || row.item.category)}</small>
-        ${row.details?.meatPoint ? `<small>Carne: ${escapeHtml(row.details.meatPoint)}</small>` : ''}
-        ${row.details?.notes ? `<small>Obs.: ${escapeHtml(row.details.notes)}</small>` : ''}
+        <small class="cart-category">${escapeHtml(categoryLabels[row.item.category] || row.item.category)}</small>
+        ${row.details?.meatPoint ? `<small class="cart-spec">Carne: ${escapeHtml(row.details.meatPoint)}</small>` : ''}
+        ${row.details?.extras?.length ? `<ul class="cart-extras" aria-label="Adicionais">${row.details.extras.map((extra) => `<li>${extra.quantity}x ${escapeHtml(extra.name)}</li>`).join('')}</ul>` : ''}
+        ${row.details?.notes ? `<small class="cart-spec cart-note">Obs.: ${escapeHtml(row.details.notes)}</small>` : ''}
         <div class="quantity"><button type="button" data-minus="${row.item.id}" aria-label="Diminuir ${escapeHtml(row.item.name)}">−</button><span>${row.quantity}</span><button type="button" data-plus="${row.item.id}" aria-label="Aumentar ${escapeHtml(row.item.name)}">+</button><button class="edit-item" type="button" data-edit="${row.item.id}" aria-label="Editar ${escapeHtml(row.item.name)}">Editar</button></div>
       </div>
       <div class="cart-line-price"><small>${money(row.item.price)} cada</small><strong class="cart-line-total">${money(row.item.price * row.quantity)}</strong></div>
     </div>
-  `).join('') || '<p class="status">Adicione itens ao pedido.</p>';
+  `).join('') || `<div class="cart-empty"><span class="cart-empty-icon" aria-hidden="true">🛒</span><strong>Seu pedido está vazio</strong><p>Escolha seus favoritos no cardápio e eles aparecem aqui.</p><button type="button" class="cart-empty-action" id="cart-empty-close">Ver cardápio</button></div>`;
+  $('cart-empty-close')?.addEventListener('click', () => $('close-cart').click());
+  const isEmpty = count() === 0;
+  $('checkout-form').hidden = isEmpty;
+  document.querySelector('.cart-footer .whatsapp-button').disabled = isEmpty;
   $('cart-items').querySelectorAll('[data-minus]').forEach((button) => button.addEventListener('click', () => changeQuantity(button.dataset.minus, -1)));
   $('cart-items').querySelectorAll('[data-plus]').forEach((button) => button.addEventListener('click', () => changeQuantity(button.dataset.plus, 1)));
   $('cart-items').querySelectorAll('[data-edit]').forEach((button) => button.addEventListener('click', () => {
