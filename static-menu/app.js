@@ -1,4 +1,4 @@
-const state = { menu: null, category: 'Todos', search: '', cart: {}, selectedItem: null, customization: null, editingCartKey: null, orderSent: null };
+const state = { menu: null, category: 'Todos', search: '', cart: {}, selectedItem: null, customization: null, editingCartKey: null, orderSent: null, lastUpdatedCartKey: null, lastTrigger: null };
 const $ = (id) => document.getElementById(id);
 const money = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 const menuUrl = new URL('menu.json', document.currentScript?.src || window.location.href);
@@ -38,6 +38,20 @@ const addOns = [
   { id: 'caramelized-onion', name: 'Cebola caramelizada', price: 6 },
   { id: 'extra-cheese', name: 'Mais queijo', price: 6 },
 ];
+
+const uiIcons = {
+  plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M8 3.2v9.6"/><path d="M3.2 8h9.6"/></svg>',
+  minus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M3.2 8h9.6"/></svg>',
+  close: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10"/><path d="M15 5L5 15"/></svg>',
+  edit: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.3 2.5l2.2 2.2-8.2 8.2-2.8.6.6-2.8 8.2-8.2z"/></svg>',
+};
+
+function announceFeedback(message) {
+  const region = $('live-feedback');
+  if (!region) return;
+  region.textContent = '';
+  setTimeout(() => { region.textContent = message; }, 20);
+}
 
 const stateIcons = {
   error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4.5"/><path d="M12 16h.01"/></svg>',
@@ -228,6 +242,7 @@ function changeQuantity(id, amount) {
 
 function openItemDetails(item, existing = null, cartKey = null) {
   const baseItem = state.menu?.items?.find((menuItem) => menuItem.id === item.id) || item;
+  state.lastTrigger = document.activeElement || null;
   state.selectedItem = baseItem;
   state.editingCartKey = cartKey;
   state.customization = {
@@ -241,15 +256,19 @@ function openItemDetails(item, existing = null, cartKey = null) {
     quantity: existing?.quantity || 1,
   };
   renderDetails();
+  $('item-details').querySelector?.('[data-close-details]')?.focus?.({ preventScroll: true });
 }
 
-function closeItemDetails() {
+function closeItemDetails({ restoreFocus = true } = {}) {
+  const trigger = state.lastTrigger;
   state.selectedItem = null;
   state.customization = null;
   state.editingCartKey = null;
+  state.lastTrigger = null;
   $('item-details').classList.remove('visible');
   $('item-details').setAttribute('aria-hidden', 'true');
   $('item-details').innerHTML = '';
+  if (restoreFocus) trigger?.focus?.({ preventScroll: true });
 }
 
 function customizationTotal() {
@@ -286,7 +305,7 @@ function renderDetails() {
   details.setAttribute('aria-label', `Personalizar ${item.name}`);
   details.innerHTML = `
     <div class="details-inner">
-      <button class="details-close" type="button" data-close-details aria-label="Fechar detalhes de ${escapeHtml(item.name)}">×</button>
+      <button class="details-close" type="button" data-close-details aria-label="Fechar detalhes de ${escapeHtml(item.name)}">${uiIcons.close}</button>
       <div class="details-product">
         <img class="details-image" src="${escapeHtml(item.image || '')}" alt="${escapeHtml(item.name)}">
         <div class="details-copy">
@@ -314,12 +333,12 @@ function renderDetails() {
           <legend>Adicionais</legend>
           <div class="add-on-list">
             ${addOns.map((option) => `
-              <div class="add-on">
+              <div class="add-on ${(customization.addOns[option.id] || 0) > 0 ? 'has-count' : ''}" data-addon-row="${option.id}">
                 <span><strong>${option.name}</strong><small>+ ${money(option.price)} cada</small></span>
                 <div class="add-on-quantity">
-                  <button type="button" data-extra-quantity="${option.id}" data-change="-1" aria-label="Diminuir ${option.name}">−</button>
+                  <button type="button" data-extra-quantity="${option.id}" data-change="-1" aria-label="Diminuir ${option.name}">${uiIcons.minus}</button>
                   <strong data-extra-count="${option.id}">${customization.addOns[option.id] || 0}</strong>
-                  <button type="button" data-extra-quantity="${option.id}" data-change="1" aria-label="Aumentar ${option.name}">+</button>
+                  <button type="button" data-extra-quantity="${option.id}" data-change="1" aria-label="Aumentar ${option.name}">${uiIcons.plus}</button>
                 </div>
               </div>
             `).join('')}
@@ -334,17 +353,18 @@ function renderDetails() {
       </div>
       <div class="details-footer">
         <div class="detail-quantity">
-          <button type="button" data-detail-quantity="-1" aria-label="Diminuir quantidade">−</button>
+          <button type="button" data-detail-quantity="-1" aria-label="Diminuir quantidade">${uiIcons.minus}</button>
           <strong>${customization.quantity}</strong>
-          <button type="button" data-detail-quantity="1" aria-label="Aumentar quantidade">+</button>
+          <button type="button" data-detail-quantity="1" aria-label="Aumentar quantidade">${uiIcons.plus}</button>
         </div>
         <button class="confirm-item" type="button" data-confirm-item>
-          Adicionar ao pedido <strong data-customization-total>${money(customizationTotal())}</strong>
+          <span>${state.editingCartKey ? 'Salvar alterações' : 'Adicionar ao pedido'}</span>
+          <strong data-customization-total>${money(customizationTotal())}</strong>
         </button>
       </div>
     </div>
   `;
-  details.querySelector('[data-close-details]').addEventListener('click', closeItemDetails);
+  details.querySelector('[data-close-details]').addEventListener('click', () => closeItemDetails());
   details.querySelectorAll('[name="meat-point"]').forEach((input) => input.addEventListener('change', (event) => {
     state.customization.meatPoint = event.target.value;
     details.querySelectorAll('.choice').forEach((choice) => {
@@ -353,8 +373,10 @@ function renderDetails() {
   }));
   details.querySelectorAll('[data-extra-quantity]').forEach((button) => button.addEventListener('click', (event) => {
     const id = event.currentTarget.dataset.extraQuantity;
-    state.customization.addOns[id] = Math.max(0, (state.customization.addOns[id] || 0) + Number(event.currentTarget.dataset.change));
-    details.querySelector(`[data-extra-count="${id}"]`).textContent = state.customization.addOns[id];
+    const countValue = Math.max(0, (state.customization.addOns[id] || 0) + Number(event.currentTarget.dataset.change));
+    state.customization.addOns[id] = countValue;
+    details.querySelector(`[data-extra-count="${id}"]`).textContent = countValue;
+    details.querySelector(`[data-addon-row="${id}"]`)?.classList.toggle('has-count', countValue > 0);
     updateCustomizationTotal();
   }));
   details.querySelector('#item-notes').addEventListener('input', (event) => {
@@ -386,11 +408,14 @@ function renderDetails() {
         extras,
       },
     };
+    const wasEditing = Boolean(state.editingCartKey);
     if (state.editingCartKey && state.editingCartKey !== key) delete state.cart[state.editingCartKey];
     state.orderSent = null;
-    closeItemDetails();
+    state.lastUpdatedCartKey = key;
+    closeItemDetails({ restoreFocus: false });
     render();
     setCartOpen(true);
+    announceFeedback(wasEditing ? `${item.name} atualizado no pedido.` : `${item.name} adicionado ao pedido.`);
   });
 }
 
@@ -420,7 +445,7 @@ function renderCard(item) {
         </div>
         <div class="card-bottom">
           <span class="price">${money(item.price)}</span>
-          <button class="add-button" data-add="${escapeHtml(item.id)}" type="button" aria-label="Adicionar ${escapeHtml(item.name)} ao pedido"><span aria-hidden="true">+</span> Adicionar</button>
+          <button class="add-button" data-add="${escapeHtml(item.id)}" type="button" aria-label="Adicionar ${escapeHtml(item.name)} ao pedido">${uiIcons.plus}<span>Adicionar</span></button>
         </div>
       </div>
     </article>
@@ -550,8 +575,11 @@ function render({ focusCategory = false, revealActiveCategory = false } = {}) {
   $('floating-total').textContent = money(total());
   $('open-cart').classList.toggle('visible', count() > 0);
   $('open-cart').setAttribute('aria-label', `Ver pedido, ${count()} ${count() === 1 ? 'item' : 'itens'}, ${money(total())}`);
-  $('cart-items').innerHTML = cartRows().map((row) => `
-    <div class="cart-row">
+  $('cart-items').innerHTML = cartRows().map((row) => {
+    const rowKey = row.id || row.item.id;
+    const isJustAdded = rowKey === state.lastUpdatedCartKey;
+    return `
+    <div class="cart-row ${isJustAdded ? 'just-added' : ''}">
       <img class="cart-item-image" src="${escapeHtml(row.item.image || '')}" alt="" loading="lazy">
       <div class="cart-item-details">
         <strong>${escapeHtml(row.item.name)}</strong>
@@ -559,11 +587,13 @@ function render({ focusCategory = false, revealActiveCategory = false } = {}) {
         ${row.details?.meatPoint ? `<small class="cart-spec">Carne: ${escapeHtml(row.details.meatPoint)}</small>` : ''}
         ${row.details?.extras?.length ? `<ul class="cart-extras" aria-label="Adicionais">${row.details.extras.map((extra) => `<li>${extra.quantity}x ${escapeHtml(extra.name)}</li>`).join('')}</ul>` : ''}
         ${row.details?.notes ? `<small class="cart-spec cart-note">Obs.: ${escapeHtml(row.details.notes)}</small>` : ''}
-        <div class="quantity"><button type="button" data-minus="${row.id || row.item.id}" aria-label="Diminuir ${escapeHtml(row.item.name)}">−</button><span>${row.quantity}</span><button type="button" data-plus="${row.id || row.item.id}" aria-label="Aumentar ${escapeHtml(row.item.name)}">+</button><button class="edit-item" type="button" data-edit="${row.id || row.item.id}" aria-label="Editar ${escapeHtml(row.item.name)}">Editar</button></div>
+        <div class="quantity"><button type="button" data-minus="${rowKey}" aria-label="Diminuir ${escapeHtml(row.item.name)}">${uiIcons.minus}</button><span>${row.quantity}</span><button type="button" data-plus="${rowKey}" aria-label="Aumentar ${escapeHtml(row.item.name)}">${uiIcons.plus}</button><button class="edit-item" type="button" data-edit="${rowKey}" aria-label="Editar ${escapeHtml(row.item.name)}">${uiIcons.edit}<span>Editar</span></button></div>
       </div>
       <div class="cart-line-price"><small>${money(rowUnitPrice(row))} cada</small><strong class="cart-line-total">${money(rowTotal(row))}</strong></div>
     </div>
-  `).join('') || `<div class="cart-empty"><span class="cart-empty-icon">${stateIcons.emptyCart}</span><strong>Seu pedido está vazio</strong><p>Escolha seus itens no cardápio, personalize como preferir e volte aqui para finalizar.</p><button type="button" class="cart-empty-action" id="cart-empty-close">Explorar cardápio</button></div>`;
+  `;
+  }).join('') || `<div class="cart-empty"><span class="cart-empty-icon">${stateIcons.emptyCart}</span><strong>Seu pedido está vazio</strong><p>Escolha seus itens no cardápio, personalize como preferir e volte aqui para finalizar.</p><button type="button" class="cart-empty-action" id="cart-empty-close">Explorar cardápio</button></div>`;
+  state.lastUpdatedCartKey = null;
   $('cart-empty-close')?.addEventListener('click', () => {
     $('close-cart').click();
     $('search')?.focus();
@@ -587,10 +617,19 @@ function escapeHtml(value) {
 }
 
 function setCartOpen(isOpen) {
-  $('cart-panel').classList.toggle('open', isOpen);
-  $('cart-panel').setAttribute('aria-hidden', String(!isOpen));
+  const panel = $('cart-panel');
+  const wasOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', isOpen);
+  panel.setAttribute('aria-hidden', String(!isOpen));
+  panel.inert = !isOpen;
   $('cart-backdrop').classList.toggle('visible', isOpen);
   $('open-cart').setAttribute('aria-expanded', String(isOpen));
+  if (isOpen && !wasOpen) {
+    $('close-cart')?.focus?.({ preventScroll: true });
+  } else if (!isOpen && wasOpen) {
+    if (count() > 0) $('open-cart')?.focus?.({ preventScroll: true });
+    else $('search')?.focus?.({ preventScroll: true });
+  }
 }
 
 function currentOrderType() {

@@ -82,6 +82,12 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-25] — Issue #23: padronização de ícones SVG e microinterações (`static-menu/`)
+- Branch `feat/issue-23-menu-microinteractions` (a partir da `feat/issue-22-menu-states`). Substituídos todos os caracteres Unicode isolados de interface (`⌕`, `×`, `+`, `−`, `→`) por ícones SVG de traço uniforme (`uiIcons` + cabeçalho/busca/ sacola flutuante/CTA WhatsApp).
+- Transições suaves e rápidas aplicadas na gaveta do pedido (slide lateral no desktop e bottom sheet no mobile com saída mais rápida que entrada), no backdrop, no popup de personalização e no botão flutuante `Ver pedido`, com gerenciamento de `inert` e restauração automática de foco ao abrir/fechar.
+- Feedback imediato sem atrasar a tarefa: destaque `.just-added` na linha recém-incluída/editada da sacola, rótulo contextual `Salvar alterações` ao editar, realce `.has-count` em adicionais selecionados, feedback tátil de clique (`:active`) e anúncio acessível em `#live-feedback` (`aria-live="polite"`).
+- Caminho dedicado para `prefers-reduced-motion: reduce`: remove deslocamentos espaciais e animações contínuas preservando feedbacks visuais de cor, borda e estado. Alterações espelhadas em `ury/public/static-menu/` e `ury/www/menu.html`, e fluxo validado manualmente pelo usuário em `/menu`.
+
 ### [2026-11-25] — Issue #22: estados de carregamento, erro, vazio e pedido enviado (`static-menu/`)
 - Branch `feat/issue-22-menu-states` (a partir da `feat/issue-21-menu-checkout`). Estados do cardápio padronizados com ícones SVG de traço uniforme, badges textuais (sem depender apenas de cor) e ações claras de recuperação:
   - **Loading estável:** skeletons para categorias e cards no HTML inicial e em `renderLoadingState()`, mantendo a geometria estável com `aria-busy`.
