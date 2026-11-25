@@ -15,7 +15,9 @@
         <img class="brand-logo" src="assets/logo-pericles-burger.png" alt="Péricles Burger">
         <p>Escolha seus favoritos e envie o pedido pelo WhatsApp.</p>
         <label class="search-shell">
-          <span class="search-icon" aria-hidden="true">⌕</span>
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5.8"/><path d="M16.5 16.5l-3.4-3.4"/></svg>
+          </span>
           <input id="search" class="search" type="search" placeholder="Buscar no cardápio..." aria-label="Buscar no cardápio">
         </label>
       </div>
@@ -23,59 +25,129 @@
 
     <section id="item-details" class="item-details" aria-hidden="true"></section>
     <div class="menu-layout">
-      <nav id="categories" class="categories" aria-label="Categorias"></nav>
+      <nav id="categories" class="categories" aria-label="Categorias" aria-busy="true">
+        <span class="skeleton-pill" aria-hidden="true"></span>
+        <span class="skeleton-pill" aria-hidden="true"></span>
+        <span class="skeleton-pill" aria-hidden="true"></span>
+        <span class="skeleton-pill" aria-hidden="true"></span>
+      </nav>
       <main>
         <div class="menu-intro">
           <div>
-            <span class="section-kicker">NOSSO MENU</span>
             <h1>Escolha o seu pedido</h1>
           </div>
-          <span id="menu-count" class="menu-count"></span>
+          <span id="menu-count" class="menu-count" aria-live="polite">Carregando itens...</span>
         </div>
-        <div id="menu-status" class="status" role="status" aria-live="polite">Carregando cardápio...</div>
-        <section id="menu" class="menu-grid" aria-live="polite"></section>
+        <div id="menu-status" class="status status-loading" role="status" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <span>Carregando o cardápio...</span>
+        </div>
+        <div id="menu" class="menu-sections" aria-live="polite" aria-busy="true">
+          <div class="skeleton-section" aria-hidden="true">
+            <div class="skeleton-heading"></div>
+            <div class="menu-grid">
+              <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line lg"></div><div class="skeleton-line"></div><div class="skeleton-line sm"></div></div>
+              <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line lg"></div><div class="skeleton-line"></div><div class="skeleton-line sm"></div></div>
+              <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line lg"></div><div class="skeleton-line"></div><div class="skeleton-line sm"></div></div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
 
     <button id="cart-backdrop" class="cart-backdrop" type="button" aria-label="Fechar pedido"></button>
-    <aside id="cart-panel" class="cart-panel" aria-label="Seu pedido" aria-hidden="true">
+    <aside id="cart-panel" class="cart-panel" aria-label="Seu pedido" aria-hidden="true" inert>
       <div class="cart-heading">
         <div>
           <span class="panel-kicker">SEU PEDIDO</span>
           <strong>Revise seu pedido</strong>
           <span id="cart-count" aria-live="polite">0 itens</span>
         </div>
-        <button id="close-cart" class="icon-button" type="button" aria-label="Fechar pedido">×</button>
+        <button id="close-cart" class="icon-button" type="button" aria-label="Fechar pedido">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5l10 10"/><path d="M15 5L5 15"/></svg>
+        </button>
       </div>
       <div class="cart-scroll">
+        <div id="order-sent-banner" class="order-sent-card" role="status" aria-live="polite" hidden></div>
         <div id="cart-items" class="cart-items"></div>
-        <form id="checkout-form">
-          <div class="form-heading">Dados para finalizar</div>
-          <input name="name" required autocomplete="name" placeholder="Seu nome *" aria-label="Seu nome">
-          <input name="phone" type="tel" autocomplete="tel" placeholder="Seu telefone" aria-label="Seu telefone">
-          <select name="type" aria-label="Tipo de pedido">
-            <option value="delivery">Entrega</option>
-            <option value="pickup">Retirada no balcão</option>
-          </select>
-          <div id="delivery-address-field">
-            <input name="address" autocomplete="street-address" placeholder="Endereço de entrega" aria-label="Endereço de entrega">
-          </div>
-          <select name="payment" aria-label="Forma de pagamento">
-            <option>PIX</option>
-            <option>Cartão na entrega</option>
-            <option>Dinheiro</option>
-          </select>
-          <textarea name="notes" rows="2" placeholder="Observações do pedido" aria-label="Observações do pedido"></textarea>
+        <form id="checkout-form" novalidate>
+          <h2 class="checkout-title">Finalizar pedido</h2>
+
+          <fieldset class="checkout-group">
+            <legend>Seus dados</legend>
+            <div class="field">
+              <label for="checkout-name">Seu nome <span class="field-req" aria-hidden="true">*</span></label>
+              <input id="checkout-name" name="name" required autocomplete="name" placeholder="Ex.: Maria Silva" aria-describedby="error-name">
+              <small id="error-name" class="field-error" role="alert" hidden></small>
+            </div>
+            <div class="field">
+              <label for="checkout-phone">Telefone / WhatsApp <span class="field-opt">(opcional)</span></label>
+              <input id="checkout-phone" name="phone" type="tel" autocomplete="tel" placeholder="(11) 99999-9999">
+            </div>
+          </fieldset>
+
+          <fieldset class="checkout-group">
+            <legend>Entrega ou retirada</legend>
+            <div class="type-toggle">
+              <label class="type-choice selected">
+                <input type="radio" name="type" value="delivery" checked>
+                <span>Entrega</span>
+              </label>
+              <label class="type-choice">
+                <input type="radio" name="type" value="pickup">
+                <span>Retirada no balcão</span>
+              </label>
+            </div>
+            <div id="delivery-address-field" class="field">
+              <label for="checkout-address">Endereço de entrega <span class="field-req" aria-hidden="true">*</span></label>
+              <input id="checkout-address" name="address" required autocomplete="street-address" placeholder="Rua, número, bairro e complemento" aria-describedby="error-address">
+              <small id="error-address" class="field-error" role="alert" hidden></small>
+            </div>
+            <p id="pickup-hint" class="pickup-hint" hidden>Você retira o pedido direto no balcão da loja.</p>
+          </fieldset>
+
+          <fieldset class="checkout-group">
+            <legend>Pagamento e observações</legend>
+            <div class="field">
+              <label for="checkout-payment">Forma de pagamento</label>
+              <select id="checkout-payment" name="payment">
+                <option value="PIX">PIX</option>
+                <option value="Cartão na entrega" id="card-payment-option">Cartão na entrega</option>
+                <option value="Dinheiro">Dinheiro</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="checkout-notes">Observações gerais <span class="field-opt">(opcional)</span></label>
+              <textarea id="checkout-notes" name="notes" rows="2" placeholder="Ex.: interfone quebrado, troco para R$ 100..."></textarea>
+            </div>
+          </fieldset>
+
+          <div id="checkout-summary" class="checkout-summary" aria-live="polite"></div>
+          <div id="checkout-alert" class="checkout-alert" role="alert" hidden></div>
         </form>
       </div>
       <div class="cart-footer">
-        <div class="cart-total" aria-live="polite"><span>Total:</span><strong id="cart-total">R$ 0,00</strong></div>
-        <button class="whatsapp-button" form="checkout-form" type="submit">Enviar pedido pelo WhatsApp <span aria-hidden="true">→</span></button>
+        <div class="cart-total" aria-live="polite"><span>Total do pedido</span><strong id="cart-total">R$ 0,00</strong></div>
+        <button class="whatsapp-button" form="checkout-form" type="submit">
+          <span class="whatsapp-cta-label">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5a7.3 7.3 0 0 0-6.3 11l-.9 3.6 3.7-.9A7.3 7.3 0 1 0 10 2.5z"/><path d="M7.6 7.4c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.2 0 .4-.1.6l-.4.5c.4.8 1.1 1.5 1.9 1.9l.5-.4c.2-.1.4-.2.6-.1l1.4.6c.3.1.4.3.4.5v.5c0 .3-.1.6-.5.8-.5.2-1.4.3-2.9-.4-1.7-.8-3-2.3-3.4-3.2-.4-.9-.2-1.5.2-2.7z"/></svg>
+            <span>Abrir WhatsApp e enviar pedido</span>
+          </span>
+          <span class="cta-arrow" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12"/><path d="M11 5l5 5-5 5"/></svg>
+          </span>
+        </button>
+        <small class="whatsapp-hint">Abre o WhatsApp com o pedido montado para confirmar.</small>
       </div>
     </aside>
 
+    <div id="live-feedback" class="sr-only" role="status" aria-live="polite"></div>
+
     <button id="open-cart" class="floating-cart" type="button" aria-expanded="false">
-      <span>Ver pedido</span>
+      <span class="floating-cart-label">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h10l-.8 10.5H5.8L5 6z"/><path d="M7.5 6a2.5 2.5 0 0 1 5 0"/></svg>
+        <span>Ver pedido</span>
+      </span>
       <strong id="floating-total">R$ 0,00</strong>
     </button>
     <script src="app.js"></script>

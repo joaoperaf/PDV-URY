@@ -82,6 +82,36 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-25] — Issue #23: padronização de ícones SVG e microinterações (`static-menu/`)
+- Branch `feat/issue-23-menu-microinteractions` (a partir da `feat/issue-22-menu-states`). Substituídos todos os caracteres Unicode isolados de interface (`⌕`, `×`, `+`, `−`, `→`) por ícones SVG de traço uniforme (`uiIcons` + cabeçalho/busca/ sacola flutuante/CTA WhatsApp).
+- Transições suaves e rápidas aplicadas na gaveta do pedido (slide lateral no desktop e bottom sheet no mobile com saída mais rápida que entrada), no backdrop, no popup de personalização e no botão flutuante `Ver pedido`, com gerenciamento de `inert` e restauração automática de foco ao abrir/fechar.
+- Feedback imediato sem atrasar a tarefa: destaque `.just-added` na linha recém-incluída/editada da sacola, rótulo contextual `Salvar alterações` ao editar, realce `.has-count` em adicionais selecionados, feedback tátil de clique (`:active`) e anúncio acessível em `#live-feedback` (`aria-live="polite"`).
+- Caminho dedicado para `prefers-reduced-motion: reduce`: remove deslocamentos espaciais e animações contínuas preservando feedbacks visuais de cor, borda e estado. Alterações espelhadas em `ury/public/static-menu/` e `ury/www/menu.html`, e fluxo validado manualmente pelo usuário em `/menu`.
+
+### [2026-11-25] — Issue #22: estados de carregamento, erro, vazio e pedido enviado (`static-menu/`)
+- Branch `feat/issue-22-menu-states` (a partir da `feat/issue-21-menu-checkout`). Estados do cardápio padronizados com ícones SVG de traço uniforme, badges textuais (sem depender apenas de cor) e ações claras de recuperação:
+  - **Loading estável:** skeletons para categorias e cards no HTML inicial e em `renderLoadingState()`, mantendo a geometria estável com `aria-busy`.
+  - **Erro de carregamento:** estado `role="alert"` com explicação clara e botão `Tentar novamente` que refaz `loadMenu()` sem recarregar a página.
+  - **Busca/filtro vazio e cardápio sem itens:** mensagens contextuais informando o termo/categoria pesquisado com ação `Limpar busca e filtros` (e estado dedicado quando não há itens `available`).
+  - **Carrinho vazio:** substituído emoji isolado por ícone SVG consistente e ação `Explorar cardápio` retornando o foco para a busca.
+  - **Confirmação pós-envio:** cartão `#order-sent-banner` (`role="status"`) exibido no painel ao abrir o WhatsApp, orientando a confirmar o envio na conversa, com link direto `Abrir WhatsApp novamente` e botão `Iniciar novo pedido`. Alterações espelhadas em `ury/public/static-menu/` e `ury/www/menu.html`, e fluxo validado manualmente pelo usuário em `/menu`.
+
+### [2026-11-25] — Issue #21: reorganização visual e acessibilidade do checkout (`static-menu/`)
+- Branch `feat/issue-21-menu-checkout` (a partir da `feat/issue-20-menu-sections`). Formulário do carrinho reorganizado em grupos semânticos (`<fieldset>`/`<legend>`): **Seus dados**, **Entrega ou retirada**, **Pagamento e observações**, com `<label>` visível em todos os campos e indicação explícita de campos obrigatórios (`*`) e opcionais.
+- Seleção de tipo de pedido convertida em controle segmentado (`Entrega` / `Retirada no balcão`), ocultando o endereço e exibindo orientação de balcão quando retirada está ativa (além de ajustar o rótulo `Cartão na entrega` / `Cartão na retirada`).
+- Adicionados validação acessível (`aria-invalid`, `aria-describedby` e mensagens `role="alert"` com foco automático no primeiro campo pendente), bloco dinâmico **Resumo antes de enviar** (`#checkout-summary`) e CTA explícito **Abrir WhatsApp e enviar pedido** com ícone SVG e texto de apoio. Alterações espelhadas em `ury/public/static-menu/` e `ury/www/menu.html`, e fluxo validado manualmente pelo usuário em `/menu`.
+
+### [2026-11-25] — Issue #20: seções e categorias do cardápio estático (`static-menu/`)
+- Branch `feat/issue-20-menu-sections` (a partir da `feat/issue-19-menu-cart`). Corpo do cardápio organizado em seções editoriais semânticas (`<section>` com título `<h2>`, subtítulo conciso, ícone SVG de traço uniforme e contagem de opções) para **Hambúrgueres**, **Entradas** e **Bebidas**, além de suporte nativo à seção/filtro **Mais pedidos** quando houver itens com `"featured": true` no `menu.json` (documentado em `static-menu/README.md`).
+- Grade de produtos ajustada para `repeat(auto-fill, minmax(260px, 1fr))` para evitar cards esticados em seções com 1 ou 2 itens; adicionado indicador `X no pedido` nos cards já presentes na sacola.
+- Navegação de categorias refinada: ícones SVG consistentes + contadores tabulares por categoria, foco preservado na seleção por teclado, suporte a setas (`ArrowLeft`/`ArrowRight`/`ArrowUp`/`ArrowDown`/`Home`/`End`), faixa horizontal sticky estendida até `860px` (cobrindo tablet e mobile) com rolagem automática do chip ativo e botão `Limpar filtros` no estado vazio de busca/categoria.
+- Contraste ajustado para passar sem alertas de contraste/texto pequeno no detector visual, alterações espelhadas em `ury/public/static-menu/` e `ury/www/menu.html`, e fluxo validado manualmente pelo usuário em `/menu`.
+
+### [2026-11-25] — Issue #19: carrinho do cardápio estático (`static-menu/`)
+- Branch `feat/issue-19-menu-cart`. Carrinho já tinha imagem/nome/preço, rodapé fixo com total + CTA WhatsApp; refinado: categoria, ponto da carne, adicionais (chips `2x Bacon`) e observação em linhas separadas (antes saíam coladas); quebra de texto longo; estado vazio com ícone, texto e botão "Ver cardápio"; formulário oculto e CTA desabilitado com carrinho vazio; `prefers-reduced-motion`.
+- Validado com Chrome headless (desktop 1280 / mobile 390) e manualmente pelo usuário em `/menu`, sem overflow horizontal, inclusive com observação longa e 3 adicionais. Servir com `python3 -m http.server 8080` em `static-menu/`.
+- Corrigido o cálculo/edição de adicionais e envio ao WhatsApp (`static-menu/app.js`, sincronizado em `ury/public/static-menu/`): o item no carrinho agora preserva seu `id` e `price` base originais, calculando preço unitário e total da linha via `rowUnitPrice`/`rowTotal` (`item.price + adicionais`), eliminando a soma duplicada ao clicar em `Editar` (e permitindo voltar ao preço base ao remover adicionais) e incluindo ponto da carne, adicionais e observações de cada item na mensagem enviada ao WhatsApp.
+
 ### [2026-11-03] — Issue #1: painel do pedido responsivo no PDV
 - **Status: CONCLUÍDO (2026-11-25). Validado visualmente em 1280/820/390px e manualmente pelo usuário; PR #26 mergeado na `version-2` e issue #1 fechada.** Pendentes não bloqueantes: busca do cabeçalho estreita e rótulos do rodapé truncados no mobile; `ProductDialog` e foco do painel não testados em navegador.
 - Correções da validação (2026-11-25): `POS.tsx` raiz `flex-1` → `h-full` (layout não preenchia a altura em tablet/desktop, deixando faixa cinza); grade do cardápio agora `repeat(auto-fill,minmax(10rem,1fr))` (cards ficavam espremidos a 1280px por causa do painel fixo); `OrderTypeSelect` com `flex-wrap` (tipos de pedido cortados). Sem overflow horizontal nas 3 larguras; drawer (tablet) e bottom sheet (mobile) abrem com total/Enviar Pedido visíveis.
