@@ -83,6 +83,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 6. Histórico de Sessões / Últimos Passos
 
 ### [2026-11-25] — Issue #23: padronização de ícones SVG e microinterações (`static-menu/`)
+- **Status da trilha do cardápio (#19 a #23): CONCLUÍDO (2026-11-25). Todas validadas manualmente pelo usuário em `/menu`; PR #27 mergeado na `version-2` (`d1baeee`) e issues #19, #20, #21, #22 e #23 fechadas (junto com #17 e #18 já encerradas). Repositório local de volta na `version-2` limpa.**
 - Branch `feat/issue-23-menu-microinteractions` (a partir da `feat/issue-22-menu-states`). Substituídos todos os caracteres Unicode isolados de interface (`⌕`, `×`, `+`, `−`, `→`) por ícones SVG de traço uniforme (`uiIcons` + cabeçalho/busca/ sacola flutuante/CTA WhatsApp).
 - Transições suaves e rápidas aplicadas na gaveta do pedido (slide lateral no desktop e bottom sheet no mobile com saída mais rápida que entrada), no backdrop, no popup de personalização e no botão flutuante `Ver pedido`, com gerenciamento de `inert` e restauração automática de foco ao abrir/fechar.
 - Feedback imediato sem atrasar a tarefa: destaque `.just-added` na linha recém-incluída/editada da sacola, rótulo contextual `Salvar alterações` ao editar, realce `.has-count` em adicionais selecionados, feedback tátil de clique (`:active`) e anúncio acessível em `#live-feedback` (`aria-live="polite"`).
@@ -269,8 +270,9 @@ Como o sistema rodará localmente neste notebook via Docker:
 ---
 
 ## 7. Próximos Passos Planejados
+- [x] **Trilha do cardápio digital estático (Issues #17 a #23):** concluída, validada manualmente em `/menu` e mergeada na `version-2` (PR #27).
 - [x] **Issue #1 (painel responsivo):** concluída e mergeada (PR #26).
-- [ ] **Auditoria UI/UX:** implementar e validar as prioridades da análise de 2026-11-01 em viewport desktop, tablet e mobile, começando pelo fluxo `/pos` → pedido → pagamento.
+- [ ] **Auditoria UI/UX (próximas P1 abertas: #2 KDS, #5 Analytics no dashboard, #11 Estados compartilhados):** implementar e validar as prioridades restantes da análise de 2026-11-01 em viewport desktop, tablet e mobile.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
 - [x] **Passo 5 (parcial):** Substituído o logo do cabeçalho do dashboard `/ury` pela marca Péricles Burger, usando `frontend/Public/logo-pericles-burger.png`. O frontend foi recompilado com sucesso; os demais logos do sistema permanecem inalterados até validação visual.
