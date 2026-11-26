@@ -92,6 +92,11 @@
     "processing": "Processing...",
     "short_by": "Short by {{amount}}",
     "change_due": "Change due: {{amount}}",
+    "exact_amount": "Full amount covered",
+    "enter_amount_hint": "Enter at least {{amount}} to complete payment",
+    "invalid_amount": "Payment amount cannot be negative",
+    "remove_discount": "Remove",
+    "no_methods_title": "No payment methods available",
     "success": "Payment successful: {{amount}} received"
   },
   "payment_modes": {

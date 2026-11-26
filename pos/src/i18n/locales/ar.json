@@ -88,6 +88,11 @@
         "processing": "جاري المعالجة...",
         "short_by": "ناقص {{amount}}",
         "change_due": "الباقي: {{amount}}",
+        "exact_amount": "تم إدخال المبلغ بالكامل",
+        "enter_amount_hint": "أدخل {{amount}} على الأقل لإتمام الدفع",
+        "invalid_amount": "لا يمكن أن يكون مبلغ الدفع سالبًا",
+        "remove_discount": "إزالة",
+        "no_methods_title": "لا توجد طرق دفع متاحة",
         "success": "تم الدفع بنجاح: تم استلام {{amount}}"
     },
     "pos": {

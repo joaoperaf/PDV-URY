@@ -83,6 +83,11 @@
     "processing": "Traitement...",
     "short_by": "Manque {{amount}}",
     "change_due": "Monnaie à rendre : {{amount}}",
+    "exact_amount": "Montant complet saisi",
+    "enter_amount_hint": "Saisissez au moins {{amount}} pour valider le paiement",
+    "invalid_amount": "Le montant du paiement ne peut pas être négatif",
+    "remove_discount": "Retirer",
+    "no_methods_title": "Aucun mode de paiement disponible",
     "success": "Paiement réussi : {{amount}} reçu"
   },
   "pos": {

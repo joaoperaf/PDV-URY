@@ -92,6 +92,11 @@
     "processing": "Processando...",
     "short_by": "Faltam {{amount}}",
     "change_due": "Troco: {{amount}}",
+    "exact_amount": "Valor completo informado",
+    "enter_amount_hint": "Informe pelo menos {{amount}} para concluir o recebimento",
+    "invalid_amount": "O valor da forma de pagamento não pode ser negativo",
+    "remove_discount": "Remover",
+    "no_methods_title": "Nenhuma forma de pagamento disponível",
     "success": "Pagamento confirmado: {{amount}} recebido"
   },
   "payment_modes": {
