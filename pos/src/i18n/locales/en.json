@@ -69,12 +69,15 @@
     "select_to_view": "Select an order to view details",
     "items_title": "Order Items",
     "taxes_charges": "Taxes & Charges",
+    "edit_order": "Edit order",
     "cancel_order": "Cancel order",
     "enter_cancel_reason": "Enter cancel reason",
     "print": "Print",
     "payment": "Payment",
     "order_actions": "Order actions",
-    "cancel_reason": "Cancellation reason"
+    "cancel_reason": "Cancellation reason",
+    "error_loading_details": "Could not load order details",
+    "qty_label": "Qty: {{qty}}"
   },
   "payment": {
     "title": "Payment",
@@ -92,6 +95,11 @@
     "processing": "Processing...",
     "short_by": "Short by {{amount}}",
     "change_due": "Change due: {{amount}}",
+    "exact_amount": "Full amount covered",
+    "enter_amount_hint": "Enter at least {{amount}} to complete payment",
+    "invalid_amount": "Payment amount cannot be negative",
+    "remove_discount": "Remove",
+    "no_methods_title": "No payment methods available",
     "success": "Payment successful: {{amount}} received"
   },
   "payment_modes": {
@@ -281,6 +289,12 @@
   },
   "orders": {
     "no_orders_found": "No orders found",
+    "no_orders_status_hint": "There are no orders in this status right now.",
+    "no_orders_search_hint": "No orders match “{{query}}” in this status.",
+    "clear_search": "Clear search",
+    "refresh": "Refresh list",
+    "error_loading": "Could not load orders",
+    "table_prefix": "Table {{table}}",
     "click_to_view": "Click on any order card to view its details",
     "status_title": "Order Status",
     "pagination": {

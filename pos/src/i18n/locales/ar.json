@@ -67,10 +67,13 @@
         "select_to_view": "حدد طلبًا لعرض التفاصيل",
         "items_title": "عناصر الطلب",
         "taxes_charges": "الضرائب والرسوم",
+        "edit_order": "تعديل الطلب",
         "cancel_order": "إلغاء الطلب",
         "enter_cancel_reason": "أدخل سبب الإلغاء",
         "print": "طباعة",
-        "payment": "الدفع"
+        "payment": "الدفع",
+        "error_loading_details": "تعذر تحميل تفاصيل الطلب",
+        "qty_label": "الكمية: {{qty}}"
     },
     "payment": {
         "title": "الدفع",
@@ -88,6 +91,11 @@
         "processing": "جاري المعالجة...",
         "short_by": "ناقص {{amount}}",
         "change_due": "الباقي: {{amount}}",
+        "exact_amount": "تم إدخال المبلغ بالكامل",
+        "enter_amount_hint": "أدخل {{amount}} على الأقل لإتمام الدفع",
+        "invalid_amount": "لا يمكن أن يكون مبلغ الدفع سالبًا",
+        "remove_discount": "إزالة",
+        "no_methods_title": "لا توجد طرق دفع متاحة",
         "success": "تم الدفع بنجاح: تم استلام {{amount}}"
     },
     "pos": {
@@ -162,6 +170,12 @@
     },
     "orders": {
         "no_orders_found": "لم يتم العثور على طلبات",
+        "no_orders_status_hint": "لا توجد طلبات في هذه الحالة حاليًا.",
+        "no_orders_search_hint": "لا توجد طلبات تطابق «{{query}}» في هذه الحالة.",
+        "clear_search": "مسح البحث",
+        "refresh": "تحديث القائمة",
+        "error_loading": "تعذر تحميل الطلبات",
+        "table_prefix": "طاولة {{table}}",
         "click_to_view": "انقر على أي بطاقة طلب لعرض تفاصيلها",
         "status_title": "حالة الطلب",
         "pagination": {

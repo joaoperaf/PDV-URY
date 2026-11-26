@@ -16,9 +16,9 @@ interface ScreenSizeProviderProps {
 // for the whole app (Cashier POS genuinely isn't usable below 1024px).
 const isCaptainRoute = () => window.location.pathname.includes('/order');
 
-// A tela de venda (/pos) é responsiva (painel do pedido vira drawer/sheet
-// abaixo de 1024px), portanto não é bloqueada pelo piso de largura.
-const isResponsivePOSRoute = () => /\/pos\/?$/.test(window.location.pathname);
+// As telas de venda (/pos) e de pedidos (/orders) são responsivas (painel
+// lateral vira drawer/sheet abaixo de 1024px), portanto não são bloqueadas.
+const isResponsivePOSRoute = () => /\/(pos|orders)\/?$/.test(window.location.pathname);
 
 const ScreenSizeProvider = ({ children }: ScreenSizeProviderProps) => {
   const [isScreenTooSmall, setIsScreenTooSmall] = useState(false);

@@ -82,6 +82,17 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-26] — Issue #3 (Pagamento) + Issue #11 e responsividade em Pedidos (`/pos/orders`)
+- Branch `feat/pos-payment-orders-ux` (a partir da `version-2`).
+- **Issue #3 (`pos/src/components/PaymentDialog.tsx`):**
+  - Associados `<label htmlFor>` e `id` em todas as formas de pagamento e no campo de desconto percentual, além de `<DialogTitle>` vinculado ao `aria-labelledby` do modal e `aria-label` no botão fechar.
+  - Foco inicial direcionado automaticamente ao campo principal de pagamento ao abrir o modal, bloqueio de fechamento acidental (`Escape`/backdrop) durante processamento e retorno previsível do foco ao botão `Pagamento` ao fechar.
+  - Prevenção e anúncio acessível de erros: validação separada para desconto (`aria-invalid`, `aria-describedby`, `role="alert"` + botão `Remover`) e para valores de pagamento (bloqueio de negativos, alerta de valor faltante `Faltam ...`, cálculo de `Troco: ...` com contraste WCAG AA corrigido e botão primário desabilitado enquanto insuficiente).
+- **Issue #11 no PDV + polimento e responsividade de `/pos/orders` (`Orders.tsx`, `OrderStatusSidebar.tsx`, `ScreenSizeProvider.tsx`, `orders-slice.ts`):**
+  - Substituídos textos hardcoded em inglês (`Failed to load orders`, `Failed to load order details`, `Qty:`, `Table`, datas `en-US` e `aria-label`s) por chaves i18n (`pt-BR`, `en`, `fr`, `ar`), `parseFrappeError` e componente compartilhado `StateMessage` com ações de recuperação (`Tentar novamente`, `Limpar busca` e `Atualizar lista`).
+  - Tornada a tela `/pos/orders` responsiva e isenta do bloqueio `< 1024px`: barra horizontal de status em mobile (`< md`), sidebar ajustada sem truncar `Pagos Recentemente`, cards de pedido operáveis por teclado (`role="button"`, `tabIndex={0}`, `Enter`/`Space`, `aria-pressed`) e painel de detalhe convertido em drawer lateral no tablet e bottom sheet no mobile (com botão fechar distinto do ícone `Ban` de cancelar pedido, `Escape` e restauração de foco ao card).
+- **Validação:** `tsc --noEmit`, `yarn build` (publicado em `ury/public/pos` e `ury/www/pos.html`), `git diff --check`, `impeccable detect` (`0` alertas) e inspeção visual em Chrome headless nas larguras `1280x800` (desktop), `820x1180` (tablet) e `390x844` (mobile) sem overflow horizontal.
+
 ### [2026-11-25] — Issue #23: padronização de ícones SVG e microinterações (`static-menu/`)
 - **Status da trilha do cardápio (#19 a #23): CONCLUÍDO (2026-11-25). Todas validadas manualmente pelo usuário em `/menu`; PR #27 mergeado na `version-2` (`d1baeee`) e issues #19, #20, #21, #22 e #23 fechadas (junto com #17 e #18 já encerradas). Repositório local de volta na `version-2` limpa.**
 - Branch `feat/issue-23-menu-microinteractions` (a partir da `feat/issue-22-menu-states`). Substituídos todos os caracteres Unicode isolados de interface (`⌕`, `×`, `+`, `−`, `→`) por ícones SVG de traço uniforme (`uiIcons` + cabeçalho/busca/ sacola flutuante/CTA WhatsApp).
@@ -272,7 +283,8 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 7. Próximos Passos Planejados
 - [x] **Trilha do cardápio digital estático (Issues #17 a #23):** concluída, validada manualmente em `/menu` e mergeada na `version-2` (PR #27).
 - [x] **Issue #1 (painel responsivo):** concluída e mergeada (PR #26).
-- [ ] **Auditoria UI/UX (próximas P1 abertas: #2 KDS, #5 Analytics no dashboard, #11 Estados compartilhados):** implementar e validar as prioridades restantes da análise de 2026-11-01 em viewport desktop, tablet e mobile.
+- [x] **Issue #3 (acessibilidade e prevenção de erro no pagamento) + estados/responsividade de `/pos/orders` (parte POS da Issue #11):** implementadas e validadas em Chrome (1280/820/390px) na branch `feat/pos-payment-orders-ux`, aguardando validação manual do usuário para merge.
+- [ ] **Auditoria UI/UX (próximas P1 abertas: #2 KDS, #5 Analytics no dashboard, #11 Estados compartilhados nas demais superfícies):** implementar e validar as prioridades restantes da análise de 2026-11-01 em viewport desktop, tablet e mobile.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
 - [x] **Passo 5 (parcial):** Substituído o logo do cabeçalho do dashboard `/ury` pela marca Péricles Burger, usando `frontend/Public/logo-pericles-burger.png`. O frontend foi recompilado com sucesso; os demais logos do sistema permanecem inalterados até validação visual.

@@ -69,12 +69,15 @@
     "select_to_view": "Selecione um pedido para ver os detalhes",
     "items_title": "Itens do Pedido",
     "taxes_charges": "Taxas e Encargos",
+    "edit_order": "Editar pedido",
     "cancel_order": "Cancelar pedido",
     "enter_cancel_reason": "Informe o motivo do cancelamento",
     "print": "Imprimir",
     "payment": "Pagamento",
     "order_actions": "Ações do pedido",
-    "cancel_reason": "Motivo do cancelamento"
+    "cancel_reason": "Motivo do cancelamento",
+    "error_loading_details": "Não foi possível carregar os detalhes do pedido",
+    "qty_label": "Qtd.: {{qty}}"
   },
   "payment": {
     "title": "Pagamento",
@@ -92,6 +95,11 @@
     "processing": "Processando...",
     "short_by": "Faltam {{amount}}",
     "change_due": "Troco: {{amount}}",
+    "exact_amount": "Valor completo informado",
+    "enter_amount_hint": "Informe pelo menos {{amount}} para concluir o recebimento",
+    "invalid_amount": "O valor da forma de pagamento não pode ser negativo",
+    "remove_discount": "Remover",
+    "no_methods_title": "Nenhuma forma de pagamento disponível",
     "success": "Pagamento confirmado: {{amount}} recebido"
   },
   "payment_modes": {
@@ -281,6 +289,12 @@
   },
   "orders": {
     "no_orders_found": "Nenhum pedido encontrado",
+    "no_orders_status_hint": "Não há pedidos neste status no momento.",
+    "no_orders_search_hint": "Nenhum pedido corresponde a “{{query}}” neste status.",
+    "clear_search": "Limpar busca",
+    "refresh": "Atualizar lista",
+    "error_loading": "Não foi possível carregar os pedidos",
+    "table_prefix": "Mesa {{table}}",
     "click_to_view": "Clique em qualquer pedido para ver os detalhes",
     "status_title": "Status do Pedido",
     "pagination": {
