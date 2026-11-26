@@ -61,11 +61,14 @@
     "select_to_view": "Sélectionnez une commande pour voir les détails",
     "items_title": "Articles de la commande",
     "taxes_charges": "Taxes et frais",
+    "edit_order": "Modifier la commande",
     "cancel_order": "Annuler la commande",
     "enter_cancel_reason": "Saisir le motif d'annulation",
     "print": "Imprimer",
     "payment": "Paiement",
-    "order_actions": "Actions sur la commande"
+    "order_actions": "Actions sur la commande",
+    "error_loading_details": "Impossible de charger les détails de la commande",
+    "qty_label": "Qté : {{qty}}"
   },
   "payment": {
     "title": "Paiement",
@@ -242,6 +245,12 @@
   },
   "orders": {
     "no_orders_found": "Aucune commande trouvée",
+    "no_orders_status_hint": "Aucune commande avec ce statut pour le moment.",
+    "no_orders_search_hint": "Aucune commande ne correspond à « {{query}} » dans ce statut.",
+    "clear_search": "Effacer la recherche",
+    "refresh": "Actualiser la liste",
+    "error_loading": "Impossible de charger les commandes",
+    "table_prefix": "Table {{table}}",
     "click_to_view": "Cliquez sur n'importe quel badge de commande pour voir ses détails",
     "status_title": "Statut de la commande",
     "pagination": {
