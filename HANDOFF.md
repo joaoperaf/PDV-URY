@@ -83,6 +83,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 6. Histórico de Sessões / Últimos Passos
 
 ### [2026-11-26] — Issue #3 (Pagamento) + Issue #11 e responsividade em Pedidos (`/pos/orders`)
+- **Status: CONCLUÍDO (2026-11-26). Validado manualmente pelo usuário em `/pos/orders`; PR #28 mergeado na `version-2` (`a28091f`), issue #3 fechada e repositório local de volta na `version-2` limpa.** (A issue #11 segue aberta para aplicar estados padronizados nas demais superfícies: KDS, painel `/ury` e `self-order`.)
 - Branch `feat/pos-payment-orders-ux` (a partir da `version-2`).
 - **Issue #3 (`pos/src/components/PaymentDialog.tsx`):**
   - Associados `<label htmlFor>` e `id` em todas as formas de pagamento e no campo de desconto percentual, além de `<DialogTitle>` vinculado ao `aria-labelledby` do modal e `aria-label` no botão fechar.
@@ -283,7 +284,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 7. Próximos Passos Planejados
 - [x] **Trilha do cardápio digital estático (Issues #17 a #23):** concluída, validada manualmente em `/menu` e mergeada na `version-2` (PR #27).
 - [x] **Issue #1 (painel responsivo):** concluída e mergeada (PR #26).
-- [x] **Issue #3 (acessibilidade e prevenção de erro no pagamento) + estados/responsividade de `/pos/orders` (parte POS da Issue #11):** implementadas e validadas em Chrome (1280/820/390px) na branch `feat/pos-payment-orders-ux`, aguardando validação manual do usuário para merge.
+- [x] **Issue #3 (acessibilidade e prevenção de erro no pagamento) + estados/responsividade de `/pos/orders` (parte POS da Issue #11):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #28).
 - [ ] **Auditoria UI/UX (próximas P1 abertas: #2 KDS, #5 Analytics no dashboard, #11 Estados compartilhados nas demais superfícies):** implementar e validar as prioridades restantes da análise de 2026-11-01 em viewport desktop, tablet e mobile.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
