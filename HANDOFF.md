@@ -82,6 +82,20 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-27] — Autoatendimento `self-order` (`/order`): Issues #4, #11 (conclusão), #24 e #25
+- **Status: IMPLEMENTADO E VALIDADO EM HEADLESS (aguardando validação manual do usuário antes de mergear na `version-2` e encerrar #4, #11, #24 e #25).**
+- Branch `feat/self-order-ux-a11y-ptbr` (a partir da `version-2`).
+- **Correção de Bootstrap de Dispositivos + Estados Padronizados (#11 — última superfície pendente):**
+  - Corrigida inicialização síncrona de credenciais em `useDeviceBootstrap.ts` (antes `isDevice` iniciava `false` no primeiro render síncrono de `App.tsx`, redirecionando tablets e totens provisionados indevidamente para `/menu` antes do `useEffect`), mantendo o redirecionamento imediato para `/menu` em acessos públicos sem token/dispositivo/sessão.
+  - Criado `layouts/shared/SessionFeedback.tsx` e integrados skeletons estruturais (`SelfOrderLoadingSkeleton`), `StateMessage` diferenciando falha de carregamento (`Tentar novamente` sem reload), ausência de rede (`offline`) e cardápio/categoria vazia, banner de conexão interrompida, confirmação pós-envio (`role="status"`) e modal acessível `ResetOrderDialog` em substituição a `window.confirm`.
+- **Acessibilidade Estrutural, Zoom, Safe Area e `aria-live` (#24):**
+  - `self-order/index.html`: definido `<html lang="pt-BR">`, título em PT-BR e removido o bloqueio de zoom (`maximum-scale=1.0, user-scalable=no`), adicionando `viewport-fit=cover`.
+  - Adicionada região `aria-live="polite"` anunciando adição, remoção, subtotal atualizado, envio para preparo e solicitação de conta; categorias em `MobileQRLayout.tsx` e `PortraitKioskLayout.tsx` expõem `aria-pressed` + ícone de seleção (sem depender apenas de cor) e adaptam-se a zoom de `200%` sem overflow horizontal; barras fixas inferiores respeitam `env(safe-area-inset-bottom)` e `PortableTabletAssignment.tsx` vincula `<label htmlFor>` ao campo de mesa.
+- **Touch Targets >= 44px (#4) e Localização 100% PT-BR (#25):**
+  - Controles `−` / `+` em `CartPanel.tsx`, `MobileQRLayout.tsx` e `PortraitKioskLayout.tsx` ampliados de `24px`/`28px` para `44x44px` (`h-11 w-11`) com ícones SVG uniformes, estados `active`/`disabled`/`focus-visible` claros e cards `min-h-[120px]`/`min-h-[140px]` com proporção `aspect-[4/3]` estável.
+  - Traduzidos todos os textos visíveis, mensagens de erro (`parseFrappeError`) e `aria-label`s remanescentes em inglês, corrigida a formatação monetária (`formatCurrency`) no resumo de pedidos já enviados e adotados rótulos orientados à consequência (`Enviar pedido para preparo`, `Abrir pagamento online`, `Solicitar fechamento da conta`).
+- **Validação:** `tsc --noEmit` (`0` erros), `yarn build` em `self-order/` (publicado em `ury/public/order` e `ury/www/order.html`), `git diff --check`, `impeccable detect` (`0` alertas nos 10 arquivos HTML/TSX) e inspeção em Chrome headless nos 4 layouts (`Mobile QR 390px`, `Tablet 820px`, `Landscape Kiosk 1280px`, `Portrait Kiosk 820px` e `Portrait Kiosk` com zoom 200% em `410x590`), confirmando `0` overflow horizontal, touch targets de `44x44px`, anúncios `aria-live`, redirecionamento `/order` -> `/menu` sem credenciais e recuperação por `Tentar novamente`.
+
 ### [2026-11-27] — Issues #5 + #16 + parte `/ury` da Issue #11 e responsividade no Dashboard Gerencial (`/ury`)
 - **Status: CONCLUÍDO (2026-11-27). Validado manualmente pelo usuário; PR #30 mergeado na `version-2` (`3a7976c`), issues #5 e #16 fechadas e repositório local de volta na `version-2` limpa.** (A issue #11 segue aberta apenas para `self-order`.)
 - Branch `feat/dashboard-analytics-ux` (a partir da `version-2`).
@@ -316,7 +330,8 @@ Como o sistema rodará localmente neste notebook via Docker:
 - [x] **Issue #3 (acessibilidade e prevenção de erro no pagamento) + estados/responsividade de `/pos/orders` (parte POS da Issue #11):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #28).
 - [x] **Issue #2 + parte KDS da Issue #11 (`/pos/kitchen` e `/mosaic`):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #29).
 - [x] **Dashboard Gerencial (Issues #5 + #16 + parte `/ury` da Issue #11):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #30).
-- [ ] **Auditoria UI/UX (próximas abertas: parte `self-order` da #11 + #4/#24/#25 em `/order`, e P2 do KDS #6/#7/#12):** implementar e validar as prioridades restantes da análise de 2026-11-01.
+- [ ] **Autoatendimento `self-order` (Issues #4 + #11 final + #24 + #25):** implementado e validado em headless nos 4 layouts na branch `feat/self-order-ux-a11y-ptbr`; pendente validação/aprovação do usuário para abrir/mergear PR na `version-2` e encerrar as issues #4, #11 (última P1 aberta), #24 e #25.
+- [ ] **Auditoria UI/UX (restantes P2/P3: KDS Fase 2 #6/#7/#12, Cardápio Digital #10 e polimento transversal #8/#14/#15):** implementar e validar as melhorias restantes.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
 - [x] **Passo 5 (parcial):** Substituído o logo do cabeçalho do dashboard `/ury` pela marca Péricles Burger, usando `frontend/Public/logo-pericles-burger.png`. O frontend foi recompilado com sucesso; os demais logos do sistema permanecem inalterados até validação visual.
