@@ -1,8 +1,9 @@
 <template>
-  <Header />
-
-  <div class="bg-slate-300 min-h-screen">
-    <router-view />
+  <div class="min-h-screen bg-slate-100 text-slate-900 flex flex-col">
+    <Header />
+    <main class="flex-1">
+      <router-view />
+    </main>
   </div>
 </template>
 
