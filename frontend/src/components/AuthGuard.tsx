@@ -1,4 +1,4 @@
-import { Spinner } from '@ury/ui';
+import { Spinner, StateMessage } from '@ury/ui';
 import { useAuth } from '../store/useAuth';
 
 interface AuthGuardProps {
@@ -10,34 +10,42 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen">
-        <Spinner message="Carregando..." />
+      <div role="status" aria-busy="true" className="min-h-[60vh] flex items-center justify-center">
+        <Spinner message="Carregando permissões..." />
       </div>
     );
   }
 
   if (error || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-red-600 text-xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Acesso Negado</h2>
-          <p className="text-gray-600">
-            {error || 'Por favor, faça login para acessar esta seção.'}
-          </p>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh] p-4">
+        <StateMessage
+          variant="error"
+          title="Acesso não autenticado"
+          description={error || 'Faça login para visualizar os relatórios gerenciais.'}
+          actionLabel="Fazer login"
+          onAction={() => {
+            window.location.href = '/login?redirect-to=%2Fury%2Freports';
+          }}
+          className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-sm"
+        />
       </div>
     );
   }
 
   if (!isManager) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-amber-600 text-xl mb-4">🔒</div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Permissão Necessária</h2>
-          <p className="text-gray-600">Esta seção é restrita a Gerentes.</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh] p-4">
+        <StateMessage
+          variant="error"
+          title="Permissão necessária"
+          description="Os relatórios gerenciais são restritos a usuários com perfil de Gerente URY."
+          actionLabel="Voltar ao PDV"
+          onAction={() => {
+            window.location.href = '/pos/pos';
+          }}
+          className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-sm"
+        />
       </div>
     );
   }
