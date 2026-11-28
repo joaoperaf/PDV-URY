@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { formatCurrency, parseFrappeError } from '@ury/core'
 import {
   addItems,
   bootstrap,
@@ -13,9 +14,6 @@ import {
   type PaymentRequestResult,
 } from '../lib/api'
 
-// Same keys api.ts uses internally for sessionStorage persistence. api.ts
-// doesn't expose a clear function (only get/store), so resetSession clears
-// them directly here rather than changing api.ts's exported surface.
 const SESSION_KEY = 'ury_order_session'
 const CONTEXT_KEY = 'ury_order_context'
 
@@ -26,18 +24,6 @@ function useQueryToken(): string | null {
   return params.get('t')
 }
 
-/**
- * Owns all the stateful ordering logic shared across layouts: token
- * bootstrap, menu/order loading, cart management, order submission, and
- * bill requests. Layout components consume this hook and are responsible
- * only for rendering.
- *
- * Pass `initialContext` when the caller has already resolved a context
- * through some other bootstrap path (e.g. device-credential bootstrap for
- * a kiosk/tablet, done once in App.tsx before a layout is chosen) — this
- * skips the QR-token/session-resume bootstrap entirely and loads menu/order
- * directly against the given context, so a device only ever bootstraps once.
- */
 export function useOrderingSession(initialContext?: OrderingContext) {
   const token = useQueryToken()
   const [context, setContext] = useState<OrderingContext | null>(null)
@@ -50,6 +36,11 @@ export function useOrderingSession(initialContext?: OrderingContext) {
   const [billRequested, setBillRequested] = useState(false)
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequestResult | null>(null)
   const [payingOnline, setPayingOnline] = useState(false)
+  const [isOnline, setIsOnline] = useState<boolean>(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true,
+  )
+  const [liveAnnouncement, setLiveAnnouncement] = useState<string>('')
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const loadOrder = useCallback(async (session: string) => {
     const current = await getCurrentOrder(session)
@@ -58,6 +49,7 @@ export function useOrderingSession(initialContext?: OrderingContext) {
 
   const init = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       let ctx: OrderingContext
       if (initialContext) {
@@ -67,14 +59,11 @@ export function useOrderingSession(initialContext?: OrderingContext) {
       } else {
         const storedContext = getStoredContext()
         if (storedContext) {
-          // No fresh token in the URL (e.g. a bookmarked/refreshed page)
-          // — reuse the full context saved at bootstrap time, not just
-          // the session token, so capabilities/table/layout survive a
-          // refresh too. The backend still rejects the session once it
-          // actually expires.
           ctx = storedContext
         } else {
-          setError('This link is missing an ordering code. Please rescan the QR code on your table.')
+          setError(
+            'Este link não possui um código de atendimento válido. Escaneie novamente o QR Code da mesa ou do balcão.',
+          )
           setLoading(false)
           return
         }
@@ -84,37 +73,39 @@ export function useOrderingSession(initialContext?: OrderingContext) {
       setMenu(menuResponse.items.filter((item) => !item.disabled))
       await loadOrder(ctx.session)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load the menu. Please rescan the QR code.')
+      setError(
+        parseFrappeError(
+          err,
+          'Não foi possível carregar o cardápio. Verifique sua conexão ou escaneie novamente o QR Code.',
+        ),
+      )
     } finally {
       setLoading(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialContext, token])
+  }, [initialContext, token, loadOrder])
 
   useEffect(() => {
     init()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  /**
-   * Manual "start a fresh order" action — the MVP alternative to an
-   * auto-idle-reset timer (not wired up yet). Always clears the cart and
-   * any in-memory order/payment/bill state, and always clears both
-   * sessionStorage keys so a stale session/context can never leak into the
-   * next customer.
-   *
-   * For device-bootstrapped sessions (kiosk/tablet — `initialContext` was
-   * passed to the hook) there's a durable device credential behind the
-   * context, so we can immediately re-bootstrap a fresh session via `init`
-   * without sending the customer back through a QR scan.
-   *
-   * For QR/link-based sessions there is no device credential to re-derive
-   * a session from — clearing storage here means the next `init` run finds
-   * neither a token override nor a stored context, so the hook falls back
-   * to its normal "missing ordering code" error state and the customer (or
-   * staff) must rescan/re-open the link. That is the correct outcome, not
-   * a bug: a QR session's only source of truth is the token in the URL.
-   */
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true)
+      setLiveAnnouncement('Conexão com a internet restabelecida.')
+    }
+    const handleOffline = () => {
+      setIsOnline(false)
+      setLiveAnnouncement('Dispositivo sem conexão com a internet.')
+    }
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
   const resetSession = useCallback(() => {
     sessionStorage.removeItem(SESSION_KEY)
     sessionStorage.removeItem(CONTEXT_KEY)
@@ -125,15 +116,24 @@ export function useOrderingSession(initialContext?: OrderingContext) {
     setPayingOnline(false)
     setSubmitting(false)
     setError(null)
+    setSuccessMessage(null)
     setContext(null)
     setMenu([])
+    setLiveAnnouncement('Pedido reiniciado. Sacola limpa.')
     init()
   }, [init])
 
   function addToCart(item: MenuItem) {
+    setSuccessMessage(null)
     setCart((prev) => {
       const existing = prev[item.item]
-      return { ...prev, [item.item]: { item, qty: (existing?.qty ?? 0) + 1 } }
+      const nextQty = (existing?.qty ?? 0) + 1
+      const next = { ...prev, [item.item]: { item, qty: nextQty } }
+      const total = Object.values(next).reduce((s, e) => s + e.qty * e.item.rate, 0)
+      setLiveAnnouncement(
+        `${item.item_name} adicionado. ${nextQty} na sacola, subtotal ${formatCurrency(total)}.`,
+      )
+      return next
     })
   }
 
@@ -141,12 +141,23 @@ export function useOrderingSession(initialContext?: OrderingContext) {
     setCart((prev) => {
       const existing = prev[itemCode]
       if (!existing) return prev
+      let next: Cart
       if (existing.qty <= 1) {
-        const rest = { ...prev }
-        delete rest[itemCode]
-        return rest
+        next = { ...prev }
+        delete next[itemCode]
+        const total = Object.values(next).reduce((s, e) => s + e.qty * e.item.rate, 0)
+        setLiveAnnouncement(
+          `${existing.item.item_name} removido da sacola. Subtotal ${formatCurrency(total)}.`,
+        )
+      } else {
+        const nextQty = existing.qty - 1
+        next = { ...prev, [itemCode]: { ...existing, qty: nextQty } }
+        const total = Object.values(next).reduce((s, e) => s + e.qty * e.item.rate, 0)
+        setLiveAnnouncement(
+          `Quantidade de ${existing.item.item_name} alterada para ${nextQty}. Subtotal ${formatCurrency(total)}.`,
+        )
       }
-      return { ...prev, [itemCode]: { ...existing, qty: existing.qty - 1 } }
+      return next
     })
   }
 
@@ -159,12 +170,24 @@ export function useOrderingSession(initialContext?: OrderingContext) {
     setSubmitting(true)
     setError(null)
     try {
+      const sentCount = cartCount
       const payload = cartItems.map((entry) => ({ item: entry.item.item, qty: entry.qty }))
       const updated = await addItems(context.session, payload)
       setOrder(updated)
       setCart({})
+      const msg =
+        sentCount === 1
+          ? '1 item enviado para preparo na cozinha!'
+          : `${sentCount} itens enviados para preparo na cozinha!`
+      setSuccessMessage(msg)
+      setLiveAnnouncement(msg)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not place the order. Please try again.')
+      const msg = parseFrappeError(
+        err,
+        'Não foi possível enviar o pedido para preparo. Verifique sua conexão e tente novamente.',
+      )
+      setError(msg)
+      setLiveAnnouncement(msg)
     } finally {
       setSubmitting(false)
     }
@@ -172,11 +195,18 @@ export function useOrderingSession(initialContext?: OrderingContext) {
 
   async function handleRequestBill() {
     if (!context) return
+    setError(null)
     try {
       await requestBill(context.session)
       setBillRequested(true)
+      setLiveAnnouncement('Fechamento da conta solicitado. Um atendente foi avisado.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not request the bill. Please ask staff for help.')
+      const msg = parseFrappeError(
+        err,
+        'Não foi possível solicitar a conta pelo aplicativo. Por favor, chame um atendente.',
+      )
+      setError(msg)
+      setLiveAnnouncement(msg)
     }
   }
 
@@ -189,11 +219,18 @@ export function useOrderingSession(initialContext?: OrderingContext) {
       setPaymentRequest(result)
       if (result.payment_url) {
         window.location.href = result.payment_url
+      } else {
+        setLiveAnnouncement(
+          'Solicitação de pagamento criada. Um atendente concluirá o atendimento.',
+        )
       }
     } catch (err) {
-      // Includes the graceful "online payment isn't set up yet" case from
-      // the backend — surfaced as a normal error message, not a crash.
-      setError(err instanceof Error ? err.message : 'Could not start online payment. Please pay at the counter.')
+      const msg = parseFrappeError(
+        err,
+        'Não foi possível abrir o pagamento online no momento. Você pode pagar diretamente no caixa.',
+      )
+      setError(msg)
+      setLiveAnnouncement(msg)
     } finally {
       setPayingOnline(false)
     }
@@ -207,6 +244,12 @@ export function useOrderingSession(initialContext?: OrderingContext) {
     loading,
     submitting,
     error,
+    isOnline,
+    liveAnnouncement,
+    successMessage,
+    dismissSuccessMessage: () => setSuccessMessage(null),
+    dismissError: () => setError(null),
+    retryInit: init,
     billRequested,
     paymentRequest,
     payingOnline,

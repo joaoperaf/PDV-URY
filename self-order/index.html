@@ -1,17 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/ury.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>Order</title>
+    <title>Autoatendimento — Péricles Burger</title>
   </head>
   <body>
     <script>
-      if (!new URLSearchParams(window.location.search).has('t')) {
-        window.location.replace('/menu');
-      }
+      (function () {
+        var hasQrToken = new URLSearchParams(window.location.search).has('t');
+        var hasDeviceCreds = false;
+        var hasStoredSession = false;
+        try {
+          hasDeviceCreds = Boolean(
+            window.localStorage.getItem('ury_device_id') &&
+              window.localStorage.getItem('ury_device_credential')
+          );
+          hasStoredSession = Boolean(window.sessionStorage.getItem('ury_order_context'));
+        } catch (e) {}
+        if (!hasQrToken && !hasDeviceCreds && !hasStoredSession) {
+          window.location.replace('/menu');
+        }
+      })();
     </script>
     <div id="root"></div>
     <script>
