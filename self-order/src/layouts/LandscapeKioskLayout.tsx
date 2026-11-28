@@ -1,10 +1,24 @@
 import { useRef, useState } from 'react'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@ury/ui'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  StateMessage,
+} from '@ury/ui'
 import { useIdleReset } from '../hooks/useIdleReset'
 import { useOrderingSession } from '../hooks/useOrderingSession'
 import type { OrderingContext } from '../lib/api'
 import CartPanel from './shared/CartPanel'
 import MenuGrid from './shared/MenuGrid'
+import {
+  LiveAnnouncementRegion,
+  ResetOrderDialog,
+  SelfOrderLoadingSkeleton,
+  SessionStatusBanners,
+} from './shared/SessionFeedback'
 
 const IDLE_WARN_MS = 60000
 const IDLE_RESET_GRACE_MS = 15000
@@ -13,14 +27,6 @@ interface LayoutProps {
   initialContext?: OrderingContext
 }
 
-/**
- * Large horizontally-oriented self-service kiosk screen (entrance /
- * counter / food-court) — used standing, at arm's length, by an unassisted
- * customer. Wider menu grid than TabletLayout (more columns, bigger touch
- * targets, more spacing) with a persistent cart panel always visible on the
- * right so the order is a one-glance affair. Pure presentation over
- * useOrderingSession — no table selector or device provisioning here.
- */
 function LandscapeKioskLayout({ initialContext }: LayoutProps) {
   const {
     context,
@@ -30,6 +36,12 @@ function LandscapeKioskLayout({ initialContext }: LayoutProps) {
     loading,
     submitting,
     error,
+    isOnline,
+    liveAnnouncement,
+    successMessage,
+    dismissSuccessMessage,
+    dismissError,
+    retryInit,
     billRequested,
     payingOnline,
     addToCart,
@@ -44,18 +56,9 @@ function LandscapeKioskLayout({ initialContext }: LayoutProps) {
   } = useOrderingSession(initialContext)
 
   const [showIdleWarning, setShowIdleWarning] = useState(false)
+  const [showResetDialog, setShowResetDialog] = useState(false)
   const idleResetTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
-  function handleReset() {
-    if (window.confirm('Iniciar um novo pedido? O carrinho atual será limpo.')) {
-      resetSession()
-    }
-  }
-
-  // Unattended-kiosk protection: warn after IDLE_WARN_MS of no interaction,
-  // then reset after an additional IDLE_RESET_GRACE_MS if the guest doesn't
-  // respond. Never fires mid-checkout — submitting/payingOnline gate both
-  // the warning and the reset itself.
   useIdleReset(() => {
     if (submitting || payingOnline) return
     setShowIdleWarning(true)
@@ -73,49 +76,69 @@ function LandscapeKioskLayout({ initialContext }: LayoutProps) {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-xl text-muted-foreground">
-        Carregando cardápio…
-      </div>
-    )
+    return <SelfOrderLoadingSkeleton message="Carregando cardápio do totem…" />
   }
 
   if (error && !context) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-10 text-center text-xl text-destructive">
-        {error}
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-10">
+        <StateMessage
+          variant={isOnline ? 'error' : 'offline'}
+          title={isOnline ? 'Não foi possível carregar o cardápio' : 'Totem sem conexão'}
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={retryInit}
+          className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-sm"
+        />
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden text-lg">
-      <header className="flex items-center justify-between border-b bg-background/95 px-10 py-6">
-        <h1 className="text-3xl font-semibold">
-          {context?.table ? `Mesa ${context.table}` : 'Pedido para Retirada'}
-        </h1>
+    <div className="flex min-h-screen lg:h-screen flex-col lg:overflow-hidden bg-slate-50 text-base">
+      <LiveAnnouncementRegion message={liveAnnouncement} />
+
+      <header className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 lg:px-10 py-5">
+        <div className="min-w-0">
+          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 truncate">
+            {context?.table ? `Mesa ${context.table}` : 'Pedido para Retirada'}
+          </h1>
+          {context?.restaurant && (
+            <p className="text-sm text-slate-600 truncate mt-0.5">{context.restaurant}</p>
+          )}
+        </div>
         <button
-          onClick={handleReset}
-          className="rounded-md border px-4 py-2 text-base font-medium text-muted-foreground"
+          type="button"
+          onClick={() => setShowResetDialog(true)}
+          className="min-h-12 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-base font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 shrink-0"
         >
-          Novo Pedido
+          Iniciar novo pedido
         </button>
       </header>
 
-      {error && (
-        <div className="mx-10 mt-4 rounded-md bg-destructive/10 p-4 text-base text-destructive">{error}</div>
-      )}
+      <SessionStatusBanners
+        isOnline={isOnline}
+        error={menu.length > 0 ? error : null}
+        successMessage={successMessage}
+        onRetry={retryInit}
+        onDismissError={dismissError}
+        onDismissSuccess={dismissSuccessMessage}
+        className="mx-6 lg:mx-10 mt-4"
+      />
 
-      <div className="flex flex-1 overflow-hidden">
-        <main className="flex-1 overflow-y-auto p-10">
+      <div className="flex flex-1 flex-col lg:flex-row lg:overflow-hidden">
+        <main className="flex-1 lg:overflow-y-auto p-6 lg:p-10">
           <MenuGrid
             menu={menu}
             cart={cart}
             capabilities={context?.capabilities}
             onAdd={addToCart}
-            gridClassName="grid grid-cols-4 gap-6 xl:grid-cols-5"
-            cardClassName="flex min-w-[180px] flex-col overflow-hidden rounded-2xl border text-left text-lg transition active:scale-[0.97]"
-            imageClassName="h-40 w-full object-cover"
+            onRetry={retryInit}
+            error={error}
+            isOnline={isOnline}
+            gridClassName="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"
+            cardClassName="flex min-h-[140px] flex-col overflow-hidden rounded-2xl border text-left text-base transition active:scale-[0.98]"
+            imageClassName="aspect-[4/3] w-full overflow-hidden bg-slate-100"
           />
         </main>
 
@@ -128,30 +151,42 @@ function LandscapeKioskLayout({ initialContext }: LayoutProps) {
           submitting={submitting}
           billRequested={billRequested}
           payingOnline={payingOnline}
+          isOnline={isOnline}
           onIncrement={addToCart}
           onDecrement={decrementCart}
           onSubmit={submitCart}
           onRequestBill={handleRequestBill}
           onPayOnline={payOnline}
-          className="flex w-[420px] shrink-0 flex-col overflow-hidden border-l bg-background p-6 text-base"
+          className="flex w-full lg:w-[400px] xl:w-[420px] shrink-0 flex-col lg:overflow-hidden border-t lg:border-t-0 lg:border-l border-slate-200 bg-white p-6 text-base"
         />
       </div>
 
       <Dialog open={showIdleWarning} onOpenChange={(open) => !open && handleStillHere()}>
         <DialogContent onClose={handleStillHere}>
           <DialogHeader>
-            <DialogTitle>Você ainda está aí?</DialogTitle>
+            <DialogTitle>Você ainda está fazendo seu pedido?</DialogTitle>
+            <DialogDescription>
+              Toque abaixo para manter sua sacola ativa neste totem.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <button
+              type="button"
               onClick={handleStillHere}
-              className="w-full rounded-md bg-primary py-3 text-base font-medium text-primary-foreground"
+              className="w-full min-h-12 rounded-xl bg-primary py-3 text-base font-bold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
             >
-              Continuar pedido
+              Continuar meu pedido
             </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ResetOrderDialog
+        open={showResetDialog}
+        onOpenChange={setShowResetDialog}
+        onConfirm={resetSession}
+        isKiosk
+      />
     </div>
   )
 }

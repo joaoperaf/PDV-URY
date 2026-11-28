@@ -1,9 +1,24 @@
 import { useMemo, useRef, useState } from 'react'
 import { formatCurrency } from '@ury/core'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@ury/ui'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  StateMessage,
+} from '@ury/ui'
+import { Check, ChevronDown, ChevronUp, Minus, Plus, UtensilsCrossed } from 'lucide-react'
 import { useIdleReset } from '../hooks/useIdleReset'
 import { useOrderingSession } from '../hooks/useOrderingSession'
 import type { MenuItem, OrderingContext } from '../lib/api'
+import {
+  LiveAnnouncementRegion,
+  ResetOrderDialog,
+  SelfOrderLoadingSkeleton,
+  SessionStatusBanners,
+} from './shared/SessionFeedback'
 
 const IDLE_WARN_MS = 60000
 const IDLE_RESET_GRACE_MS = 15000
@@ -14,22 +29,6 @@ interface LayoutProps {
   initialContext?: OrderingContext
 }
 
-/**
- * Large vertically-oriented self-service kiosk (McDonald's/Burger King
- * format): a standing customer facing a tall public screen.
- *
- * Layout: a left category rail for quick filtering, a large tap-to-add
- * product grid in the main area, and a bottom cart bar.
- *
- * Cart design choice: the cart bar starts collapsed (just count/total) and
- * expands to the full item list + Place Order button when tapped, rather
- * than being always-expanded. On a tall portrait screen an always-expanded
- * cart would either eat a large fixed chunk of the browsing area or force
- * the product grid to reflow awkwardly as items are added; a collapsed bar
- * keeps the maximum screen real estate for browsing (the primary activity)
- * while staying persistent and within a standing customer's thumb reach at
- * the bottom of the screen.
- */
 function PortraitKioskLayout({ initialContext }: LayoutProps) {
   const {
     context,
@@ -39,6 +38,12 @@ function PortraitKioskLayout({ initialContext }: LayoutProps) {
     loading,
     submitting,
     error,
+    isOnline,
+    liveAnnouncement,
+    successMessage,
+    dismissSuccessMessage,
+    dismissError,
+    retryInit,
     billRequested,
     payingOnline,
     addToCart,
@@ -55,18 +60,9 @@ function PortraitKioskLayout({ initialContext }: LayoutProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORY)
   const [cartExpanded, setCartExpanded] = useState(false)
   const [showIdleWarning, setShowIdleWarning] = useState(false)
+  const [showResetDialog, setShowResetDialog] = useState(false)
   const idleResetTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
-  function handleReset() {
-    if (window.confirm('Iniciar um novo pedido? O carrinho atual será limpo.')) {
-      resetSession()
-    }
-  }
-
-  // Unattended-kiosk protection: warn after IDLE_WARN_MS of no interaction,
-  // then reset after an additional IDLE_RESET_GRACE_MS if the guest doesn't
-  // respond. Never fires mid-checkout — submitting/payingOnline gate both
-  // the warning and the reset itself.
   useIdleReset(() => {
     if (submitting || payingOnline) return
     setShowIdleWarning(true)
@@ -101,141 +97,235 @@ function PortraitKioskLayout({ initialContext }: LayoutProps) {
   }, [menu, selectedCategory])
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Carregando cardápio…
-      </div>
-    )
+    return <SelfOrderLoadingSkeleton message="Carregando cardápio do totem…" />
   }
 
   if (error && !context) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-6 text-center text-destructive">
-        {error}
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+        <StateMessage
+          variant={isOnline ? 'error' : 'offline'}
+          title={isOnline ? 'Não foi possível abrir o cardápio' : 'Totem sem conexão'}
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={retryInit}
+          className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-sm"
+        />
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col pb-24">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 px-6 py-4 backdrop-blur">
-        <h1 className="text-2xl font-semibold">
-          {context?.table ? `Mesa ${context.table}` : 'Pedido para Retirada'}
-        </h1>
+    <div className="flex min-h-screen flex-col bg-slate-50 pb-36">
+      <LiveAnnouncementRegion message={liveAnnouncement} />
+
+      <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-4 sm:px-6 py-4 backdrop-blur">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">
+            {context?.table ? `Mesa ${context.table}` : 'Pedido para Retirada'}
+          </h1>
+          {context?.restaurant && (
+            <p className="text-xs sm:text-sm text-slate-600 truncate">{context.restaurant}</p>
+          )}
+        </div>
         <button
-          onClick={handleReset}
-          className="rounded-md border px-3 py-2 text-sm font-medium text-muted-foreground"
+          type="button"
+          onClick={() => setShowResetDialog(true)}
+          className="min-h-11 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 shrink-0"
         >
-          Novo Pedido
+          Iniciar novo pedido
         </button>
       </header>
 
-      {error && (
-        <div className="mx-6 mt-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-      )}
+      <SessionStatusBanners
+        isOnline={isOnline}
+        error={menu.length > 0 ? error : null}
+        successMessage={successMessage}
+        onRetry={retryInit}
+        onDismissError={dismissError}
+        onDismissSuccess={dismissSuccessMessage}
+        className="mx-4 sm:mx-6 mt-3"
+      />
 
       {order && order.items.length > 0 && (
-        <section className="mx-6 mt-4 rounded-lg border p-4">
-          <h2 className="mb-2 text-sm font-medium text-muted-foreground">Seu pedido até agora</h2>
-          <ul className="space-y-1 text-base">
+        <section
+          aria-label="Itens já enviados para preparo"
+          className="mx-4 sm:mx-6 mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs"
+        >
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-600">
+            Já enviado para preparo
+          </h2>
+          <ul className="space-y-1.5 text-base">
             {order.items.map((row, idx) => (
-              <li key={`${row.item_code}-${idx}`} className="flex justify-between">
-                <span>{row.item_name} × {row.qty}</span>
-                <span>{row.amount}</span>
+              <li key={`${row.item_code}-${idx}`} className="flex justify-between gap-2">
+                <span className="text-slate-800">
+                  {row.item_name} <span className="font-semibold tabular-nums">× {row.qty}</span>
+                </span>
+                <span className="font-semibold text-slate-900 tabular-nums shrink-0">
+                  {formatCurrency(row.amount)}
+                </span>
               </li>
             ))}
           </ul>
-          <div className="mt-2 flex justify-between border-t pt-2 text-base font-semibold">
-            <span>Total</span>
-            <span>{order.grand_total}</span>
+          <div className="mt-2.5 flex justify-between border-t border-slate-200 pt-2 text-base font-bold text-slate-900">
+            <span>Total já pedido</span>
+            <span className="tabular-nums">{formatCurrency(order.grand_total)}</span>
           </div>
           {context?.capabilities.customer_payment_enabled && !order.billed && (
             <button
-              className="mt-3 w-full rounded-md bg-primary py-3 text-sm font-medium text-primary-foreground disabled:opacity-50"
-              disabled={payingOnline}
+              type="button"
+              className="mt-3 w-full min-h-12 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+              disabled={payingOnline || !isOnline}
               onClick={payOnline}
             >
-              {payingOnline ? 'Iniciando pagamento…' : 'Pagar Online'}
+              {payingOnline ? 'Abrindo pagamento…' : 'Abrir pagamento online'}
             </button>
           )}
           {context?.capabilities.request_bill_enabled && !order.billed && (
             <button
-              className="mt-3 w-full rounded-md border py-3 text-sm font-medium disabled:opacity-50"
-              disabled={billRequested}
+              type="button"
+              className="mt-2.5 w-full min-h-12 rounded-xl border border-slate-300 bg-white py-3 text-sm font-semibold text-slate-800 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+              disabled={billRequested || !isOnline}
               onClick={handleRequestBill}
             >
-              {billRequested ? 'Conta solicitada — garçom avisado' : 'Pedir a Conta'}
+              {billRequested
+                ? 'Conta solicitada — atendente avisado'
+                : 'Solicitar fechamento da conta'}
             </button>
           )}
         </section>
       )}
 
-      <div className="flex flex-1 gap-4 px-6 pt-4">
+      <div className="flex flex-1 flex-col md:flex-row gap-4 px-4 sm:px-6 pt-4">
         <nav
           aria-label="Categorias do cardápio"
-          className="flex w-40 shrink-0 flex-col gap-2 self-start rounded-lg border p-2"
+          className="flex md:w-44 shrink-0 flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible self-stretch md:self-start rounded-2xl border border-slate-200 bg-white p-2 shadow-2xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <button
+            type="button"
+            aria-pressed={selectedCategory === ALL_CATEGORY}
             onClick={() => setSelectedCategory(ALL_CATEGORY)}
-            className={`rounded-md px-3 py-3 text-left text-sm font-medium transition ${
+            className={`inline-flex min-h-12 shrink-0 items-center justify-between gap-2 rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
               selectedCategory === ALL_CATEGORY
                 ? 'bg-primary text-primary-foreground'
-                : 'text-foreground hover:bg-muted'
+                : 'text-slate-800 hover:bg-slate-100'
             }`}
           >
-            Todos os Itens
+            <span>Todos os Itens</span>
+            {selectedCategory === ALL_CATEGORY && (
+              <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
+            )}
           </button>
-          {categories.map((category) => (
-            <button
-              key={category.course}
-              onClick={() => setSelectedCategory(category.course)}
-              className={`rounded-md px-3 py-3 text-left text-sm font-medium transition ${
-                selectedCategory === category.course
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-foreground hover:bg-muted'
-              }`}
-            >
-              {category.label}
-            </button>
-          ))}
+          {categories.map((category) => {
+            const isSelected = selectedCategory === category.course
+            return (
+              <button
+                key={category.course}
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => setSelectedCategory(category.course)}
+                className={`inline-flex min-h-12 shrink-0 items-center justify-between gap-2 rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+                  isSelected
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-slate-800 hover:bg-slate-100'
+                }`}
+              >
+                <span>{category.label}</span>
+                {isSelected && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />}
+              </button>
+            )
+          })}
         </nav>
 
-        <section className="grid flex-1 grid-cols-2 gap-4 self-start">
-          {visibleMenu.map((item) => (
-            <MenuCard
-              key={item.item}
-              item={item}
-              qtyInCart={cart[item.item]?.qty ?? 0}
-              showImage={context?.capabilities.show_item_images ?? false}
-              onAdd={() => addToCart(item)}
+        <main className="flex-1">
+          {menu.length === 0 && error ? (
+            <StateMessage
+              variant={isOnline ? 'error' : 'offline'}
+              title={isOnline ? 'Não foi possível carregar o cardápio' : 'Sem conexão com a internet'}
+              description={error}
+              actionLabel="Tentar novamente"
+              onAction={retryInit}
+              className="rounded-2xl border border-slate-200 bg-white shadow-xs"
             />
-          ))}
-        </section>
+          ) : visibleMenu.length === 0 ? (
+            <StateMessage
+              variant="empty"
+              title="Nenhum item encontrado"
+              description={
+                selectedCategory !== ALL_CATEGORY
+                  ? 'Não há itens disponíveis nesta categoria no momento.'
+                  : 'O cardápio não possui itens disponíveis no momento.'
+              }
+              actionLabel={
+                selectedCategory !== ALL_CATEGORY
+                  ? 'Ver todos os itens'
+                  : 'Atualizar cardápio'
+              }
+              onAction={
+                selectedCategory !== ALL_CATEGORY
+                  ? () => setSelectedCategory(ALL_CATEGORY)
+                  : retryInit
+              }
+              className="rounded-2xl border border-slate-200 bg-white shadow-xs"
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+              {visibleMenu.map((item) => (
+                <MenuCard
+                  key={item.item}
+                  item={item}
+                  qtyInCart={cart[item.item]?.qty ?? 0}
+                  showImage={context?.capabilities.show_item_images ?? false}
+                  onAdd={() => addToCart(item)}
+                />
+              ))}
+            </div>
+          )}
+        </main>
       </div>
 
       {cartCount > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-background shadow-lg">
+        <div
+          style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+          className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white shadow-xl"
+        >
           {cartExpanded && (
-            <div className="max-h-[50vh] overflow-y-auto border-b p-4">
-              <ul className="space-y-2 text-base">
+            <div className="max-h-[48vh] overflow-y-auto border-b border-slate-200 p-4">
+              <ul className="space-y-2.5 text-base">
                 {cartItems.map((entry) => (
-                  <li key={entry.item.item} className="flex items-center justify-between">
-                    <span>{entry.item.item_name}</span>
-                    <span className="flex items-center gap-3">
+                  <li
+                    key={entry.item.item}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-2.5"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-slate-900 truncate">
+                        {entry.item.item_name}
+                      </div>
+                      <div className="text-xs font-medium text-slate-600 tabular-nums">
+                        {formatCurrency(entry.item.rate * entry.qty)}
+                      </div>
+                    </div>
+                    <span className="flex items-center gap-2.5 shrink-0">
                       <button
+                        type="button"
                         onClick={() => decrementCart(entry.item.item)}
-                        className="h-8 w-8 rounded-full border text-base leading-none"
-                        aria-label={`Remove one ${entry.item.item_name}`}
+                        disabled={submitting}
+                        className="inline-flex h-11 w-11 min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-900 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                        aria-label={`Diminuir quantidade de ${entry.item.item_name}`}
                       >
-                        −
+                        <Minus className="h-4 w-4" aria-hidden="true" />
                       </button>
-                      {entry.qty}
+                      <span className="min-w-6 text-center font-bold text-slate-900 tabular-nums">
+                        {entry.qty}
+                      </span>
                       <button
+                        type="button"
                         onClick={() => addToCart(entry.item)}
-                        className="h-8 w-8 rounded-full border text-base leading-none"
-                        aria-label={`Add one more ${entry.item.item_name}`}
+                        disabled={submitting}
+                        className="inline-flex h-11 w-11 min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-900 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                        aria-label={`Aumentar quantidade de ${entry.item.item_name}`}
                       >
-                        +
+                        <Plus className="h-4 w-4" aria-hidden="true" />
                       </button>
                     </span>
                   </li>
@@ -244,23 +334,38 @@ function PortraitKioskLayout({ initialContext }: LayoutProps) {
             </div>
           )}
 
-          <div className="flex items-center gap-3 p-4">
+          <div className="flex flex-wrap items-center gap-3 px-4 pt-3.5">
             <button
+              type="button"
               onClick={() => setCartExpanded((prev) => !prev)}
-              className="flex flex-1 items-center justify-between rounded-md border px-4 py-3 text-left"
+              className="flex min-h-12 flex-1 items-center justify-between gap-2 rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-left hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
               aria-expanded={cartExpanded}
             >
-              <span className="text-base font-semibold">
-                {cartCount} {cartCount > 1 ? 'itens' : 'item'}
+              <span className="inline-flex items-center gap-1.5 text-base font-bold text-slate-900">
+                <span>
+                  {cartCount} {cartCount > 1 ? 'itens na sacola' : 'item na sacola'}
+                </span>
+                {cartExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-slate-600" aria-hidden="true" />
+                ) : (
+                  <ChevronUp className="h-4 w-4 text-slate-600" aria-hidden="true" />
+                )}
               </span>
-              <span className="text-base font-semibold tabular-nums">{formatCurrency(cartTotal)}</span>
+              <span className="text-base font-extrabold text-slate-900 tabular-nums">
+                {formatCurrency(cartTotal)}
+              </span>
             </button>
             <button
+              type="button"
               onClick={submitCart}
-              disabled={submitting}
-              className="rounded-md bg-primary px-6 py-3 text-base font-medium text-primary-foreground disabled:opacity-50"
+              disabled={submitting || !isOnline}
+              className="min-h-12 rounded-xl bg-primary px-6 py-3 text-base font-bold text-primary-foreground shadow-xs disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
             >
-              {submitting ? 'Enviando…' : 'Fazer Pedido'}
+              {submitting
+                ? 'Enviando…'
+                : !isOnline
+                ? 'Sem conexão'
+                : 'Enviar pedido para preparo'}
             </button>
           </div>
         </div>
@@ -269,18 +374,29 @@ function PortraitKioskLayout({ initialContext }: LayoutProps) {
       <Dialog open={showIdleWarning} onOpenChange={(open) => !open && handleStillHere()}>
         <DialogContent onClose={handleStillHere}>
           <DialogHeader>
-            <DialogTitle>Você ainda está aí?</DialogTitle>
+            <DialogTitle>Você ainda está fazendo seu pedido?</DialogTitle>
+            <DialogDescription>
+              Toque abaixo para manter sua sacola ativa neste totem.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <button
+              type="button"
               onClick={handleStillHere}
-              className="w-full rounded-md bg-primary py-3 text-base font-medium text-primary-foreground"
+              className="w-full min-h-12 rounded-xl bg-primary py-3 text-base font-bold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
             >
-              Continuar pedido
+              Continuar meu pedido
             </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ResetOrderDialog
+        open={showResetDialog}
+        onOpenChange={setShowResetDialog}
+        onConfirm={resetSession}
+        isKiosk
+      />
     </div>
   )
 }
@@ -298,18 +414,53 @@ function MenuCard({
 }) {
   return (
     <button
+      type="button"
       onClick={onAdd}
-      className="flex flex-col overflow-hidden rounded-xl border text-left transition active:scale-[0.98]"
+      aria-label={`Adicionar ${item.item_name}, ${formatCurrency(item.rate)}${
+        qtyInCart > 0 ? `, ${qtyInCart} na sacola` : ''
+      }`}
+      className={`flex min-h-[140px] flex-col overflow-hidden rounded-2xl border text-left transition active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+        qtyInCart > 0
+          ? 'border-blue-600 bg-blue-50/25 ring-1 ring-blue-600/20'
+          : 'border-slate-200 bg-white hover:border-slate-300'
+      }`}
     >
-      {showImage && item.item_image && (
-        <img src={item.item_image} alt={item.item_name} className="h-48 w-full object-cover" />
+      {showImage && (
+        <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100">
+          {item.item_image ? (
+            <img
+              src={item.item_image}
+              alt={item.item_name}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-slate-400">
+              <UtensilsCrossed className="h-8 w-8" aria-hidden="true" />
+            </div>
+          )}
+        </div>
       )}
-      <div className="p-4">
-        <div className="text-lg font-medium">{item.item_name}</div>
-        <div className="mt-1 text-base text-muted-foreground tabular-nums">{formatCurrency(item.rate)}</div>
-        {qtyInCart > 0 && (
-          <div className="mt-2 text-sm font-semibold text-primary">No carrinho: {qtyInCart}</div>
-        )}
+      <div className="flex flex-1 flex-col justify-between gap-3 p-4">
+        <div>
+          <div className="text-lg font-semibold text-slate-900 leading-snug">{item.item_name}</div>
+          <div className="mt-1 text-base font-bold text-slate-800 tabular-nums">
+            {formatCurrency(item.rate)}
+          </div>
+        </div>
+        <div>
+          {qtyInCart > 0 ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white tabular-nums">
+              <Check className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Na sacola: {qtyInCart}</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Adicionar</span>
+            </span>
+          )}
+        </div>
       </div>
     </button>
   )
