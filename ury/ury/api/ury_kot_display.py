@@ -83,7 +83,10 @@ def confirm_cancel_kot(name):
 
 @frappe.whitelist(allow_guest=True)
 def get_site_name():
-    return {"site_name": frappe.local.site}
+    return {
+        "site_name": frappe.local.site,
+        "socketio_port": frappe.conf.get("socketio_port"),
+    }
 
 def build_dashboard_summary(kot_list):
     summary = {}

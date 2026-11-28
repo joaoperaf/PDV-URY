@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
+
+export type RealtimeSocketState = 'connecting' | 'connected' | 'disconnected' | 'error';
 
 // Mirrors the connection pattern used by the legacy Vue KDS app
 // (mosaic/src/components/kot.vue): the socket.io server is namespaced per
@@ -8,7 +10,12 @@ let socket: Socket | null = null;
 let socketPromise: Promise<Socket> | null = null;
 let globalSiteName = '';
 
-async function fetchSiteName(): Promise<string> {
+interface SiteRealtimeConfig {
+  siteName: string;
+  socketioPort: number | string | null;
+}
+
+async function fetchSiteConfig(): Promise<SiteRealtimeConfig> {
   try {
     const response = await fetch('/api/method/ury.ury.api.ury_kot_display.get_site_name', {
       method: 'GET',
@@ -17,15 +24,18 @@ async function fetchSiteName(): Promise<string> {
       },
     });
     const data = await response.json();
-    return data.message?.site_name ?? '';
+    return {
+      siteName: data.message?.site_name ?? '',
+      socketioPort: data.message?.socketio_port ?? null,
+    };
   } catch (error) {
     console.error('Failed to fetch site name:', error);
-    return '';
+    return { siteName: '', socketioPort: null };
   }
 }
 
 async function createSocket(): Promise<Socket> {
-  const site = await fetchSiteName();
+  const { siteName: site, socketioPort } = await fetchSiteConfig();
   if (!site) {
     throw new Error('Site name is not set. Socket cannot be initialized.');
   }
@@ -33,8 +43,11 @@ async function createSocket(): Promise<Socket> {
   const host = window.location.hostname;
   const port = window.location.port;
   const protocol = window.location.protocol;
-  const url = port ? `${protocol}//${host}:${port}` : `${protocol}//${host}`;
-  const siteUrl = `${url}/${site}`;
+  const useDirectSocketPort =
+    Boolean(port) && port !== '80' && port !== '443' && Boolean(socketioPort);
+  const effectivePort = useDirectSocketPort ? String(socketioPort) : port;
+  const baseUrl = effectivePort ? `${protocol}//${host}:${effectivePort}` : `${protocol}//${host}`;
+  const siteUrl = `${baseUrl}/${site}`;
 
   globalSiteName = site;
   const newSocket = io(siteUrl, { withCredentials: true });
@@ -171,4 +184,100 @@ export function useKotErrorChannels(
       channelNames.forEach((channelName) => activeSocket?.off(channelName, handler));
     };
   }, [branch, productionKey]);
+}
+
+export async function reconnectRealtimeSocket(): Promise<Socket> {
+  if (socket) {
+    if (!socket.connected) {
+      socket.connect();
+    }
+    return socket;
+  }
+  return getRealtimeSocket();
+}
+
+/**
+ * Monitors realtime socket connection health and subscribes to KOT update channels
+ * for the branch's production units so KDS views can react immediately and recover
+ * without reloading the page.
+ */
+export function useKitchenRealtime(
+  branch: string,
+  productions: string[],
+  onKotUpdate: () => void,
+): {
+  socketState: RealtimeSocketState;
+  reconnectSocket: () => Promise<void>;
+} {
+  const [socketState, setSocketState] = useState<RealtimeSocketState>(() =>
+    socket?.connected ? 'connected' : 'connecting',
+  );
+  const onUpdateRef = useRef(onKotUpdate);
+
+  useEffect(() => {
+    onUpdateRef.current = onKotUpdate;
+  }, [onKotUpdate]);
+
+  const productionKey = productions.join('||');
+
+  useEffect(() => {
+    let activeSocket: Socket | null = null;
+    let cancelled = false;
+
+    const handleConnect = () => {
+      if (!cancelled) setSocketState('connected');
+    };
+    const handleDisconnect = () => {
+      if (!cancelled) setSocketState('disconnected');
+    };
+    const handleConnectError = () => {
+      if (!cancelled) setSocketState('error');
+    };
+    const handleKotEvent = () => {
+      if (!cancelled) onUpdateRef.current();
+    };
+
+    const productionList = productionKey.split('||').filter(Boolean);
+    const channelNames = branch
+      ? productionList.map((prod) => `kot_update_${branch}_${prod}`)
+      : [];
+
+    setSocketState(socket?.connected ? 'connected' : 'connecting');
+
+    getRealtimeSocket()
+      .then((s) => {
+        if (cancelled) return;
+        activeSocket = s;
+        setSocketState(s.connected ? 'connected' : 'connecting');
+        s.on('connect', handleConnect);
+        s.on('disconnect', handleDisconnect);
+        s.on('connect_error', handleConnectError);
+        channelNames.forEach((ch) => s.on(ch, handleKotEvent));
+      })
+      .catch(() => {
+        if (!cancelled) setSocketState('error');
+      });
+
+    return () => {
+      cancelled = true;
+      if (activeSocket) {
+        activeSocket.off('connect', handleConnect);
+        activeSocket.off('disconnect', handleDisconnect);
+        activeSocket.off('connect_error', handleConnectError);
+        channelNames.forEach((ch) => activeSocket?.off(ch, handleKotEvent));
+      }
+    };
+  }, [branch, productionKey]);
+
+  const reconnectSocket = useCallback(async () => {
+    setSocketState('connecting');
+    try {
+      const s = await reconnectRealtimeSocket();
+      setSocketState(s.connected ? 'connected' : 'connecting');
+    } catch {
+      setSocketState('error');
+    }
+  }, []);
+
+  return { socketState, reconnectSocket };
 }
