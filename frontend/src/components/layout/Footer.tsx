@@ -7,62 +7,51 @@ import {
   ChefHat,
   Smartphone,
 } from 'lucide-react';
+import { cn } from '@ury/ui';
 
 export const Footer: React.FC = () => {
+  const linkBase =
+    'flex flex-col items-center justify-center min-h-11 min-w-0 flex-1 md:flex-none p-1 md:p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors';
+
   return (
-    <footer className="bg-white border-t border-gray-200 py-2 relative w-full shrink-0 z-30">
-      <nav className="max-w-screen-xl mx-auto px-4">
-        <div className="flex justify-center items-center gap-6">
-          {/* 1ª Posição: Ícone de Casinha (Início / Painel Principal /ury) */}
+    <footer className="bg-white border-t border-slate-200 py-2 relative w-full shrink-0 z-30">
+      <nav className="max-w-screen-xl mx-auto px-1 md:px-4" aria-label="Atalhos operacionais">
+        <div className="flex justify-around md:justify-center items-center gap-0 md:gap-6">
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
-              `flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors ${
-                isActive ? 'text-blue-600 font-semibold' : ''
-              }`
+              cn(linkBase, isActive && 'text-blue-600 font-semibold')
             }
           >
-            <Home className="w-5 h-5" />
-            <span className="text-xs mt-1">Início</span>
+            <Home className="w-5 h-5" aria-hidden="true" />
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">Início</span>
           </NavLink>
 
-          {/* 2ª Posição: PDV (Frente de Caixa) */}
-          <a
-            href="/pos/pos"
-            className="flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <LayoutGrid className="w-5 h-5" />
-            <span className="text-xs mt-1">PDV</span>
+          <a href="/pos/pos" className={linkBase}>
+            <LayoutGrid className="w-5 h-5" aria-hidden="true" />
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">PDV</span>
           </a>
 
-          {/* 3ª Posição: Pedidos */}
-          <a
-            href="/pos/orders"
-            className="flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <Smartphone className="w-5 h-5 hidden" />
-            <ClipboardList className="w-5 h-5" />
-            <span className="text-xs mt-1">Pedidos</span>
+          <a href="/pos/orders" className={linkBase}>
+            <ClipboardList className="w-5 h-5" aria-hidden="true" />
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">Pedidos</span>
           </a>
 
-          {/* 4ª Posição: Cozinha (KDS) */}
-          <a
-            href="/pos/kitchen"
-            className="flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <ChefHat className="w-5 h-5" />
-            <span className="text-xs mt-1">Cozinha (KDS)</span>
+          <a href="/pos/kitchen" className={linkBase}>
+            <ChefHat className="w-5 h-5" aria-hidden="true" />
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">Cozinha (KDS)</span>
           </a>
 
-          {/* 5ª Posição: Cardápio Digital */}
           <a
             href="/menu"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            className={linkBase}
           >
-            <Smartphone className="w-5 h-5" />
-            <span className="text-xs mt-1">Cardápio Digital</span>
+            <Smartphone className="w-5 h-5" aria-hidden="true" />
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">
+              Cardápio Digital
+            </span>
           </a>
         </div>
       </nav>

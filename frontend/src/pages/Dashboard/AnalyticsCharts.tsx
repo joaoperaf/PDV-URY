@@ -1,495 +1,558 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { formatCurrency } from '@ury/core';
-import { Card, CardHeader, CardTitle, CardContent, Badge, Spinner } from '@ury/ui';
-import { useBranchContext } from '../../context/BranchContext';
-import { DashboardChartsData } from '../../services/dashboard';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Badge,
+  StateMessage,
+  cn,
+} from '@ury/ui';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from 'recharts';
+import { DashboardChartsData, DashboardPeriod } from '../../services/dashboard';
 
 interface AnalyticsChartsProps {
   chartsData: DashboardChartsData | null;
   loading: boolean;
+  error?: string | null;
+  period: DashboardPeriod;
+  onRetry?: () => void;
+  onSelectPeriod?: (period: DashboardPeriod) => void;
 }
 
-export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ chartsData, loading }) => {
-  const { selectedBranch } = useBranchContext();
-  const [activeHourlyHour, setActiveHourlyHour] = useState<string | null>(null);
+function formatChannelName(raw?: string): string {
+  switch (raw) {
+    case 'Delivery':
+      return 'Delivery Próprio';
+    case 'Aggregators':
+      return 'Apps / iFood';
+    case 'Take Away':
+      return 'Retirada no Balcão';
+    case 'Phone In':
+      return 'Telefone / WhatsApp';
+    case 'Dine In':
+      return 'Consumo Local';
+    default:
+      return raw || 'Balcão';
+  }
+}
 
-  // Sales Trend line data
-  const trendData = chartsData?.sales_trend?.map(d => ({
-    time: d.date ? d.date.split('-').slice(1).join('/') : '',
-    sales: d.sales || 0
-  })) || [];
+const CHANNEL_COLORS = ['#2563EB', '#E11D48', '#059669', '#D97706', '#7C3AED'];
+const PAYMENT_COLORS = ['#0F766E', '#2563EB', '#7C3AED', '#D97706', '#475569'];
 
-  const maxTrendSales = Math.max(...trendData.map(d => d.sales), 1);
-  const peakTrend = trendData.reduce((max, d) => d.sales > max.sales ? d : max, { time: 'No data', sales: 0 });
+export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
+  chartsData,
+  loading,
+  error,
+  period,
+  onRetry,
+  onSelectPeriod,
+}) => {
+  const [trendMetric, setTrendMetric] = useState<'sales' | 'orders'>('sales');
 
-  // Hourly distribution data
-  const hourlyData = chartsData?.hourly_sales?.map(d => ({
-    hour: d.hour || '',
-    sales: d.sales || 0
-  })) || [];
+  const trendSeries = useMemo(() => {
+    return (chartsData?.sales_trend || []).map((point) => ({
+      label: point.label || point.date,
+      date: point.date,
+      sales: point.sales || 0,
+      orders: point.orders || 0,
+      avgTicket: point.avg_ticket || 0,
+    }));
+  }, [chartsData?.sales_trend]);
 
-  const maxHourlySales = Math.max(...hourlyData.map(d => d.sales), 1);
-  const hourlyDataWithPeak = hourlyData.map(d => ({
-    ...d,
-    isPeak: d.sales > 0 && d.sales === maxHourlySales
-  }));
+  const hasAnyPeriodSales = useMemo(() => {
+    return (
+      trendSeries.some((p) => p.sales > 0 || p.orders > 0) ||
+      (chartsData?.order_types?.length ?? 0) > 0 ||
+      (chartsData?.top_items?.length ?? 0) > 0
+    );
+  }, [trendSeries, chartsData?.order_types, chartsData?.top_items]);
 
-  // Revenue by branch comparative data
-  const totalRevenue = chartsData?.revenue_by_branch?.reduce((sum, b) => sum + (b.total || 0), 0) || 0;
-  const branchData = chartsData?.revenue_by_branch?.map(b => ({
-    name: b.branch,
-    revenue: b.total || 0,
-    share: totalRevenue > 0 ? Math.round((b.total / totalRevenue) * 100) : 0
-  })) || [];
-  const maxBranchRevenue = Math.max(...branchData.map(b => b.revenue), 1);
+  const peakTrendPoint = useMemo(() => {
+    return trendSeries.reduce(
+      (best, cur) => (cur.sales > best.sales ? cur : best),
+      { label: '–', sales: 0, orders: 0 },
+    );
+  }, [trendSeries]);
 
-  // Payment method distribution
-  const colors = ['#7C3AED', '#3B82F6', '#10B981', '#F59E0B', '#EC4899', '#6366F1'];
-  const totalPayment = chartsData?.payment_methods?.reduce((sum, pm) => sum + (pm.total || 0), 0) || 0;
-  let currentOffset = 0;
-  const paymentMethods = chartsData?.payment_methods?.map((pm, index) => {
-    const amount = pm.total || 0;
-    const percentage = totalPayment > 0 ? Math.round((amount / totalPayment) * 100) : 0;
-    const color = colors[index % colors.length];
-    const strokeVal = totalPayment > 0 ? (amount / totalPayment) * 238.76 : 0;
-    const dashArray = `${strokeVal.toFixed(1)} ${(238.76 - strokeVal).toFixed(1)}`;
-    const dashOffset = (-currentOffset).toFixed(1);
-    currentOffset += strokeVal;
-    return {
-      type: pm.method || 'Unknown',
-      percentage,
-      amount,
-      color,
-      dashArray,
-      dashOffset
-    };
-  }) || [];
+  const hourlySeries = useMemo(() => {
+    const raw = chartsData?.hourly_sales || [];
+    const maxSales = Math.max(...raw.map((r) => r.sales || 0), 1);
+    return raw.map((r) => ({
+      hour: r.hour,
+      sales: r.sales || 0,
+      orders: r.orders || 0,
+      isPeak: (r.sales || 0) > 0 && (r.sales || 0) === maxSales,
+    }));
+  }, [chartsData?.hourly_sales]);
 
-  // Order type distribution
-  const totalOrdersCount = chartsData?.order_types?.reduce((sum, ot) => sum + (ot.count || 0), 0) || 0;
-  let otOffset = 0;
-  const orderTypes = chartsData?.order_types?.map((ot, index) => {
-    const count = ot.count || 0;
-    const percentage = totalOrdersCount > 0 ? Math.round((count / totalOrdersCount) * 100) : 0;
-    const color = colors[(index + 2) % colors.length];
-    const strokeVal = totalOrdersCount > 0 ? (count / totalOrdersCount) * 238.76 : 0;
-    const dashArray = `${strokeVal.toFixed(1)} ${(238.76 - strokeVal).toFixed(1)}`;
-    const dashOffset = (-otOffset).toFixed(1);
-    otOffset += strokeVal;
-    return {
-      type: ot.order_type || 'Unknown',
-      percentage,
-      count,
-      color,
-      dashArray,
-      dashOffset
-    };
-  }) || [];
+  const peakHour = useMemo(() => {
+    return hourlySeries.find((h) => h.isPeak) || null;
+  }, [hourlySeries]);
 
-  // Top selling menu items
-  const maxTopQty = chartsData?.top_items?.[0]?.total_qty || 1;
-  const topItems = chartsData?.top_items?.map((item, index) => ({
-    rank: index + 1,
-    name: item.item_name,
-    category: 'Sales Item',
-    count: item.total_qty || 0,
-    revenue: item.total_amount || 0,
-    percentage: Math.round(((item.total_qty || 0) / maxTopQty) * 100)
-  })) || [];
+  const channels = useMemo(() => {
+    const raw = chartsData?.order_types || [];
+    const totalRevenue = raw.reduce((acc, item) => acc + (item.total || 0), 0);
+    const totalCount = raw.reduce((acc, item) => acc + (item.count || 0), 0);
+    return raw.map((item, idx) => ({
+      label: formatChannelName(item.order_type),
+      count: item.count || 0,
+      total: item.total || 0,
+      avgTicket:
+        item.avg_ticket ?? (item.count > 0 ? item.total / item.count : 0),
+      sharePct:
+        totalRevenue > 0
+          ? Math.round(((item.total || 0) / totalRevenue) * 100)
+          : totalCount > 0
+          ? Math.round(((item.count || 0) / totalCount) * 100)
+          : 0,
+      color: CHANNEL_COLORS[idx % CHANNEL_COLORS.length],
+    }));
+  }, [chartsData?.order_types]);
 
-  let areaD = '';
-  let lineD = '';
-  if (trendData.length > 0) {
-    const points = trendData.map((d, index) => {
-      const cx = trendData.length > 1 ? (index / (trendData.length - 1)) * 500 : 0;
-      const cy = 190 - (d.sales / maxTrendSales) * 160;
-      return { cx, cy };
-    });
+  const payments = useMemo(() => {
+    const raw = chartsData?.payment_methods || [];
+    const sum = raw.reduce((acc, p) => acc + (p.total || 0), 0);
+    return raw.map((p, idx) => ({
+      method: p.method || 'Outro',
+      count: p.count || 0,
+      total: p.total || 0,
+      sharePct: sum > 0 ? Math.round(((p.total || 0) / sum) * 100) : 0,
+      color: PAYMENT_COLORS[idx % PAYMENT_COLORS.length],
+    }));
+  }, [chartsData?.payment_methods]);
 
-    lineD = `M ${points[0].cx} ${points[0].cy}`;
-    for (let i = 1; i < points.length; i++) {
-      lineD += ` L ${points[i].cx} ${points[i].cy}`;
-    }
+  const topItems = useMemo(() => {
+    const raw = chartsData?.top_items || [];
+    const maxAmount = Math.max(...raw.map((i) => i.total_amount || 0), 1);
+    return raw.map((item, idx) => ({
+      rank: idx + 1,
+      name: item.item_name,
+      group: item.item_group || 'Cardápio',
+      qty: item.total_qty || 0,
+      amount: item.total_amount || 0,
+      widthPct: Math.max(6, Math.round(((item.total_amount || 0) / maxAmount) * 100)),
+    }));
+  }, [chartsData?.top_items]);
 
-    areaD = `M 0 190 L ${points[0].cx} ${points[0].cy}`;
-    for (let i = 1; i < points.length; i++) {
-      areaD += ` L ${points[i].cx} ${points[i].cy}`;
-    }
-    areaD += ` L 500 190 Z`;
+  if (loading && !chartsData) {
+    return (
+      <section aria-label="Análises operacionais" role="status" aria-busy="true" className="space-y-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          <div className="xl:col-span-7 rounded-xl border border-slate-200 bg-white p-6 shadow-sm motion-safe:animate-pulse space-y-4">
+            <div className="h-5 w-52 rounded bg-slate-200" />
+            <div className="h-60 w-full rounded-lg bg-slate-100" />
+          </div>
+          <div className="xl:col-span-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm motion-safe:animate-pulse space-y-4">
+            <div className="h-5 w-48 rounded bg-slate-200" />
+            <div className="h-60 w-full rounded-lg bg-slate-100" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section aria-label="Análises operacionais">
+        <StateMessage
+          variant="error"
+          title="Não foi possível carregar os gráficos analíticos"
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={onRetry}
+          className="rounded-xl border border-slate-200 bg-white shadow-sm"
+        />
+      </section>
+    );
+  }
+
+  if (!hasAnyPeriodSales) {
+    return (
+      <section aria-label="Análises operacionais">
+        <StateMessage
+          variant="empty"
+          title={
+            period === 'today'
+              ? 'Nenhuma venda faturada hoje até o momento'
+              : 'Nenhuma venda concluída no período selecionado'
+          }
+          description={
+            period === 'today'
+              ? 'Assim que pedidos forem pagos no PDV, os gráficos de evolução, canais de delivery, horários de pico e produtos aparecerão aqui. Você também pode consultar o histórico recente.'
+              : 'Não há faturas pagas ou consolidadas para esta filial no intervalo escolhido.'
+          }
+          actionLabel={period !== '30d' && onSelectPeriod ? 'Ver últimos 30 dias' : 'Atualizar dados'}
+          onAction={
+            period !== '30d' && onSelectPeriod ? () => onSelectPeriod('30d') : onRetry
+          }
+          className="rounded-xl border border-slate-200 bg-white shadow-sm"
+        />
+      </section>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Top Grid: Sales Trend Line Chart + Peak Distribution Bar Chart */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Sales Trend SVG Area Chart */}
-        <Card className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-7">
+    <section aria-label="Análises operacionais" className="space-y-6">
+      {/* Row 1: Sales/Orders Evolution + Delivery Channels Breakdown */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        {/* 1. Sales & Volume Over Time */}
+        <Card className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm xl:col-span-7">
           <CardHeader className="p-0 pb-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <CardTitle className="text-lg font-bold text-gray-900">Tendência de Vendas</CardTitle>
-                <p className="text-xs text-gray-500 mt-1">Fluxo de receita em tempo real ao longo do horário de funcionamento</p>
+                <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
+                  Evolução de Vendas e Pedidos
+                </CardTitle>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  {period === 'today'
+                    ? 'Faturamento e volume por faixa horária hoje'
+                    : 'Desempenho diário de receita e pedidos concluídos'}
+                  {peakTrendPoint.sales > 0
+                    ? ` • Pico em ${peakTrendPoint.label} (${formatCurrency(peakTrendPoint.sales)})`
+                    : ''}
+                </p>
               </div>
-              <Badge variant="outline" className="border-purple-200 bg-purple-50 text-purple-700 font-medium">
-                Pico: {peakTrend.time} ({formatCurrency(peakTrend.sales)})
-              </Badge>
+
+              <div
+                role="group"
+                aria-label="Métrica do gráfico de evolução"
+                className="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200"
+              >
+                <button
+                  type="button"
+                  aria-pressed={trendMetric === 'sales'}
+                  onClick={() => setTrendMetric('sales')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-md text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600',
+                    trendMetric === 'sales'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900',
+                  )}
+                >
+                  Receita (R$)
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={trendMetric === 'orders'}
+                  onClick={() => setTrendMetric('orders')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-md text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600',
+                    trendMetric === 'orders'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900',
+                  )}
+                >
+                  Pedidos
+                </button>
+              </div>
             </div>
           </CardHeader>
+
           <CardContent className="p-0 pt-2">
-            {loading ? (
-              <div className="h-64 flex items-center justify-center">
-                <Spinner className="w-6 h-6 text-primary" />
-              </div>
-            ) : trendData.length === 0 ? (
-              <div className="h-64 flex items-center justify-center border border-dashed border-gray-200 rounded-lg text-gray-400 text-xs">
-                Sem dados de tendência de vendas disponíveis
+            {trendSeries.length === 0 ? (
+              <div className="h-64 flex items-center justify-center rounded-lg border border-dashed border-slate-200 text-xs text-slate-600">
+                Sem série temporal disponível para este período.
               </div>
             ) : (
-              <>
-                <div className="relative h-64 w-full">
-                  <svg className="h-full w-full overflow-visible" viewBox="0 0 500 200" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.35" />
-                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.0" />
-                      </linearGradient>
-                    </defs>
-
-                    {/* Grid Lines */}
-                    <line x1="0" y1="40" x2="500" y2="40" stroke="hsl(var(--gray-100))" strokeDasharray="4 4" />
-                    <line x1="0" y1="90" x2="500" y2="90" stroke="hsl(var(--gray-100))" strokeDasharray="4 4" />
-                    <line x1="0" y1="140" x2="500" y2="140" stroke="hsl(var(--gray-100))" strokeDasharray="4 4" />
-                    <line x1="0" y1="190" x2="500" y2="190" stroke="hsl(var(--gray-200))" />
-
-                    {/* Area Gradient Path */}
-                    {areaD && <path d={areaD} fill="url(#salesGradient)" />}
-
-                    {/* Trend Stroke Line */}
-                    {lineD && <path d={lineD} fill="none" stroke="hsl(var(--primary))" strokeWidth="3" />}
-
-                    {/* Data Points */}
-                    {trendData.map((d, index) => {
-                      const cx = trendData.length > 1 ? (index / (trendData.length - 1)) * 500 : 0;
-                      const cy = 190 - (d.sales / maxTrendSales) * 160;
-                      return (
-                        <g key={index} className="group cursor-pointer">
-                          <circle cx={cx} cy={cy} r="5" fill="#FFFFFF" stroke="hsl(var(--primary))" strokeWidth="2.5" />
-                          <circle cx={cx} cy={cy} r="8" fill="hsl(var(--primary))" fillOpacity="0.2" className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </g>
-                      );
-                    })}
-                  </svg>
-                </div>
-
-                {/* X-Axis Labels */}
-                <div className="mt-3 flex justify-between text-xs text-gray-400 font-medium px-1">
-                  {trendData.map((d, i) => (
-                    <span key={i}>{d.time}</span>
-                  ))}
-                </div>
-              </>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={trendSeries}
+                    margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11, fill: '#475569' }}
+                      tickLine={false}
+                      axisLine={{ stroke: '#CBD5E1' }}
+                      minTickGap={14}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#475569' }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={trendMetric === 'sales' ? 68 : 36}
+                      allowDecimals={false}
+                      tickFormatter={(val: number) =>
+                        trendMetric === 'sales' ? `R$ ${val}` : String(val)
+                      }
+                    />
+                    <Tooltip
+                      cursor={{ fill: '#F1F5F9' }}
+                      contentStyle={{
+                        borderRadius: '0.75rem',
+                        borderColor: '#CBD5E1',
+                        fontSize: '12px',
+                      }}
+                      formatter={(value: number, name: string) => {
+                        if (name === 'sales') return [formatCurrency(value), 'Receita'];
+                        return [`${value} pedido(s)`, 'Volume'];
+                      }}
+                      labelFormatter={(label) => `Período: ${label}`}
+                    />
+                    <Bar
+                      dataKey={trendMetric}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={36}
+                      fill={trendMetric === 'sales' ? '#2563EB' : '#0F766E'}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Sales by Hour Peak Distribution Bar Chart */}
-        <Card className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-5">
+        {/* 2. Sales Channels & Delivery Mix */}
+        <Card className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm xl:col-span-5">
           <CardHeader className="p-0 pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg font-bold text-gray-900">Distribuição de Picos de Vendas</CardTitle>
-                <p className="text-xs text-gray-500 mt-1">Densidade do volume de pedidos por hora</p>
-              </div>
-              <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded">Pico por Hora</span>
-            </div>
+            <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
+              Canais de Venda e Delivery
+            </CardTitle>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Participação por canal, volume de pedidos e ticket médio
+            </p>
           </CardHeader>
+
           <CardContent className="p-0 pt-2">
-            {loading ? (
-              <div className="h-52 flex items-center justify-center">
-                <Spinner className="w-6 h-6 text-primary" />
-              </div>
-            ) : hourlyDataWithPeak.length === 0 ? (
-              <div className="h-52 flex items-center justify-center border border-dashed border-gray-200 rounded-lg text-gray-400 text-xs">
-                Sem dados por hora disponíveis
+            {channels.length === 0 ? (
+              <div className="h-56 flex items-center justify-center rounded-lg border border-dashed border-slate-200 text-xs text-slate-600">
+                Sem vendas por canal neste período.
               </div>
             ) : (
-              <div className="flex items-end justify-between gap-1 h-52 pt-4">
-                {hourlyDataWithPeak.map((item, idx) => {
-                  const heightPercent = Math.round((item.sales / maxHourlySales) * 100);
-                  const isHovered = activeHourlyHour === item.hour;
-                  return (
-                    <div
-                      key={idx}
-                      className="flex-1 flex flex-col items-center group relative cursor-pointer"
-                      onMouseEnter={() => setActiveHourlyHour(item.hour)}
-                      onMouseLeave={() => setActiveHourlyHour(null)}
-                    >
-                      {/* Tooltip on hover */}
-                      {isHovered && (
-                        <div className="absolute -top-12 z-20 rounded bg-gray-900 px-2 py-1 text-center text-xs text-white shadow-lg whitespace-nowrap">
-                          <p className="font-bold">{formatCurrency(item.sales)}</p>
-                        </div>
-                      )}
-
-                      <div className="w-full flex items-end justify-center h-40">
-                        <div
-                          style={{ height: `${heightPercent}%` }}
-                          className={`w-full max-w-[22px] rounded-t-md transition-all duration-300 ${
-                            item.isPeak
-                              ? 'bg-gradient-to-t from-purple-700 to-purple-500 shadow-sm shadow-purple-200'
-                              : 'bg-purple-100 group-hover:bg-purple-300'
-                          }`}
+              <div className="space-y-4">
+                {channels.map((ch) => (
+                  <div
+                    key={ch.label}
+                    className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 space-y-2"
+                  >
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: ch.color }}
+                          aria-hidden="true"
                         />
+                        <span className="font-bold text-slate-900 truncate">
+                          {ch.label}
+                        </span>
                       </div>
-                      <span className="mt-2 text-[10px] text-gray-500 font-medium tracking-tighter truncate w-full text-center">
-                        {item.hour}
+                      <span className="font-extrabold text-slate-900 tabular-nums shrink-0">
+                        {formatCurrency(ch.total)} ({ch.sharePct}%)
                       </span>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Middle Grid: Revenue by Branch + Payment Methods + Order Type Distribution */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Revenue by Branch Comparative Bar Chart */}
-        <Card className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-5">
-          <CardHeader className="p-0 pb-4">
-            <CardTitle className="text-lg font-bold text-gray-900">Receita por Filial</CardTitle>
-            <p className="text-xs text-gray-500 mt-1">Desempenho comparativo entre unidades</p>
-          </CardHeader>
-          <CardContent className="p-0 pt-2 space-y-4">
-            {loading ? (
-              <div className="py-8 flex items-center justify-center">
-                <Spinner className="w-6 h-6 text-primary" />
-              </div>
-            ) : branchData.length === 0 ? (
-              <div className="py-8 flex items-center justify-center border border-dashed border-gray-200 rounded-lg text-gray-400 text-xs">
-                Sem dados de filiais disponíveis
-              </div>
-            ) : (
-              branchData.map((branch, i) => {
-                const widthPct = Math.round((branch.revenue / maxBranchRevenue) * 100);
-                const isSelected = selectedBranch === 'All Branches' || selectedBranch === branch.name;
-                return (
-                  <div key={i} className={`space-y-1.5 ${!isSelected ? 'opacity-40' : ''}`}>
-                    <div className="flex items-center justify-between text-xs font-semibold">
-                      <span className="text-gray-800">{branch.name}</span>
-                      <span className="text-purple-700 font-bold">{formatCurrency(branch.revenue)}</span>
-                    </div>
-                    <div className="relative h-3.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                    <div className="h-2.5 w-full rounded-full bg-slate-200/80 overflow-hidden">
                       <div
-                        style={{ width: `${widthPct}%` }}
-                        className="h-full rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-500"
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${Math.max(ch.sharePct, 4)}%`,
+                          backgroundColor: ch.color,
+                        }}
                       />
                     </div>
-                    <div className="flex justify-between text-[11px] text-gray-400">
-                      <span>{branch.share}% da receita total</span>
+
+                    <div className="flex items-center justify-between text-xs text-slate-600 tabular-nums">
+                      <span>{ch.count} pedido(s)</span>
+                      <span>Ticket médio: {formatCurrency(ch.avgTicket)}</span>
                     </div>
                   </div>
-                );
-              })
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Payment Method Distribution Donut Chart */}
-        <Card className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-3">
-          <CardHeader className="p-0 pb-4">
-            <CardTitle className="text-lg font-bold text-gray-900">Divisão de Pagamentos</CardTitle>
-            <p className="text-xs text-gray-500 mt-1">Recebimentos por forma de pagamento</p>
-          </CardHeader>
-          <CardContent className="p-0 pt-2 flex flex-col items-center">
-            {loading ? (
-              <div className="py-8 flex items-center justify-center">
-                <Spinner className="w-6 h-6 text-primary" />
+                ))}
               </div>
-            ) : paymentMethods.length === 0 ? (
-              <div className="py-12 flex flex-col items-center justify-center text-gray-400 text-xs gap-2">
-                <div className="relative h-24 w-24">
-                  <svg className="h-full w-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="hsl(var(--gray-100))" strokeWidth="14" />
-                  </svg>
-                </div>
-                <span>Sem dados</span>
-              </div>
-            ) : (
-              <>
-                {/* SVG Donut Chart */}
-                <div className="relative h-44 w-44">
-                  <svg className="h-full w-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="hsl(var(--gray-100))" strokeWidth="14" />
-                    {paymentMethods.map((pm, i) => (
-                      <circle
-                        key={i}
-                        cx="50"
-                        cy="50"
-                        r="38"
-                        fill="none"
-                        stroke={pm.color}
-                        strokeWidth="14"
-                        strokeDasharray={pm.dashArray}
-                        strokeDashoffset={pm.dashOffset}
-                        transform="rotate(-90 50 50)"
-                      />
-                    ))}
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-[11px] font-semibold uppercase text-gray-400">Total</span>
-                    <span className="text-sm font-bold text-gray-900">{formatCurrency(totalPayment)}</span>
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <div className="mt-4 w-full space-y-2 text-xs">
-                  {paymentMethods.map((pm, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: pm.color }} />
-                        <span className="text-gray-700 font-medium">{pm.type}</span>
-                      </div>
-                      <span className="font-bold text-gray-900">{pm.percentage}%</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Order Type Distribution Donut Chart */}
-        <Card className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-4">
-          <CardHeader className="p-0 pb-4">
-            <CardTitle className="text-lg font-bold text-gray-900">Divisão por Tipo de Pedido</CardTitle>
-            <p className="text-xs text-gray-500 mt-1">Salão vs Viagem vs Delivery</p>
-          </CardHeader>
-          <CardContent className="p-0 pt-2 flex flex-col items-center">
-            {loading ? (
-              <div className="py-8 flex items-center justify-center">
-                <Spinner className="w-6 h-6 text-primary" />
-              </div>
-            ) : orderTypes.length === 0 ? (
-              <div className="py-12 flex flex-col items-center justify-center text-gray-400 text-xs gap-2">
-                <div className="relative h-24 w-24">
-                  <svg className="h-full w-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="hsl(var(--gray-100))" strokeWidth="14" />
-                  </svg>
-                </div>
-                <span>Sem dados</span>
-              </div>
-            ) : (
-              <>
-                {/* SVG Donut Chart */}
-                <div className="relative h-44 w-44">
-                  <svg className="h-full w-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="hsl(var(--gray-100))" strokeWidth="14" />
-                    {orderTypes.map((ot, i) => (
-                      <circle
-                        key={i}
-                        cx="50"
-                        cy="50"
-                        r="38"
-                        fill="none"
-                        stroke={ot.color}
-                        strokeWidth="14"
-                        strokeDasharray={ot.dashArray}
-                        strokeDashoffset={ot.dashOffset}
-                        transform="rotate(-90 50 50)"
-                      />
-                    ))}
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-xl font-bold text-gray-900">{totalOrdersCount}</span>
-                    <span className="text-[10px] uppercase font-semibold text-gray-400">Total de Pedidos</span>
-                  </div>
-                </div>
-
-                {/* Order Type Legend & Counts */}
-                <div className="mt-4 w-full space-y-2 text-xs">
-                  {orderTypes.map((ot, i) => (
-                    <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-gray-50">
-                      <div className="flex items-center gap-2">
-                        <span className="h-3 w-3 rounded-md" style={{ backgroundColor: ot.color }} />
-                        <span className="font-semibold text-gray-800">{ot.type}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-bold text-gray-900 mr-2">{ot.count} pedidos</span>
-                        <span className="text-gray-500 font-medium">({ot.percentage}%)</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Bottom Grid: Top Selling Menu Items Ranked Horizontal Progress List */}
-      <Card className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-        <CardHeader className="p-0 pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg font-bold text-gray-900">Itens Mais Vendidos do Cardápio</CardTitle>
-              <p className="text-xs text-gray-500 mt-1">Itens de maior faturamento classificados por quantidade e volume</p>
+      {/* Row 2: Peak Hours + Top Products & Payment Methods */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        {/* 3. Peak Hours */}
+        <Card className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm xl:col-span-5">
+          <CardHeader className="p-0 pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
+                  Horários de Maior Movimento
+                </CardTitle>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Concentração de receita por hora para dimensionar chapa e entregas
+                </p>
+              </div>
+              {peakHour && (
+                <Badge className="bg-amber-100 text-amber-950 border border-amber-300 text-xs font-bold tabular-nums">
+                  Pico: {peakHour.hour} ({peakHour.orders} ped.)
+                </Badge>
+              )}
             </div>
-            <Badge variant="outline" className="border-purple-200 bg-purple-50 text-purple-700">
-              Top {topItems.length}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0 pt-2">
-          {loading ? (
-            <div className="py-12 flex items-center justify-center">
-              <Spinner className="w-6 h-6 text-primary" />
-            </div>
-          ) : topItems.length === 0 ? (
-            <div className="py-12 flex items-center justify-center border border-dashed border-gray-200 rounded-lg text-gray-400 text-xs">
-              Sem dados de itens mais vendidos disponíveis
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-              {topItems.map((item) => (
-                <div key={item.rank} className="flex items-center gap-3 p-3 rounded-lg hover:bg-purple-50/50 transition-colors">
-                  <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                      item.rank === 1
-                        ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                        : item.rank === 2
-                        ? 'bg-gray-100 text-gray-800 border border-gray-300'
-                        : item.rank === 3
-                        ? 'bg-amber-800/10 text-amber-900 border border-amber-800/30'
-                        : 'bg-purple-50 text-purple-700'
-                    }`}
+          </CardHeader>
+
+          <CardContent className="p-0 pt-2">
+            {hourlySeries.length === 0 ? (
+              <div className="h-56 flex items-center justify-center rounded-lg border border-dashed border-slate-200 text-xs text-slate-600">
+                Sem horários registrados neste período.
+              </div>
+            ) : (
+              <div className="h-56 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={hourlySeries}
+                    margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
                   >
-                    #{item.rank}
-                  </span>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-gray-900">{item.name}</span>
-                      <span className="font-bold text-purple-700">{formatCurrency(item.revenue)}</span>
-                    </div>
-                    <div className="relative h-2 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        style={{ width: `${item.percentage}%` }}
-                        className="h-full rounded-full bg-gradient-to-r from-purple-600 to-purple-400"
-                      />
-                    </div>
-                    <div className="flex justify-between text-[11px] text-gray-400">
-                      <span>Categoria: {item.category}</span>
-                      <span>{item.count} itens pedidos</span>
-                    </div>
-                  </div>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis
+                      dataKey="hour"
+                      tick={{ fontSize: 11, fill: '#475569' }}
+                      tickLine={false}
+                      axisLine={{ stroke: '#CBD5E1' }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#475569' }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={60}
+                      tickFormatter={(v: number) => `R$ ${v}`}
+                    />
+                    <Tooltip
+                      cursor={{ fill: '#F1F5F9' }}
+                      contentStyle={{
+                        borderRadius: '0.75rem',
+                        borderColor: '#CBD5E1',
+                        fontSize: '12px',
+                      }}
+                      formatter={(value: number, _name, item) => [
+                        `${formatCurrency(value)} (${item?.payload?.orders ?? 0} ped.)`,
+                        'Movimento',
+                      ]}
+                      labelFormatter={(label) => `Faixa: ${label}`}
+                    />
+                    <Bar dataKey="sales" radius={[6, 6, 0, 0]} maxBarSize={32}>
+                      {hourlySeries.map((entry, idx) => (
+                        <Cell
+                          key={idx}
+                          fill={entry.isPeak ? '#D97706' : '#64748B'}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 4. Top Products + Payment Methods */}
+        <Card className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm xl:col-span-7">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+            {/* Top Selling Products */}
+            <div className="md:col-span-7 space-y-4">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Produtos Mais Vendidos
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Itens líderes em faturamento e quantidade vendida
+                </p>
+              </div>
+
+              {topItems.length === 0 ? (
+                <div className="h-44 flex items-center justify-center rounded-lg border border-dashed border-slate-200 text-xs text-slate-600">
+                  Sem itens faturados neste período.
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-3">
+                  {topItems.slice(0, 5).map((item) => (
+                    <div key={`${item.rank}-${item.name}`} className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-800 font-bold text-[11px] shrink-0 tabular-nums">
+                            {item.rank}
+                          </span>
+                          <span className="font-semibold text-slate-900 truncate">
+                            {item.name}
+                          </span>
+                        </div>
+                        <span className="font-bold text-slate-900 tabular-nums shrink-0">
+                          {formatCurrency(item.amount)}
+                        </span>
+                      </div>
+
+                      <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-blue-600"
+                          style={{ width: `${item.widthPct}%` }}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-600 tabular-nums">
+                        <span className="truncate">{item.group}</span>
+                        <span>{item.qty} un. vendida(s)</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+
+            {/* Payment Methods */}
+            <div className="md:col-span-5 md:border-s md:border-slate-100 md:ps-6 space-y-4">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Meios de Pagamento
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Distribuição financeira recebida
+                </p>
+              </div>
+
+              {payments.length === 0 ? (
+                <div className="h-44 flex items-center justify-center rounded-lg border border-dashed border-slate-200 text-xs text-slate-600 text-center px-3">
+                  Sem pagamentos liquidados neste período.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {payments.map((pm) => (
+                    <div
+                      key={pm.method}
+                      className="rounded-lg border border-slate-100 bg-slate-50/70 p-3 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <span className="inline-flex items-center gap-2 font-semibold text-slate-900 min-w-0">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: pm.color }}
+                            aria-hidden="true"
+                          />
+                          <span className="truncate">{pm.method}</span>
+                        </span>
+                        <span className="font-bold text-slate-900 tabular-nums shrink-0">
+                          {pm.sharePct}%
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-slate-600 tabular-nums">
+                        <span>{formatCurrency(pm.total)}</span>
+                        <span>{pm.count} fatura(s)</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </div>
+    </section>
   );
 };
 

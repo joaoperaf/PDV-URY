@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { call } from '@ury/core';
+import { call, parseFrappeError } from '@ury/core';
+import { StateMessage } from '@ury/ui';
 import SetupPage from './pages/Setup/SetupPage';
 import ConfigurePage from './pages/Setup/ConfigurePage';
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -35,43 +36,55 @@ interface WizardStatus {
 
 function SetupGuard() {
   const [status, setStatus] = useState<WizardStatus | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadWizardStatus = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const res = await call<any>(
+        'ury.ury.api.minimal.setup_organization.get_wizard_status'
+      );
+      const wizardStatus: WizardStatus = res?.message ?? res;
+      setStatus(wizardStatus);
+    } catch (err) {
+      setLoadError(
+        parseFrappeError(
+          err,
+          'Não foi possível verificar a configuração inicial do sistema.'
+        )
+      );
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    loadWizardStatus();
+  }, [loadWizardStatus]);
 
-    (async () => {
-      try {
-        const res = await call<any>(
-          'ury.ury.api.minimal.setup_organization.get_wizard_status'
-        );
-        const wizardStatus: WizardStatus = res?.message ?? res;
-
-        if (!cancelled) {
-          setStatus(wizardStatus);
-        }
-      } catch {
-        // If the status fetch fails, fall back to treating setup as incomplete
-        // rather than flashing a redirect to the dashboard on bad data.
-        if (!cancelled) {
-          setStatus({
-            step1_complete: false,
-            step2_complete: false,
-          });
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <StateMessage
+          variant="error"
+          title="Não foi possível carregar o painel gerencial"
+          description={loadError}
+          actionLabel="Tentar novamente"
+          onAction={loadWizardStatus}
+          className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-sm"
+        />
+      </div>
+    );
+  }
 
   if (!status) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div
+        role="status"
+        aria-busy="true"
+        className="min-h-screen flex items-center justify-center bg-slate-50"
+      >
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full motion-safe:animate-spin" />
+          <p className="text-sm font-medium text-slate-600">Carregando painel...</p>
         </div>
       </div>
     );
