@@ -15,21 +15,21 @@ const Footer = () => {
   const navItems = [
     { icon: LayoutGrid, label: t('footer.pos'), path: '/pos' },
     { icon: ClipboardList, label: t('footer.orders'), path: '/orders' },
-    { icon: ChefHat, label: 'Cozinha (KDS)', path: '/kitchen' },
+    { icon: ChefHat, label: t('footer.kitchen'), path: '/kitchen' },
     { icon: Settings, label: t('footer.settings'), path: '/settings', hidden: true },
   ].filter((item) => !item.hidden);
 
   return (
     <div className="bg-white border-t border-gray-200 py-2 relative z-30">
-      <nav className="max-w-screen-xl mx-auto px-1 md:px-4">
+      <nav className="max-w-screen-xl mx-auto px-1 md:px-4" aria-label={t('footer.nav_label')}>
         <div className="flex justify-around md:justify-center items-center gap-0 md:gap-6">
           {/* 1ª Posição: Ícone de Casinha (Início / Painel Principal /ury) */}
           <a
             href="/ury/dashboard"
             className="flex flex-col items-center justify-center min-h-11 min-w-0 flex-1 md:flex-none p-1 md:p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
           >
-            <Home className="w-5 h-5" />
-            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">Início</span>
+            <Home className="w-5 h-5" aria-hidden="true" />
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">{t('footer.home')}</span>
           </a>
 
           {/* Abas internas do PDV */}
@@ -44,7 +44,7 @@ const Footer = () => {
                 )
               }
             >
-              <item.icon className="w-5 h-5" />
+              <item.icon className="w-5 h-5" aria-hidden="true" />
               <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">{item.label}</span>
             </NavLink>
           ))}
@@ -56,8 +56,8 @@ const Footer = () => {
             rel="noopener noreferrer"
             className="flex flex-col items-center justify-center min-h-11 min-w-0 flex-1 md:flex-none p-1 md:p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
           >
-            <Smartphone className="w-5 h-5" />
-            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">Cardápio Digital</span>
+            <Smartphone className="w-5 h-5" aria-hidden="true" />
+            <span className="text-[11px] md:text-xs mt-1 max-w-full truncate">{t('footer.digital_menu')}</span>
           </a>
         </div>
       </nav>

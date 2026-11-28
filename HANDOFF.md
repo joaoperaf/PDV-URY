@@ -82,6 +82,20 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-27] — Issue #2 + parte KDS da Issue #11 e responsividade em `/pos/kitchen` e `/mosaic`
+- **Status: IMPLEMENTADO E VALIDADO EM HEADLESS (aguardando validação manual do usuário antes de mergear na `version-2`).**
+- Branch `feat/kds-states-responsive` (a partir da `version-2`).
+- **Correção de Socket.io em tempo real no ambiente local (`ury/ury/api/ury_kot_display.py`, `pos/src/lib/realtime.ts`, `mosaic/src/components/kot.vue`):**
+  - `get_site_name` passa a retornar também `socketio_port` do `common_site_config.json`; quando o frontend roda em porta direta do `bench serve` (`:8000`, fora de `80`/`443`), o cliente Socket.io conecta automaticamente na porta dedicada (`:9000`), ativando `Tempo real ativo` tanto em `/pos/kitchen` quanto em `/mosaic/<setor>` sem quebrar ambientes com proxy reverso Nginx.
+- **KDS Integrado no PDV (`pos/src/pages/Kitchen.tsx`, `ScreenSizeProvider.tsx`, `Footer.tsx`, `i18n/locales/*.json`):**
+  - Rota `/pos/kitchen` liberada do bloqueio `< 1024px` em `ScreenSizeProvider.tsx` e internacionalizada nos 4 idiomas (`pt-BR`, `en`, `fr`, `ar`), incluindo rótulos de navegação em `Footer.tsx`.
+  - Aplicados skeletons estruturais no carregamento inicial (`aria-busy`), estados padronizados via `StateMessage` diferenciando falha de API, dispositivo offline, filtro de canal vazio (`Mostrar todos os canais`) e fila sem comandas, além de indicador em tempo real no topo e banner recuperável (`Reconectar agora` / `Tentar novamente` sem recarregar a página).
+  - Reforçados badges textuais explícitos (`EM PREPARO`, `ATRASADO`, `MODIFICADO`, `CANCELADO`, `CANCEL. PARCIAL`, `DESPACHADO`), `motion-safe:animate-pulse`, números tabulares (`tabular-nums`), itens marcáveis por teclado (`role="checkbox"`, `aria-checked`, `min-h-11`, persistência em `localStorage`) e ícones SVG consistentes.
+- **KDS Standalone Mosaic (`mosaic/src/App.vue`, `Header.vue`, `ProductionDashboard.vue`, `ProductionCard.vue`, `kot.vue`):**
+  - `ProductionDashboard.vue` e `ProductionCard.vue`: adicionados skeletons de carregamento, estados explícitos de erro/sessão/offline com `Tentar novamente` e `Fazer login`, estado vazio distinto de falha, banner de sincronização degradada, card semântico `<button>` acessível por teclado com explicação quando inativo e substituição de emoji (`🍳`) por ícone SVG.
+  - `kot.vue` e `Header.vue`: botão de atualização no cabeçalho sincroniza via evento `mosaic:refresh` sem recarregar a página inteira; adicionados indicador de saúde de rede/socket, reconexão idempotente com fallback de polling quando o socket cai, estados padronizados de loading/erro/vazio, alertas de atraso com SVG + badge `ATRASADO` (sem depender de emoji `⚠️` ou cor isolada), correção do hook Vue 3 `unmounted()`, remoção do `.bg-gray-100` global não escopado e empilhamento responsivo em `< 640px` sem overflow do Masonry.
+- **Validação:** `py_compile`, JSON dos 4 locales, `tsc --noEmit`, `yarn build` em `pos/` e `mosaic/` (publicados em `ury/public/pos`, `ury/www/pos.html`, `ury/public/mosaic` e `ury/www/mosaic.html`), `git diff --check`, `impeccable detect` (`0` alertas nos 7 arquivos de UI) e inspeção visual em Chrome headless nas larguras `1280x800`, `820x1180` e `390x844` (estados vazio, offline, erro 500 -> recuperação por `Tentar novamente` sem reload e cards atrasado/modificado/cancelado sem overflow horizontal).
+
 ### [2026-11-26] — Issue #3 (Pagamento) + Issue #11 e responsividade em Pedidos (`/pos/orders`)
 - **Status: CONCLUÍDO (2026-11-26). Validado manualmente pelo usuário em `/pos/orders`; PR #28 mergeado na `version-2` (`a28091f`), issue #3 fechada e repositório local de volta na `version-2` limpa.** (A issue #11 segue aberta para aplicar estados padronizados nas demais superfícies: KDS, painel `/ury` e `self-order`.)
 - Branch `feat/pos-payment-orders-ux` (a partir da `version-2`).
@@ -285,7 +299,8 @@ Como o sistema rodará localmente neste notebook via Docker:
 - [x] **Trilha do cardápio digital estático (Issues #17 a #23):** concluída, validada manualmente em `/menu` e mergeada na `version-2` (PR #27).
 - [x] **Issue #1 (painel responsivo):** concluída e mergeada (PR #26).
 - [x] **Issue #3 (acessibilidade e prevenção de erro no pagamento) + estados/responsividade de `/pos/orders` (parte POS da Issue #11):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #28).
-- [ ] **Auditoria UI/UX (próximas P1 abertas: #2 KDS, #5 Analytics no dashboard, #11 Estados compartilhados nas demais superfícies):** implementar e validar as prioridades restantes da análise de 2026-11-01 em viewport desktop, tablet e mobile.
+- [ ] **Issue #2 + parte KDS da Issue #11 (`/pos/kitchen` e `/mosaic`):** implementadas e validadas em headless na branch `feat/kds-states-responsive`; pendente validação manual do usuário para abrir/mergear PR na `version-2` e encerrar a issue #2.
+- [ ] **Auditoria UI/UX (próximas P1 abertas: #5 Analytics no dashboard, #11 Estados compartilhados em `/ury` e `self-order`):** implementar e validar as prioridades restantes da análise de 2026-11-01 em viewport desktop, tablet e mobile.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
 - [x] **Passo 5 (parcial):** Substituído o logo do cabeçalho do dashboard `/ury` pela marca Péricles Burger, usando `frontend/Public/logo-pericles-burger.png`. O frontend foi recompilado com sucesso; os demais logos do sistema permanecem inalterados até validação visual.
