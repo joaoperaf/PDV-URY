@@ -83,7 +83,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 6. Histórico de Sessões / Últimos Passos
 
 ### [2026-11-27] — Issue #2 + parte KDS da Issue #11 e responsividade em `/pos/kitchen` e `/mosaic`
-- **Status: IMPLEMENTADO E VALIDADO EM HEADLESS (aguardando validação manual do usuário antes de mergear na `version-2`).**
+- **Status: CONCLUÍDO (2026-11-27). Validado manualmente pelo usuário; PR #29 mergeado na `version-2` (`f8bcac2`), issue #2 fechada e repositório local de volta na `version-2` limpa.** (A issue #11 segue aberta apenas para `/ury` e `self-order`.)
 - Branch `feat/kds-states-responsive` (a partir da `version-2`).
 - **Correção de Socket.io em tempo real no ambiente local (`ury/ury/api/ury_kot_display.py`, `pos/src/lib/realtime.ts`, `mosaic/src/components/kot.vue`):**
   - `get_site_name` passa a retornar também `socketio_port` do `common_site_config.json`; quando o frontend roda em porta direta do `bench serve` (`:8000`, fora de `80`/`443`), o cliente Socket.io conecta automaticamente na porta dedicada (`:9000`), ativando `Tempo real ativo` tanto em `/pos/kitchen` quanto em `/mosaic/<setor>` sem quebrar ambientes com proxy reverso Nginx.
@@ -299,7 +299,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 - [x] **Trilha do cardápio digital estático (Issues #17 a #23):** concluída, validada manualmente em `/menu` e mergeada na `version-2` (PR #27).
 - [x] **Issue #1 (painel responsivo):** concluída e mergeada (PR #26).
 - [x] **Issue #3 (acessibilidade e prevenção de erro no pagamento) + estados/responsividade de `/pos/orders` (parte POS da Issue #11):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #28).
-- [ ] **Issue #2 + parte KDS da Issue #11 (`/pos/kitchen` e `/mosaic`):** implementadas e validadas em headless na branch `feat/kds-states-responsive`; pendente validação manual do usuário para abrir/mergear PR na `version-2` e encerrar a issue #2.
+- [x] **Issue #2 + parte KDS da Issue #11 (`/pos/kitchen` e `/mosaic`):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #29).
 - [ ] **Auditoria UI/UX (próximas P1 abertas: #5 Analytics no dashboard, #11 Estados compartilhados em `/ury` e `self-order`):** implementar e validar as prioridades restantes da análise de 2026-11-01 em viewport desktop, tablet e mobile.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
