@@ -83,7 +83,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 ## 6. Histórico de Sessões / Últimos Passos
 
 ### [2026-11-27] — Issues #5 + #16 + parte `/ury` da Issue #11 e responsividade no Dashboard Gerencial (`/ury`)
-- **Status: IMPLEMENTADO E VALIDADO EM HEADLESS (aguardando validação manual do usuário antes de mergear na `version-2`).**
+- **Status: CONCLUÍDO (2026-11-27). Validado manualmente pelo usuário; PR #30 mergeado na `version-2` (`3a7976c`), issues #5 e #16 fechadas e repositório local de volta na `version-2` limpa.** (A issue #11 segue aberta apenas para `self-order`.)
 - Branch `feat/dashboard-analytics-ux` (a partir da `version-2`).
 - **Backend de Analytics e Alertas Operacionais (`ury/ury/api/dashboard.py`, `ury/api/dashboard.py`, `frontend/src/services/dashboard.ts`):**
   - Substituídos os stubs zerados/vazios por consultas SQL reais parametrizadas por filial (`branch`) e janela temporal (`today`, `7d`, `30d`), com cálculo de variação percentual (`sales_delta_pct`, `orders_delta_pct`, `aov_delta_pct`) frente ao período imediatamente anterior (`vs. ontem`, `vs. 7 dias anteriores`, `vs. 30 dias anteriores`) e aplicação efetiva do filtro de filial também em `get_recent_transactions`.
@@ -315,7 +315,7 @@ Como o sistema rodará localmente neste notebook via Docker:
 - [x] **Issue #1 (painel responsivo):** concluída e mergeada (PR #26).
 - [x] **Issue #3 (acessibilidade e prevenção de erro no pagamento) + estados/responsividade de `/pos/orders` (parte POS da Issue #11):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #28).
 - [x] **Issue #2 + parte KDS da Issue #11 (`/pos/kitchen` e `/mosaic`):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #29).
-- [ ] **Dashboard Gerencial (Issues #5 + #16 + parte `/ury` da Issue #11):** implementado e validado em headless na branch `feat/dashboard-analytics-ux`; pendente validação manual do usuário para abrir/mergear PR na `version-2` e encerrar as issues #5 e #16.
+- [x] **Dashboard Gerencial (Issues #5 + #16 + parte `/ury` da Issue #11):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #30).
 - [ ] **Auditoria UI/UX (próximas abertas: parte `self-order` da #11 + #4/#24/#25 em `/order`, e P2 do KDS #6/#7/#12):** implementar e validar as prioridades restantes da análise de 2026-11-01.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
