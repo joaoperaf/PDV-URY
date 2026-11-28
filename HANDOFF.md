@@ -82,6 +82,21 @@ Como o sistema rodará localmente neste notebook via Docker:
 
 ## 6. Histórico de Sessões / Últimos Passos
 
+### [2026-11-27] — Issues #5 + #16 + parte `/ury` da Issue #11 e responsividade no Dashboard Gerencial (`/ury`)
+- **Status: IMPLEMENTADO E VALIDADO EM HEADLESS (aguardando validação manual do usuário antes de mergear na `version-2`).**
+- Branch `feat/dashboard-analytics-ux` (a partir da `version-2`).
+- **Backend de Analytics e Alertas Operacionais (`ury/ury/api/dashboard.py`, `ury/api/dashboard.py`, `frontend/src/services/dashboard.ts`):**
+  - Substituídos os stubs zerados/vazios por consultas SQL reais parametrizadas por filial (`branch`) e janela temporal (`today`, `7d`, `30d`), com cálculo de variação percentual (`sales_delta_pct`, `orders_delta_pct`, `aov_delta_pct`) frente ao período imediatamente anterior (`vs. ontem`, `vs. 7 dias anteriores`, `vs. 30 dias anteriores`) e aplicação efetiva do filtro de filial também em `get_recent_transactions`.
+  - Criado `get_dashboard_alerts` focado na operação de delivery: detecta comandas atrasadas no KDS, pedidos em aberto (`Draft`) há mais de 20 minutos, turnos de caixa abertos de dias anteriores e pedidos iFood pendentes de mapeamento de catálogo, cada um com ação direta (`Abrir Cozinha (KDS)`, `Revisar Pedidos`, `Abrir PDV`, `Ver Agregadores`).
+  - Removida a supressão silenciosa de falhas em `dashboardService`, propagando mensagens tratadas via `parseFrappeError` para permitir recuperação por seção sem recarregar a página.
+- **Reorganização Operacional e Analytics Reativados (`DashboardPage.tsx`, `KPIGrid.tsx`, `AnalyticsCharts.tsx`, `ReportWidgets.tsx`):**
+  - Hierarquia orientada a decisão (#16): **1) Alertas acionáveis** no topo (ou faixa de confirmação quando sem pendências), **2) Indicadores do período** com comparativo anterior + **Fila Operacional Agora** (chapa + contas abertas), **3) Gráficos operacionais reativados** (#5: Evolução de Vendas/Pedidos com alternância Receita/Pedidos, Canais de Venda e Delivery com participação `%` e ticket médio, Horários de Maior Movimento destacando pico, Produtos Mais Vendidos e Meios de Pagamento) e **4) Movimentações Recentes do PDV**.
+  - Estados independentes de loading (skeletons), erro (`StateMessage` + `Tentar novamente`) e vazio por seção (incluindo atalho de 1 clique `Ver últimos 30 dias` quando `Hoje` ainda não possui vendas faturadas).
+- **Shell Responsivo e Estados Padronizados em `/ury` (`DashboardLayout.tsx`, `Header.tsx`, `Sidebar.tsx`, `Footer.tsx`, `App.tsx`, `RoleGuard.tsx`, `AuthGuard.tsx`):**
+  - Sidebar convertida em coluna fixa apenas em desktop (`>= 1024px`) e gaveta lateral acessível (`role="dialog"`, `Escape`, backdrop) em tablet/mobile, acompanhada de seletor global de filial no `Header.tsx` e rodapé responsivo unificado.
+  - Substituídos emojis (`⚠️`, `🔒`), texto em inglês (`Loading…`) e redirecionamento indevido para o setup wizard em falhas transitórias por estados padronizados com `StateMessage` e ações de recuperação.
+- **Validação:** `py_compile`, `yarn build` em `frontend/` (publicado em `ury/public/ury` e `ury/www/ury.html`, `0` erros TypeScript nos 12 arquivos alterados), `git diff --check`, `impeccable detect` (`0` alertas nos 11 arquivos TSX) e inspeção em Chrome headless nas larguras `1280x950`, `820x1180` e `390x844` (sem overflow horizontal, gaveta mobile validada e falha simulada de gráficos recuperada via `Tentar novamente` sem reload).
+
 ### [2026-11-27] — Issue #2 + parte KDS da Issue #11 e responsividade em `/pos/kitchen` e `/mosaic`
 - **Status: CONCLUÍDO (2026-11-27). Validado manualmente pelo usuário; PR #29 mergeado na `version-2` (`f8bcac2`), issue #2 fechada e repositório local de volta na `version-2` limpa.** (A issue #11 segue aberta apenas para `/ury` e `self-order`.)
 - Branch `feat/kds-states-responsive` (a partir da `version-2`).
@@ -300,7 +315,8 @@ Como o sistema rodará localmente neste notebook via Docker:
 - [x] **Issue #1 (painel responsivo):** concluída e mergeada (PR #26).
 - [x] **Issue #3 (acessibilidade e prevenção de erro no pagamento) + estados/responsividade de `/pos/orders` (parte POS da Issue #11):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #28).
 - [x] **Issue #2 + parte KDS da Issue #11 (`/pos/kitchen` e `/mosaic`):** concluídas, validadas manualmente e mergeadas na `version-2` (PR #29).
-- [ ] **Auditoria UI/UX (próximas P1 abertas: #5 Analytics no dashboard, #11 Estados compartilhados em `/ury` e `self-order`):** implementar e validar as prioridades restantes da análise de 2026-11-01 em viewport desktop, tablet e mobile.
+- [ ] **Dashboard Gerencial (Issues #5 + #16 + parte `/ury` da Issue #11):** implementado e validado em headless na branch `feat/dashboard-analytics-ux`; pendente validação manual do usuário para abrir/mergear PR na `version-2` e encerrar as issues #5 e #16.
+- [ ] **Auditoria UI/UX (próximas abertas: parte `self-order` da #11 + #4/#24/#25 em `/order`, e P2 do KDS #6/#7/#12):** implementar e validar as prioridades restantes da análise de 2026-11-01.
 - [x] **Cardápio estático econômico:** Criada a pasta `static-menu/`, independente do Frappe, Docker e banco de dados, com `menu.json` editável, carrinho no navegador e envio direto ao WhatsApp. A vitrine pública antiga em `/order` foi desativada para acessos sem token; fluxos internos com QR Code continuam preservados.
 - [x] **Cardápio estático integrado:** Disponibilizado também em `/menu` dentro do Frappe, mantendo `/order` para fluxos antigos com QR Code e encaminhando acessos públicos sem token para o novo cardápio.
 - [x] **Passo 5 (parcial):** Substituído o logo do cabeçalho do dashboard `/ury` pela marca Péricles Burger, usando `frontend/Public/logo-pericles-burger.png`. O frontend foi recompilado com sucesso; os demais logos do sistema permanecem inalterados até validação visual.
